@@ -1,15 +1,15 @@
 # Dataset Usage Guide
 
-This guide explains the dataset produced by [`typo_pipeline.py`](./typo_pipeline.py)
+This guide explains the dataset produced by [`data_creation/typo_pipeline.py`](./data_creation/typo_pipeline.py)
 and how to use it in the "how typos affect reasoning LLMs" experiment.
 
 ## 1. What gets produced
 
-Running the pipeline creates an output directory (default `./typo_dataset/`)
+Running the pipeline from `data_creation/` creates an output directory (default `./typo_dataset/` relative to `data_creation/`, or `./data_creation/typo_dataset/` from the repo root)
 containing **one saved dataset per real-word-ratio bin**:
 
 ```
-typo_dataset/
+data_creation/typo_dataset/
 ├── bin_0-25/      # problems where 0–25% of typos are real words
 ├── bin_25-50/
 ├── bin_50-75/
@@ -57,7 +57,7 @@ by non-word noise or by real-word (semantically confusing) noise.
 ```python
 from datasets import load_from_disk
 
-ds = load_from_disk("typo_dataset/bin_75-100")
+ds = load_from_disk("data_creation/typo_dataset/bin_75-100")
 print(ds)
 print(ds[0]["problem"])       # original, clean
 print(ds[0]["problem_typo"])  # corrupted version to send to the model
@@ -72,7 +72,7 @@ from datasets import load_from_disk
 
 bins = {
     p.name.replace("bin_", ""): load_from_disk(str(p))
-    for p in sorted(Path("typo_dataset").glob("bin_*"))
+    for p in sorted(Path("data_creation/typo_dataset").glob("bin_*"))
 }
 for label, ds in bins.items():
     print(label, len(ds))
@@ -90,7 +90,7 @@ Typical evaluation loop:
 ```python
 from datasets import load_from_disk
 
-ds = load_from_disk("typo_dataset/bin_50-75")
+ds = load_from_disk("data_creation/typo_dataset/bin_50-75")
 
 for row in ds:
     # 1) Baseline: ask the model to solve the clean problem
@@ -131,4 +131,4 @@ print(summary)
 - Numbers and LaTeX are guaranteed untouched, so mathematical correctness of
   each problem is preserved — only the surrounding prose is corrupted.
 - To regenerate with different settings (typo rate, number of bins, subset
-  size), edit the `Config` dataclass in `typo_pipeline.py` and re-run.
+  size), edit the `Config` dataclass in `data_creation/typo_pipeline.py` and re-run.

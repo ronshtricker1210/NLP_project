@@ -1,0 +1,31 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS/editor noise
+desktop.ini
+.DS_Store
+
+# Data creation outputs
+interactive_runs/
+data_creation/interactive_runs/
+typo_dataset*/
+data_creation/typo_dataset*/
+
+# Slurm/runtime artifacts
+*.out
+*.err
+python_pkgs/
+data_creation/python_pkgs/
+nltk_data/
+data_creation/nltk_data/
+hf_home/
+data_creation/hf_home/
+.hf_token
+data_creation/.hf_token
+
+# Local environments
+.venv/
+venv/
+.env

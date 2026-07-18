@@ -12,9 +12,9 @@ Research question: **how do typos affect the reasoning ability of LLMs?**
 
 This repo builds the *typo dataset* used for that study. The pipeline:
 
-1. Loads a subset of the `MATH-500` dataset (`HuggingFaceH4/MATH-500`, split `test`).
+1. Loads a supported reasoning dataset such as `MATH-500`, `GSM8K`, or `GPQA Diamond`.
 2. Injects **keyboard-aware typos** into the `problem` text using the local
-   [`multypo`](./multypo) package. Four techniques are used, matching the
+   [`data_creation/multypo`](./data_creation/multypo) package. Four techniques are used, matching the
    proposal:
    - `replace`   = adjacent-key substitution
    - `transpose` = swapping two letters
@@ -42,17 +42,20 @@ This repo builds the *typo dataset* used for that study. The pipeline:
 
 | Path | Purpose |
 | --- | --- |
-| `typo_pipeline.py`   | The whole pipeline (loading, typos, scoring, binning, saving). |
-| `multypo/`           | Local keyboard-aware typo generator (do not `pip install`, used locally). |
-| `requirements.txt`   | Python deps (`datasets`, `nltk`, `pandas`, `numpy`). |
+| `data_creation/interactive_slurm_hf_run.py` | Interactive one-command runner: prompts, stages to Slurm, downloads output, uploads to Hugging Face. |
+| `data_creation/typo_pipeline.py` | The whole pipeline (loading, typos, scoring, binning, saving). |
+| `data_creation/typo_generator.py` | Tracked fallback typo generator used when the `multypo` package is unavailable. |
+| `data_creation/multypo/` | Local keyboard-aware typo generator (do not `pip install`, used locally). |
+| `data_creation/requirements.txt` | Python deps (`datasets`, `nltk`, `pandas`, `numpy`). |
 | `DATASET_USAGE.md`   | How to consume the produced binned datasets downstream. |
-| `run_pipeline.slurm` | Template Slurm batch script for the cluster. |
-| `typo_dataset/`      | **Output** (created on run): `bin_<range>/` folders. |
+| `data_creation/run_pipeline.slurm` | Template Slurm batch script for the cluster. |
+| `data_creation/typo_dataset/` | **Output** (created on run): `bin_<range>/` folders. |
 
 ## 3. How to run on the cluster (the real run)
 
 ```bash
 # from the repo root
+cd data_creation
 module load python            # or activate your conda/venv
 pip install -r requirements.txt
 python -c "import nltk; nltk.download('words')"   # one-time corpus download
@@ -60,9 +63,16 @@ python -c "import nltk; nltk.download('words')"   # one-time corpus download
 python typo_pipeline.py
 ```
 
+For the interactive Slurm + Hugging Face workflow, run:
+
+```bash
+cd data_creation
+python interactive_slurm_hf_run.py
+```
+
 ### Recommended config for the full run
 
-Edit the `Config` dataclass at the top of `typo_pipeline.py`:
+Edit the `Config` dataclass at the top of `data_creation/typo_pipeline.py`:
 
 | Field | Local-dev value | Full cluster run |
 | --- | --- | --- |
@@ -107,7 +117,7 @@ networked machine and point the config at them:
 
 1. Console prints a `PREVIEW` (original vs. typo text) and a `SUMMARY`.
 2. `min typos / problem` in the summary must be **>= 1**.
-3. `typo_dataset/` contains `bin_<range>/` folders; each loads back with
+3. `data_creation/typo_dataset/` contains `bin_<range>/` folders; each loads back with
    `datasets.load_from_disk`.
 4. Spot-check that LaTeX/numbers are **identical** between `problem` and
    `problem_typo`.

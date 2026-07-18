@@ -60,6 +60,7 @@ class Config:
 
     # --- data loading (local-dev mode) ---
     dataset_name: str = "HuggingFaceH4/MATH-500"
+    dataset_config_name: Optional[str] = None
     dataset_split: str = "test"
     subset_size: int = 50          # keep small for local Windows testing
     text_field: str = "problem"    # only this field receives typos
@@ -89,6 +90,7 @@ class Config:
         ("transpose", 0.20),
     )
     min_word_len: int = 2          # words shorter than this are never typo'd
+    real_word_retry_attempts: int = 1  # retry a selected word until a real-word typo appears
 
     # --- binning ---
     real_token_groups: int = 4     # number of P-ratio bins
@@ -254,7 +256,16 @@ def get_generator():
     if _GENERATOR is not None:
         return _GENERATOR
 
-    from multypo import MultiTypoGenerator
+    try:
+        from multypo import MultiTypoGenerator
+    except ImportError:
+        try:
+            from .multypo import MultiTypoGenerator
+        except ImportError:
+            try:
+                from typo_generator import MultiTypoGenerator
+            except ImportError:
+                from .typo_generator import MultiTypoGenerator
 
     _GENERATOR = MultiTypoGenerator(
         language=CONFIG.language,
@@ -302,12 +313,39 @@ def _apply_one_typo(
     return word, False
 
 
+def _apply_typo_with_real_word_retries(
+    generator,
+    word: str,
+    word_set: frozenset,
+    typo_types: List[str],
+    type_weights: List[float],
+    max_attempts: int,
+) -> Tuple[str, bool, bool]:
+    """Try typo candidates for one word until one is a real English word."""
+    attempts = max(1, max_attempts)
+    fallback_word = word
+    fallback_changed = False
+
+    for _ in range(attempts):
+        new_word, changed = _apply_one_typo(generator, word, typo_types, type_weights)
+        if not changed:
+            continue
+        if not fallback_changed:
+            fallback_word = new_word
+            fallback_changed = True
+        if new_word.lower() in word_set:
+            return new_word, True, True
+
+    return fallback_word, fallback_changed, False
+
+
 def apply_typos_to_text(
     text: str,
     generator,
     word_set: frozenset,
     typo_rate: float,
     min_word_len: int,
+    real_word_retry_attempts: int,
 ) -> TypoResult:
     """
     Inject typos into ``text`` and classify each change as real/non-word.
@@ -343,13 +381,18 @@ def apply_typos_to_text(
     replacements: List[Tuple[int, int, str]] = []
     for match in chosen:
         original = match.group()
-        new_word, changed = _apply_one_typo(
-            generator, original, typo_types, type_weights
+        new_word, changed, is_real_word = _apply_typo_with_real_word_retries(
+            generator,
+            original,
+            word_set,
+            typo_types,
+            type_weights,
+            real_word_retry_attempts,
         )
         if not changed:
             continue
         total += 1
-        if new_word.lower() in word_set:
+        if is_real_word:
             real += 1
         else:
             nonword += 1
@@ -368,7 +411,7 @@ def apply_typos_to_text(
 # ---------------------------------------------------------------------------
 
 
-def process_row(example: dict, idx: int) -> dict:
+def process_row(example: dict, idx: int, config: Optional[Config] = None) -> dict:
     """
     Corrupt one dataset row and attach typo statistics.
 
@@ -380,6 +423,10 @@ def process_row(example: dict, idx: int) -> dict:
     num_nonword  : int   -> changes that are non-words
     real_ratio   : float -> P = num_real / num_total (in [0, 1])
     """
+    global CONFIG
+    if config is not None:
+        CONFIG = config
+
     # Deterministic, per-row seeding so runs are reproducible even in parallel.
     random.seed(CONFIG.seed + idx)
 
@@ -392,6 +439,7 @@ def process_row(example: dict, idx: int) -> dict:
         word_set=word_set,
         typo_rate=CONFIG.typo_rate,
         min_word_len=CONFIG.min_word_len,
+        real_word_retry_attempts=CONFIG.real_word_retry_attempts,
     )
 
     real_ratio = result.real / result.total if result.total > 0 else float("nan")
@@ -449,7 +497,14 @@ def load_math_subset(config: Config):
 
     # 2) Hugging Face Hub, with 3) offline fallback on failure.
     try:
-        dataset = load_dataset(config.dataset_name, split=config.dataset_split)
+        if config.dataset_config_name:
+            dataset = load_dataset(
+                config.dataset_name,
+                config.dataset_config_name,
+                split=config.dataset_split,
+            )
+        else:
+            dataset = load_dataset(config.dataset_name, split=config.dataset_split)
     except Exception as exc:
         if not config.allow_offline_fallback:
             raise
@@ -567,17 +622,23 @@ def summarize(dataset) -> None:
 
 
 def main(config: Config = CONFIG) -> None:
-    print(f"[load] {config.dataset_name} [{config.dataset_split}] "
+    global CONFIG
+    CONFIG = config
+
+    config_suffix = f"/{config.dataset_config_name}" if config.dataset_config_name else ""
+    print(f"[load] {config.dataset_name}{config_suffix} [{config.dataset_split}] "
           f"(subset={config.subset_size})")
     dataset = load_math_subset(config)
 
     print(f"[typo] generating typos on '{config.text_field}' "
           f"(num_proc={config.num_proc}) ...")
+    map_kwargs = {"num_proc": config.num_proc} if config.num_proc > 1 else {}
     processed = dataset.map(
         process_row,
         with_indices=True,
-        num_proc=config.num_proc,
+        fn_kwargs={"config": config},
         desc="Injecting typos",
+        **map_kwargs,
     )
 
     preview(processed, config)
@@ -585,6 +646,12 @@ def main(config: Config = CONFIG) -> None:
 
     print(f"\n[bin ] splitting into {config.real_token_groups} bins by P ...")
     binned = bin_dataset(processed, config.real_token_groups)
+
+    print("\n" + "-" * 78)
+    print("BIN COUNTS")
+    print("-" * 78)
+    for label, ds in binned.items():
+        print(f"bin {label:>7}: {len(ds):>4d} rows")
 
     print(f"[save] writing bins to {config.out_dir}")
     save_bins(binned, config.out_dir)

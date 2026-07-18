@@ -14,6 +14,8 @@
 
 set -euo pipefail
 
+cd "$SLURM_SUBMIT_DIR"
+
 # 1) Environment ------------------------------------------------------------
 # Use whatever your cluster provides (module or conda/venv). Example:
 # module load python/3.10
