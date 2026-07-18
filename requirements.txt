@@ -1,0 +1,10 @@
+# Core pipeline dependencies for typo_pipeline.py
+# Install on the cluster with:  pip install -r requirements.txt
+#
+# `multypo` is used from the local ./multypo package in this repo, so it is
+# intentionally NOT listed here.
+
+datasets>=2.14
+nltk>=3.8
+pandas>=2.0
+numpy>=1.24
