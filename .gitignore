@@ -29,3 +29,5 @@ data_creation/.hf_token
 .venv/
 venv/
 .env
+typo_variants/
+data_creation/typo_variants/

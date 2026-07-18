@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 
 _KEY_ROWS = ("qwertyuiop", "asdfghjkl", "zxcvbnm")
@@ -89,6 +89,64 @@ class MultiTypoGenerator:
         else:
             letter = random.choice("abcdefghijklmnopqrstuvwxyz")
         return _match_case(letter, char)
+
+    def candidate_distribution(
+        self, word: str, weights: Dict[str, float] | None = None
+    ) -> List[Tuple[str, str, float]]:
+        """Every word reachable with one typo, as (candidate, technique,
+        probability) under the generator's natural sampling distribution."""
+        if weights is None:
+            weights = self.typo_distribution or {
+                "delete": 1.0, "insert": 1.0, "replace": 1.0, "transpose": 1.0
+            }
+        total_w = sum(w for w in weights.values() if w > 0)
+        if total_w <= 0:
+            return []
+
+        out: List[Tuple[str, str, float]] = []
+        n = len(word)
+
+        w = weights.get("delete", 0.0)
+        if w > 0 and n >= 2:
+            p_each = w / total_w / n
+            for i in range(n):
+                out.append((word[:i] + word[i + 1 :], "delete", p_each))
+
+        w = weights.get("insert", 0.0)
+        if w > 0 and n >= 1:
+            positions = range(n + 1)
+            for i in positions:
+                base = word[i - 1] if i > 0 else word[0]
+                neighbours = _ADJACENT_KEYS.get(base.lower())
+                letters = neighbours if neighbours else "abcdefghijklmnopqrstuvwxyz"
+                p_each = w / total_w / len(positions) / len(letters)
+                for letter in letters:
+                    out.append(
+                        (word[:i] + _match_case(letter, base) + word[i:], "insert", p_each)
+                    )
+
+        w = weights.get("replace", 0.0)
+        if w > 0:
+            positions = [i for i in range(n) if word[i].lower() in _ADJACENT_KEYS]
+            for i in positions:
+                neighbours = _ADJACENT_KEYS[word[i].lower()]
+                p_each = w / total_w / len(positions) / len(neighbours)
+                for letter in neighbours:
+                    out.append(
+                        (word[:i] + _match_case(letter, word[i]) + word[i + 1 :], "replace", p_each)
+                    )
+
+        w = weights.get("transpose", 0.0)
+        if w > 0 and n >= 2:
+            positions = [i for i in range(n - 1) if word[i] != word[i + 1]]
+            if positions:
+                p_each = w / total_w / len(positions)
+                for i in positions:
+                    out.append(
+                        (word[:i] + word[i + 1] + word[i] + word[i + 2 :], "transpose", p_each)
+                    )
+
+        return out
 
 
 def _match_case(new_char: str, original_char: str) -> str:
