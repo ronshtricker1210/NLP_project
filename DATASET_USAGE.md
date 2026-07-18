@@ -1,134 +1,87 @@
 # Dataset Usage Guide
 
-This guide explains the dataset produced by [`data_creation/typo_pipeline.py`](./data_creation/typo_pipeline.py)
-and how to use it in the "how typos affect reasoning LLMs" experiment.
+The typo datasets are built by [`data_creation/generate_variants.py`](./data_creation/generate_variants.py)
+for the "how typos affect reasoning LLMs" experiment.
 
-## 1. What gets produced
+## 1. What exists
 
-Running the pipeline from `data_creation/` creates an output directory (default `./typo_dataset/` relative to `data_creation/`, or `./data_creation/typo_dataset/` from the repo root)
-containing **one saved dataset per real-word-ratio bin**:
+For each source dataset there are **8 variants** that differ only in the fraction
+of typos that are **real English words** (`sum -> sun`) vs **non-words**
+(`triangle -> trianlge`): `real0`, `real10`, ..., `real70` (0% to 70% in 10% steps).
 
+| HF repo (private) | Source | Rows | Text field |
+| --- | --- | --- | --- |
+| `idoazou/math500-typos` | MATH-500 test | 500 | `problem` |
+| `idoazou/gsm8k-typos` | GSM8K test | 1319 | `question` |
+| `idoazou/gpqa-typos` | GPQA Diamond | 198 | `Question` |
+
+Held constant across variants: ~30% of eligible prose words corrupted (>= 1 per
+problem), numbers/LaTeX never touched, 1 edit per typo (90%) or 2 edits (10%),
+keyboard-aware replace/delete/insert/transpose. The same seed is used everywhere,
+so the same words are corrupted in every variant of a problem — only the kind of
+typo differs.
+
+> Why max 70%? Most words have no 1-edit typo that forms a real word, so higher
+> targets are not reliably reachable without biasing which words get corrupted.
+> Each row records its actually achieved ratio in `real_ratio`.
+
+## 2. Loading
+
+The repos are private — authenticate first (`hf auth login`, or `export HF_TOKEN=...`
+on the cluster):
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("idoazou/math500-typos", "real70", split="test")
+print(ds[0]["problem"])       # clean original
+print(ds[0]["problem_typo"])  # corrupted version to send to the model
 ```
-data_creation/typo_dataset/
-├── bin_0-25/      # problems where 0–25% of typos are real words
-├── bin_25-50/
-├── bin_50-75/
-└── bin_75-100/
-```
 
-Each `bin_<range>/` is a standard Hugging Face dataset saved with
-`save_to_disk`, so it is loaded with `load_from_disk`.
+Local copies (same content) live under `data_creation/typo_variants/<dataset>/<variant>/`
+and load with `datasets.load_from_disk`.
 
-> The number of bins is controlled by `Config.real_token_groups` (default `4`).
-> A bin folder is only created if at least one problem falls into it.
+## 3. Columns
 
-## 2. Columns
-
-Each row keeps the original `MATH-500` fields (`problem`, `solution`,
-`answer`, `subject`, `level`, `unique_id`) **plus**:
+Original source columns are preserved, plus:
 
 | Column | Type | Meaning |
 | --- | --- | --- |
-| `problem_typo` | str | The problem text **with typos** — feed this to the model. |
-| `num_total` | int | Number of words actually changed in this problem (always `>= 1`). |
-| `num_real` | int | How many changed words are valid English words (real-word typos). |
-| `num_nonword` | int | How many changed words are non-words. |
-| `real_ratio` | float | `P = num_real / num_total`, a value in `[0, 1]`. |
-| `real_bin` | str | The percentage bin this row belongs to, e.g. `"50-75"`. |
+| `problem_typo` | str | Corrupted text (same name in all 3 datasets). |
+| `num_total` | int | Words corrupted (>= 1). |
+| `num_real` / `num_nonword` | int | Real-word / non-word typo counts. |
+| `real_ratio` | float | Achieved P = num_real / num_total. |
+| `target_real_ratio` | float | The variant's target (0.0-0.7). |
+| `typo_originals` | list[str] | Corrupted words, before. |
+| `typo_replacements` | list[str] | Corrupted words, after. |
+| `typo_techniques` | list[str] | e.g. `"replace"`, `"delete+insert"`. |
+| `typo_edit_counts` | list[int] | 1 or 2 edits per typo. |
+| `typo_is_real` | list[bool] | Per-typo real-word flag. |
 
-The original `problem` column is preserved untouched, so each row carries both
-the clean and the corrupted version.
-
-## 3. What the bins mean
-
-`real_ratio` (P) measures **how "sneaky" the typos are**:
-
-- **Low P (e.g. `0-25`)** → most typos produce *non-words* (obvious garbage
-  like `teh`, `naswer`). Easier for a model to notice something is wrong.
-- **High P (e.g. `75-100`)** → most typos produce *other real words*
-  (`from` → `form`, `their` → `there`). Harder to detect; may silently change
-  meaning.
-
-Comparing accuracy across bins shows whether reasoning LLMs are more affected
-by non-word noise or by real-word (semantically confusing) noise.
-
-## 4. Loading a bin
+## 4. Typical evaluation loop
 
 ```python
-from datasets import load_from_disk
-
-ds = load_from_disk("data_creation/typo_dataset/bin_75-100")
-print(ds)
-print(ds[0]["problem"])       # original, clean
-print(ds[0]["problem_typo"])  # corrupted version to send to the model
-print(ds[0]["real_ratio"])    # e.g. 0.83
+for variant in ["real0", "real10", "real30", "real50", "real70"]:
+    ds = load_dataset("idoazou/gsm8k-typos", variant, split="test")
+    for row in ds:
+        baseline_pred = run_llm(row["question"])
+        typo_pred = run_llm(row["problem_typo"])
+        log(variant=variant, real_ratio=row["real_ratio"],
+            baseline_correct=is_correct(baseline_pred, row["answer"]),
+            typo_correct=is_correct(typo_pred, row["answer"]))
 ```
 
-Load every bin at once:
+Aggregate accuracy per variant (or per `real_ratio` when it deviates from the
+target) to get the dose-response curve of real-word vs non-word noise. The
+metadata lists support per-technique and 1-vs-2-edit breakdowns.
 
-```python
-from pathlib import Path
-from datasets import load_from_disk
+## 5. Regenerating
 
-bins = {
-    p.name.replace("bin_", ""): load_from_disk(str(p))
-    for p in sorted(Path("data_creation/typo_dataset").glob("bin_*"))
-}
-for label, ds in bins.items():
-    print(label, len(ds))
+Deterministic — same command, same data:
+
+```bash
+cd data_creation
+python generate_variants.py                          # all 3 datasets x real0..real70
+python generate_variants.py --push --namespace idoazou --private
+python generate_variants.py --help                   # rates, ratios, subset, seed...
 ```
-
-## 5. Using the dataset in the experiment
-
-The core comparison is **typo condition vs. the zero-typo baseline**. Because
-every problem has `num_total >= 1`, every row in the typo dataset has a direct
-clean counterpart (its own `problem` field, and/or the original MATH-500 row
-with the same `unique_id`).
-
-Typical evaluation loop:
-
-```python
-from datasets import load_from_disk
-
-ds = load_from_disk("data_creation/typo_dataset/bin_50-75")
-
-for row in ds:
-    # 1) Baseline: ask the model to solve the clean problem
-    baseline_pred = run_llm(row["problem"])
-
-    # 2) Typo condition: ask the model to solve the corrupted problem
-    typo_pred = run_llm(row["problem_typo"])
-
-    # 3) Score both against the gold answer
-    gold = row["answer"]
-    log(unique_id=row["unique_id"],
-        real_bin=row["real_bin"],
-        real_ratio=row["real_ratio"],
-        baseline_correct=is_correct(baseline_pred, gold),
-        typo_correct=is_correct(typo_pred, gold))
-```
-
-Then aggregate accuracy **per bin** to see how robustness degrades as the
-real-word ratio changes:
-
-```python
-import pandas as pd
-
-df = pd.DataFrame(all_logs)
-summary = df.groupby("real_bin").agg(
-    n=("typo_correct", "size"),
-    baseline_acc=("baseline_correct", "mean"),
-    typo_acc=("typo_correct", "mean"),
-)
-summary["accuracy_drop"] = summary["baseline_acc"] - summary["typo_acc"]
-print(summary)
-```
-
-## 6. Reproducibility notes
-
-- Typos are seeded deterministically per row (`Config.seed + row_index`), so
-  re-running with the same config reproduces the same dataset.
-- Numbers and LaTeX are guaranteed untouched, so mathematical correctness of
-  each problem is preserved — only the surrounding prose is corrupted.
-- To regenerate with different settings (typo rate, number of bins, subset
-  size), edit the `Config` dataclass in `data_creation/typo_pipeline.py` and re-run.
