@@ -26,7 +26,7 @@ conda activate $STORAGE/envs/typo
 echo ">>> [3/5] python deps (torch cu128 + libs)"
 python -c "import torch; assert 'cu128' in torch.__version__" 2>/dev/null || \
   pip install --force-reinstall "torch==2.11.0" --index-url https://download.pytorch.org/whl/cu128
-pip install -q -U "huggingface_hub[cli]" transformers accelerate datasets
+pip install -q -U "huggingface_hub[cli]" transformers accelerate datasets math_verify
 pip uninstall -y hf_xet 2>/dev/null || true
 
 echo ">>> [4/5] model download"
