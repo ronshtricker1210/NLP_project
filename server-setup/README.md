@@ -12,10 +12,9 @@ troubleshooting). It captures every gotcha we hit.
 | File | Purpose |
 |------|---------|
 | `CLUSTER_RUNBOOK.md` | The main guide. Read this first. |
-| `bootstrap.sh` | One command to rebuild the disposable scratch env (conda + torch cu128 + model + datasets) after a `/vol/scratch` purge. |
+| `bootstrap.sh` | One command to rebuild everything after a `/vol/scratch` purge: both conda envs (transformers + vLLM 0.11.0), the model, and the datasets. |
 | `env.sh` | Sourced to activate the scratch conda env (kept in home, persistent). |
 | `setup_and_download.sh` | Original one-shot setup + model download (superseded by `bootstrap.sh`). |
-| `install_vllm.sbatch` | Builds the separate vLLM conda env as a Slurm job (compute nodes have internet). |
 
 ### Inference pipeline
 | File | Purpose |
