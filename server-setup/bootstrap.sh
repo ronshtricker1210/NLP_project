@@ -29,11 +29,16 @@ python -c "import torch; assert 'cu128' in torch.__version__" 2>/dev/null || \
 pip install -q -U "huggingface_hub[cli]" transformers accelerate datasets math_verify
 pip uninstall -y hf_xet 2>/dev/null || true
 
-echo ">>> [4/5] model download"
+echo ">>> [4/6] model download (fp16 full + AWQ 4-bit)"
 D=$HF_HOME/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-7B
 SZ=$(du -sm "$D/blobs" 2>/dev/null | cut -f1 || echo 0)
 if [ "${SZ:-0}" -lt 14000 ]; then hf download deepseek-ai/DeepSeek-R1-Distill-Qwen-7B; fi
 find "$D" -name '*.incomplete' -delete 2>/dev/null || true
+# 4-bit AWQ quant (fits one 11GB GPU, faster batched inference)
+A=$HF_HOME/hub/models--casperhansen--deepseek-r1-distill-qwen-7b-awq
+AZ=$(du -sm "$A/blobs" 2>/dev/null | cut -f1 || echo 0)
+if [ "${AZ:-0}" -lt 4000 ]; then hf download casperhansen/deepseek-r1-distill-qwen-7b-awq; fi
+find "$A" -name '*.incomplete' -delete 2>/dev/null || true
 
 echo ">>> [5/6] cache typo datasets (compute nodes may run offline, so pre-cache here)"
 python - <<'PY'
