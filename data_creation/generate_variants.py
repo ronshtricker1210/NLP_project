@@ -100,6 +100,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out", type=Path,
                         default=Path(__file__).resolve().parent / "typo_variants",
                         help="local output root")
+    parser.add_argument("--rate-in-name", action="store_true",
+                        help="prefix config names with rateNN_ (NN = typo rate %%)")
+    parser.add_argument("--clean", action="store_true",
+                        help="only produce the untouched 'clean' config per dataset")
     parser.add_argument("--push", action="store_true",
                         help="push each variant to the Hugging Face Hub")
     parser.add_argument("--namespace", type=str, default=None,
@@ -154,14 +158,36 @@ def variant_stats(processed) -> Dict[str, Any]:
     }
 
 
+def push_clean(args: argparse.Namespace) -> None:
+    for preset_key in args.datasets:
+        preset = PRESETS[preset_key]
+        dataset = load_math_subset(build_config(preset, 0.0, args))
+        if preset["keep_columns"]:
+            dataset = dataset.select_columns(
+                [c for c in preset["keep_columns"] if c in dataset.column_names]
+            )
+        out_dir = Path(args.out) / preset_key / "clean"
+        dataset.save_to_disk(str(out_dir))
+        print(f"[save] {out_dir} ({len(dataset)} rows)")
+        if args.push:
+            repo_id = f"{args.namespace}/{preset['hub_repo']}"
+            dataset.push_to_hub(repo_id, config_name="clean", split="test",
+                                private=preset["private"] or args.private)
+            print(f"[push] {repo_id} config=clean")
+
+
 def main() -> None:
     args = parse_args()
+    if args.clean:
+        push_clean(args)
+        return
+    prefix = f"rate{int(round(args.typo_rate * 100))}_" if args.rate_in_name else ""
     summary: List[Dict[str, Any]] = []
 
     for preset_key in args.datasets:
         preset = PRESETS[preset_key]
         for ratio in sorted(args.ratios):
-            name = variant_name(ratio)
+            name = prefix + variant_name(ratio)
             config = build_config(preset, ratio, args)
             print(f"\n=== {preset_key} / {name} "
                   f"(target={ratio:.2f}, rate={args.typo_rate}) ===")
