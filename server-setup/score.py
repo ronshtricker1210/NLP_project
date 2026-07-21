@@ -71,9 +71,14 @@ def last_number(text):
 def extract_pred(gen, kind, final_text=""):
     b = last_boxed(gen)
     if kind == "mc":
-        src = b if b else (final_text or gen)
-        m = re.findall(r"\b([ABCD])\b", src)
-        return m[-1] if m else None
+        # accept a boxed letter, or an explicit "answer ... X" near the end.
+        # do NOT fall back to a random letter from the reasoning: a truncated trace
+        # with no stated answer is UNANSWERED (None), not a lucky guess.
+        if b and re.fullmatch(r"\s*[ABCD]\s*", b):
+            return b.strip().upper()
+        tail = (final_text or gen)[-400:]
+        m = re.findall(r"(?:answer|option|choice|correct)\D{0,15}\b([ABCD])\b", tail, re.I)
+        return m[-1].upper() if m else None
     if kind == "gsm8k_num":
         # prefer boxed, else the last number in the answer section (then whole gen)
         if b is not None:
@@ -89,10 +94,10 @@ def is_correct(kind, pred, gold):
         return pred.strip().upper() == str(gold).strip().upper()
     if kind == "gsm8k_num":
         return norm_num(pred) is not None and norm_num(pred) == gold
-    # generic math (MATH500)
+    # generic math (MATH500) - math_verify needs the LaTeX wrapped in $...$ to parse
     if HAVE_MATH_VERIFY:
         try:
-            return bool(mv_verify(mv_parse(str(gold)), mv_parse(str(pred))))
+            return bool(mv_verify(mv_parse(f"${gold}$"), mv_parse(f"${pred}$")))
         except Exception:
             pass
     return norm_num(pred) is not None and norm_num(pred) == norm_num(gold)
@@ -133,8 +138,13 @@ def main():
         cfg = os.path.basename(fp).replace(".jsonl", "").split("_", 1)[1]
         dataset, per = score_file(fp)
         by_config[cfg] = per
-        acc = sum(c for c, _, _ in per.values()) / max(len(per), 1)
-        print(f"{os.path.basename(fp):32s}  n={len(per):4d}  accuracy={acc:6.1%}")
+        n = len(per)
+        answered = sum(1 for _, p, _ in per.values() if p is not None)
+        ncorr = sum(c for c, _, _ in per.values())
+        acc = ncorr / max(n, 1)                    # over all questions
+        acc_ans = ncorr / max(answered, 1)         # over questions that produced an answer
+        print(f"{os.path.basename(fp):26s}  n={n:3d}  answered={answered:3d}/{n:<3d}"
+              f"  acc(all)={acc:6.1%}  acc(answered)={acc_ans:6.1%}")
 
     # flip analysis vs the clean baseline ("clean" file, or real0 if that is what exists)
     base_key = "clean" if "clean" in by_config else ("real0" if "real0" in by_config else None)

@@ -45,7 +45,8 @@ def main():
     ap.add_argument("--max-new-tokens", type=int, default=4096)
     ap.add_argument("--outdir", default=os.path.expanduser("~/nlp_project/results"))
     ap.add_argument("--tp", type=int, default=2, help="tensor parallel size = num GPUs")
-    ap.add_argument("--max-model-len", type=int, default=8192)
+    ap.add_argument("--max-model-len", type=int, default=None,
+                    help="context length; auto = max_new_tokens + 1536 (prompt headroom)")
     args = ap.parse_args()
 
     spec = DATASETS[args.dataset]
@@ -55,8 +56,9 @@ def main():
     tok = AutoTokenizer.from_pretrained(model_path)
     # float16 (not bfloat16): the RTX 2080 Ti (sm_75) does not support bf16 in vLLM.
     # enforce_eager=True: skip torch.compile/cudagraph (compute nodes have no nvcc).
+    mml = args.max_model_len or (args.max_new_tokens + 1536)   # room for the prompt
     llm = LLM(model=model_path, dtype="float16", tensor_parallel_size=args.tp,
-              max_model_len=args.max_model_len, gpu_memory_utilization=0.90,
+              max_model_len=mml, gpu_memory_utilization=0.90,
               enforce_eager=True, trust_remote_code=True)
     sampling = SamplingParams(temperature=0.6, top_p=0.95, max_tokens=args.max_new_tokens)
 
