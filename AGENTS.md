@@ -38,10 +38,19 @@ This repo builds the *typo dataset* used for that study. The pipeline:
    (default 4: `0-25`, `25-50`, `50-75`, `75-100` percent) and saves **one
    dataset per bin** via `datasets.save_to_disk`.
 
+**Controlled-ratio mode (the experiment datasets).** The primary entry point is
+now `data_creation/generate_variants.py`: instead of binning whatever ratio
+falls out naturally, it targets a per-problem fraction of real-word typos
+(`Config.target_real_fraction`), producing variants `real0`..`real70` per
+source dataset (MATH-500, GSM8K, GPQA Diamond) with identical noise density.
+Typos get 1 edit (90%) or 2 edits (10%, `Config.two_edit_prob`). See
+`DATASET_USAGE.md` for the output scheme and loading.
+
 ## 2. Repo layout
 
 | Path | Purpose |
 | --- | --- |
+| `data_creation/generate_variants.py` | **Main driver**: builds the `real0`..`real70` variant matrix for all 3 datasets and pushes to the HF Hub. |
 | `data_creation/interactive_slurm_hf_run.py` | Interactive one-command runner: prompts, stages to Slurm, downloads output, uploads to Hugging Face. |
 | `data_creation/typo_pipeline.py` | The whole pipeline (loading, typos, scoring, binning, saving). |
 | `data_creation/typo_generator.py` | Tracked fallback typo generator used when the `multypo` package is unavailable. |
@@ -134,6 +143,11 @@ Every produced row keeps the original MATH-500 fields plus:
 | `num_real` | int | Changes that are valid English words. |
 | `num_nonword` | int | Changes that are non-words. |
 | `real_ratio` | float | `P = num_real / num_total`, in `[0, 1]`. |
-| `real_bin` | str | Percentage bin label, e.g. `"25-50"`. |
+| `target_real_ratio` | float | Variant's target P (NaN in natural mode). |
+| `typo_originals` / `typo_replacements` | list[str] | Corrupted words before/after. |
+| `typo_techniques` | list[str] | e.g. `"replace"`, `"delete+insert"`. |
+| `typo_edit_counts` | list[int] | 1 or 2 edits per typo. |
+| `typo_is_real` | list[bool] | Per-typo real-word flag. |
+| `real_bin` | str | Percentage bin label (natural/binned mode only). |
 
 See `DATASET_USAGE.md` for downstream usage.
