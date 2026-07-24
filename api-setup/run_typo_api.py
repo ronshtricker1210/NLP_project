@@ -16,7 +16,7 @@ Examples (mirror run_typo_vllm.py):
     python run_typo_api.py --dataset all --configs all --limit 50
     python run_typo_api.py --dataset math500 --configs real0,real30,real70 --n-samples 5
 """
-import os, json, re, time, argparse, random, sys, threading
+import os, json, re, time, argparse, random, sys, threading, types
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from datasets import load_dataset, get_dataset_config_names
@@ -24,8 +24,8 @@ from openai import OpenAI
 
 DEFAULT_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B:nscale"
 API_BASE = os.environ.get("API_BASE", "https://router.huggingface.co/v1")
-# Nscale list prices, USD per 1M tokens (reasoning tokens bill as output).
-PRICE_IN, PRICE_OUT = 0.01, 0.03
+# Nscale via HF router, USD per 1M tokens (source: router.huggingface.co/v1/models).
+PRICE_IN, PRICE_OUT = 0.15, 0.15
 
 DATASETS = {
     "gsm8k":   {"repo": "idoazou/gsm8k-typos",   "clean": "question", "typo": "problem_typo", "gold": "answer",         "kind": "math"},
@@ -142,17 +142,37 @@ def ask_one(client, args, prompt, retries):
     for attempt in range(retries):
         try:
             t0 = time.time()
-            resp = client.chat.completions.create(
+            # stream=True keeps bytes flowing so the router's gateway timeout
+            # (~10 min) can't kill long generations mid-chain.
+            stream = client.chat.completions.create(
                 model=args.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=args.temperature,
                 top_p=args.top_p,
                 max_tokens=args.max_new_tokens,
                 timeout=1200,
+                stream=True,
+                stream_options={"include_usage": True},
             )
-            msg = resp.choices[0].message
+            reasoning_parts, content_parts, usage = [], [], None
+            for chunk in stream:
+                if chunk.usage:
+                    usage = chunk.usage
+                if chunk.choices:
+                    delta = chunk.choices[0].delta
+                    rc = getattr(delta, "reasoning_content", None)
+                    if rc:
+                        reasoning_parts.append(rc)
+                    if delta.content:
+                        content_parts.append(delta.content)
+            msg = types.SimpleNamespace(
+                reasoning_content="".join(reasoning_parts) or None,
+                content="".join(content_parts))
             generation, reasoning, final = split_generation(msg)
-            usage = resp.usage
+            if usage is None:  # provider sent no usage chunk; estimate ~3.5 chars/token
+                est = lambda s: max(1, int(len(s) / 3.5))
+                usage = types.SimpleNamespace(prompt_tokens=est(prompt),
+                                              completion_tokens=est(generation))
             return {
                 "generation": generation, "reasoning": reasoning, "final_answer_text": final,
                 "n_prompt_tokens": usage.prompt_tokens, "n_gen_tokens": usage.completion_tokens,
