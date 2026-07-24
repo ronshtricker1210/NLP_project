@@ -1,0 +1,11 @@
+config,repair_per_1k,frac_any_repair
+clean,1.151,0.4657
+typo25_real10,2.132,0.5066
+typo25_real40,2.269,0.5568
+typo25_real70,2.09,0.5529
+typo50_real10,2.419,0.5628
+typo50_real40,2.614,0.6045
+typo50_real70,3.403,0.642
+typo75_real10,3.278,0.6553
+typo75_real40,3.053,0.6595
+typo75_real70,3.426,0.6556

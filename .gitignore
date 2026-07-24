@@ -31,3 +31,6 @@ venv/
 .env
 typo_variants/
 data_creation/typo_variants/
+
+# Analysis inputs (result JSONL — reproducible from Dolevabudi/typo-results on the Hub)
+full_analysis/data/
