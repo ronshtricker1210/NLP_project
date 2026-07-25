@@ -25,10 +25,7 @@ except Exception:
     pass
 
 from common import (config_files, parse_tag, load_evals, bootstrap_ci,
-                    mcnemar, _HERE)
-
-TABLES = os.path.join(_HERE, "tables")
-os.makedirs(TABLES, exist_ok=True)
+                    mcnemar, TABLES, DATASET)
 
 
 def summarize(evals):
@@ -60,7 +57,7 @@ def main():
     cs = S["clean"]
 
     # ---- per-config table -------------------------------------------------
-    print("=== gsm8k: accuracy (truncation-aware) ===")
+    print(f"=== {DATASET}: accuracy (truncation-aware) ===")
     print(f"{'config':16s}{'n':>5}{'trunc%':>8}{'compl%':>8}{'acc|ans':>9}"
           f"{'acc(strict)':>12}{'95% CI':>16}{'Δstrict':>9}{'capped%':>9}")
     rows_csv = []

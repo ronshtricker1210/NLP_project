@@ -14,11 +14,9 @@ try:
 except Exception:
     pass
 
-from common import config_files, parse_tag, load_evals, _HERE
+from common import config_files, parse_tag, load_evals, TABLES
 from self_doubt import MARKER_CATS, COMPILED
 from marker_banks import RM_COMPILED, TN_COMPILED
-
-TABLES = os.path.join(_HERE, "tables")
 
 FAMILIES = ["second_guess", "uncertainty", "typo_noticing", "repair_words"]
 

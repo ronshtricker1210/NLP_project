@@ -10,11 +10,13 @@ Steps:
      (\\documentclass ... \\end{document}) with a booktabs table per result,
      grouped by proposal dimension. Copy report.tex into Overleaf and compile.
 """
-import os, sys, csv, subprocess
+import os, sys, csv, subprocess, argparse
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-TABLES = os.path.join(_HERE, "tables")
-REPORT = os.path.join(_HERE, "report.tex")
+# Set from --dataset in main(); these module-level defaults follow the env var.
+DATASET = os.environ.get("NLP_DATASET", "gsm8k")
+TABLES = os.path.join(_HERE, "tables", DATASET)
+REPORT = os.path.join(_HERE, f"report_{DATASET}.tex")
 
 # active modules to run (imported-only files are excluded, so is the retired one)
 MODULES = ["accuracy_flips", "reasoning_length", "self_doubt",
@@ -71,18 +73,17 @@ bucket by which form appears in the reasoning:
 
 REALWORD_NOTE = r"""\noindent This section isolates the effect of typo \emph{kind}
 (real-word vs non-word), holding the question, corrupted positions, and rate fixed ---
-something the vs-clean accuracy section cannot do. \textbf{Key results:}
+something the vs-clean accuracy section cannot do. Three views:
 \begin{itemize}\setlength{\itemsep}{1pt}
-  \item Converting non-word typos into real-word ones on the \emph{same} questions
-  significantly lowers accuracy at higher noise: real10$\to$real70 gives
-  $\Delta\mathrm{acc} = -5.0\%$ at rate~50 ($p = 0.04$) and $-8.9\%$ at rate~75
-  ($p < 0.001$); at rate~25 the effect is negligible (paired table).
-  \item Per typo, one real-word typo cuts the odds of a correct answer about
-  \emph{twice} as much as one non-word typo (odds $0.93$ vs $0.97$; logit table).
-  \item Yet real-word failures are flagged \emph{more}, not less (notice rate among
-  wrong answers rises with real ratio) --- so the damage is
-  ``noticed-but-unrecoverable'', not a silent confident failure.
+  \item a \textbf{controlled paired} comparison of low-real vs high-real variants on
+  the \emph{same} questions, with a McNemar test (paired table);
+  \item a \textbf{per-typo logistic regression} comparing the marginal harm of one
+  real-word vs one non-word typo (logit table);
+  \item whether wrong answers \textbf{flag the corruption} more or less as the
+  real-word share rises (silent-failure table).
 \end{itemize}
+\noindent Read the signs, deltas and $p$-values in the tables below for this
+dataset's result.
 \medskip
 """
 
@@ -160,16 +161,14 @@ def build_report():
         r"\usepackage{float}",
         r"\usepackage{caption}",
         r"\captionsetup{font=small,labelfont=bf,skip=4pt}",
-        r"\title{The Silent Tax: Typo-Robustness Analysis (GSM8K)\\"
+        rf"\title{{The Silent Tax: Typo-Robustness Analysis ({esc(DATASET.upper())})\\"
         r"\large DeepSeek-R1-Distill-Qwen-7B}",
         r"\date{}",
         r"\begin{document}",
         r"\maketitle",
-        r"\noindent All tables are \emph{answered-only}: traces that hit the "
-        r"4096-token cap before writing a final answer are excluded from the "
-        r"metrics (the cap rate is shown as \texttt{capped\_frac} in the accuracy "
-        r"table). Configs are named "
-        r"\texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words "
+        r"\noindent All tables are \emph{answered-only}: traces that hit the token "
+        r"cap before writing a final answer are excluded from the metrics. Configs "
+        r"are named \texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words "
         r"corrupted, \emph{real} = \% of typos that form real words. Baseline is "
         r"the clean input.",
         "",
@@ -201,10 +200,25 @@ def run_modules():
 
 
 def main():
-    if "--skip-run" not in sys.argv:
+    global DATASET, TABLES, REPORT
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--dataset", default=os.environ.get("NLP_DATASET", "gsm8k"),
+                    help="which dataset under data/<dataset>/ to analyse (default gsm8k)")
+    ap.add_argument("--skip-run", action="store_true",
+                    help="rebuild the report from existing tables/<dataset>/ CSVs only")
+    args = ap.parse_args()
+
+    DATASET = args.dataset
+    os.environ["NLP_DATASET"] = DATASET      # every module reads this
+    TABLES = os.path.join(_HERE, "tables", DATASET)
+    REPORT = os.path.join(_HERE, f"report_{DATASET}.tex")
+
+    if not args.skip_run:
         run_modules()
     build_report()
-    print("\nCopy report.tex into Overleaf (or run: pdflatex report.tex).")
+    rep = os.path.basename(REPORT)
+    print(f"\nOpen {rep} in Overleaf (or run: pdflatex {rep}).")
 
 
 if __name__ == "__main__":

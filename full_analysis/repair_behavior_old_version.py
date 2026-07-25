@@ -38,11 +38,8 @@ try:
 except Exception:
     pass
 
-from common import config_files, parse_tag, load_evals, _HERE
+from common import config_files, parse_tag, load_evals, TABLES, DATASET
 from marker_banks import TN_COMPILED, RM_COMPILED, classify_trace  # shared banks
-
-TABLES = os.path.join(_HERE, "tables")
-os.makedirs(TABLES, exist_ok=True)
 
 
 def load_traces(path):
@@ -76,7 +73,7 @@ def main():
         DATA[t["tag"]] = load_traces(f)
 
     # ---- notice type x outcome (the 4 behavioural cells) ------------------
-    print("=== gsm8k: repair behaviour — notice type x outcome (answered-only, %) ===")
+    print(f"=== {DATASET}: repair behaviour — notice type x outcome (answered-only, %) ===")
     print(f"{'config':16s}{'n_ans':>7}{'explicit%':>10}"
           f"{'silent+OK':>11}{'silent+WRONG':>13}{'expl+OK':>9}{'expl+WRONG':>11}")
     cell_csv = []

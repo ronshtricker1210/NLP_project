@@ -33,10 +33,8 @@ except Exception:
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-from common import config_files, parse_tag, load_evals, mcnemar, _HERE
+from common import config_files, parse_tag, load_evals, mcnemar, TABLES
 from marker_banks import classify_trace   # (notice_type, n_notice, n_repair)
-
-TABLES = os.path.join(_HERE, "tables")
 
 
 def load_records(path):

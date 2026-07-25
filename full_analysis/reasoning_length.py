@@ -21,11 +21,10 @@ try:
 except Exception:
     pass
 
-from common import config_files, parse_tag, load_evals, _HERE, MAX_NEW_TOKENS
+from common import (config_files, parse_tag, load_evals, MAX_NEW_TOKENS,
+                    TABLES, DATASET)
 import json
 
-TABLES = os.path.join(_HERE, "tables")
-os.makedirs(TABLES, exist_ok=True)
 
 
 def load_tokens(path):
@@ -74,7 +73,7 @@ def main():
     # ---- absolute generated-token counts (answered-only) ------------------
     # The raw length the model produced (thousands of tokens). The ratio section
     # below normalises these per question, per the proposal.
-    print("=== gsm8k: absolute generated tokens (answered-only) ===")
+    print(f"=== {DATASET}: absolute generated tokens (answered-only) ===")
     print(f"{'config':16s}{'n_ans':>7}{'mean':>8}{'median':>8}{'p90':>8}{'max':>7}")
     abs_csv = []
     for tag in tags:

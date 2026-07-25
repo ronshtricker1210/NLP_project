@@ -31,9 +31,7 @@ try:
 except Exception:
     pass
 
-from common import config_files, parse_tag, load_evals, _HERE
-
-TABLES = os.path.join(_HERE, "tables")
+from common import config_files, parse_tag, load_evals, TABLES
 WORD = re.compile(r"[A-Za-z']+")
 MIN_LEN = 3   # ignore very short words (the/of/a) — they match trivially
 

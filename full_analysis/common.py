@@ -1,26 +1,48 @@
-"""Shared loading / scoring helpers for the wider typo analysis (gsm8k).
+"""Shared loading / scoring helpers for the wider typo analysis.
 
-Correctness reuses api-setup/score.py (same normalisation and gsm8k gold parsing),
-but answer EXTRACTION is deliberately stricter here: we only read the model's
-answer from the final section (after </think>), never from mid-reasoning. A trace
-that hit the 4096-token cap before writing a final answer is UNANSWERED, not a
-lucky trailing-number guess. This keeps "didn't finish" separate from "got it wrong".
+Dataset-agnostic: the target dataset comes from the NLP_DATASET environment
+variable (default "gsm8k"). Data is read from data/<dataset>/ and tables are
+written to tables/<dataset>/, so several datasets coexist without clobbering.
+
+Correctness reuses api-setup/score.py per dataset kind (gsm8k = numeric,
+math500 = math_verify on \\boxed, gpqa = multiple choice). Answer EXTRACTION is
+deliberately stricter here: we only read the answer from the final section (after
+</think>), never from mid-reasoning. A trace that hit the token cap before writing
+a final answer is UNANSWERED, not a lucky trailing guess -- this keeps "didn't
+finish" separate from "got it wrong".
 """
 import os, sys, json, glob, re, random
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "..", "api-setup"))
-from score import gold_gsm8k, norm_num, last_boxed, last_number, is_correct  # noqa: E402
+from score import (gold_gsm8k, norm_num, last_boxed, last_number,  # noqa: E402
+                   extract_pred, is_correct)
 
-DATA_DIR = os.path.join(_HERE, "data", "gsm8k")
+# ---- dataset selection -----------------------------------------------------
+DATASET = os.environ.get("NLP_DATASET", "gsm8k")
+
+# kind = how score.py extracts/compares answers; gold = how to read the gold field.
+DATASETS = {
+    "gsm8k":   {"kind": "gsm8k_num", "gold": lambda r: gold_gsm8k(r["gold_answer"])},
+    "math500": {"kind": "math",      "gold": lambda r: r["gold_answer"]},
+    "gpqa":    {"kind": "mc",        "gold": lambda r: r["gold_answer"]},
+}
+if DATASET not in DATASETS:
+    raise SystemExit(f"unknown NLP_DATASET={DATASET!r}; choices: {list(DATASETS)}")
+
+DATA_DIR = os.path.join(_HERE, "data", DATASET)
+TABLES = os.path.join(_HERE, "tables", DATASET)
+os.makedirs(TABLES, exist_ok=True)
 MAX_NEW_TOKENS = 4096  # the cap used at generation time (run_typo_api.py default)
 
 
 # ---- config identity -------------------------------------------------------
 def parse_tag(path):
-    """gsm8k_clean.jsonl -> {'tag':'clean','rate':0,'real':None}
-       gsm8k_typo50_real40.jsonl -> {'tag':'typo50_real40','rate':50,'real':40}"""
-    base = os.path.basename(path).replace(".jsonl", "").replace("gsm8k_", "")
+    """<ds>_clean.jsonl -> {'tag':'clean',...}; <ds>_typo50_real40.jsonl ->
+       {'tag':'typo50_real40','rate':50,'real':40}."""
+    base = os.path.basename(path).replace(".jsonl", "")
+    if base.startswith(DATASET + "_"):
+        base = base[len(DATASET) + 1:]
     if base == "clean":
         return {"tag": "clean", "rate": 0, "real": None, "is_clean": True}
     m = re.fullmatch(r"typo(\d+)_real(\d+)", base)
@@ -30,8 +52,12 @@ def parse_tag(path):
 
 
 def config_files():
-    """Clean first, then typo configs sorted by (rate, real)."""
-    files = glob.glob(os.path.join(DATA_DIR, "gsm8k_*.jsonl"))
+    """Clean first, then typo configs sorted by (rate, real), for DATASET."""
+    files = glob.glob(os.path.join(DATA_DIR, f"{DATASET}_*.jsonl"))
+    if not files:
+        raise SystemExit(
+            f"no data for dataset '{DATASET}' in {DATA_DIR}\n"
+            f"  run:  python download_data.py --dataset {DATASET}")
     def key(f):
         t = parse_tag(f)
         return (0, 0, 0) if t["is_clean"] else (1, t["rate"] or 0, t["real"] or 0)
@@ -39,22 +65,26 @@ def config_files():
 
 
 # ---- answer extraction (strict: final section only) ------------------------
-def extract_answer(final_text):
-    """Model's gsm8k answer from the FINAL section only. None => unanswered."""
-    b = last_boxed(final_text or "")
-    if b is not None:
-        return b
-    return last_number(final_text or "")   # None if no number present
+def _kind_gold(row):
+    ds = row.get("dataset", DATASET)
+    spec = DATASETS.get(ds, DATASETS[DATASET])
+    return spec["kind"], spec["gold"](row)
+
+
+def extract_answer(final_text, kind="gsm8k_num"):
+    """Predicted answer from the FINAL section only (score.py logic, final text as
+    the whole 'generation' so nothing mid-reasoning leaks in). None => unanswered."""
+    return extract_pred(final_text or "", kind, final_text or "")
 
 
 # ---- per-row evaluation ----------------------------------------------------
 # state is one of: "correct", "wrong", "unanswered"
 def eval_row(row):
-    gold = gold_gsm8k(row["gold_answer"])
+    kind, gold = _kind_gold(row)
     final = row.get("final_answer_text", "") or ""
-    pred = extract_answer(final)
+    pred = extract_answer(final, kind)
     answered = pred is not None
-    correct = bool(answered and is_correct("gsm8k_num", pred, gold))
+    correct = bool(answered and is_correct(kind, pred, gold))
     state = "correct" if correct else ("unanswered" if not answered else "wrong")
     return {
         "idx": row["idx"],
@@ -69,7 +99,7 @@ def eval_row(row):
 
 
 def load_evals(path):
-    """{idx: eval_dict} for one config file (gsm8k has 1 sample/question)."""
+    """{idx: eval_dict} for one config file (one sample/question)."""
     out = {}
     for line in open(path, encoding="utf-8"):
         r = json.loads(line)

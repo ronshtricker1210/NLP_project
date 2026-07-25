@@ -26,10 +26,7 @@ try:
 except Exception:
     pass
 
-from common import config_files, parse_tag, load_evals, _HERE
-
-TABLES = os.path.join(_HERE, "tables")
-os.makedirs(TABLES, exist_ok=True)
+from common import config_files, parse_tag, load_evals, TABLES, DATASET
 
 # Doubt markers in two transparent categories, chosen after checking each one's
 # clean-vs-typo discrimination on this data (see the commit notes / word-bank test):
@@ -140,7 +137,7 @@ def main():
 
     # ---- per-config summary (by category) --------------------------------
     active_str = " + ".join(ACTIVE_CATS)
-    print(f"=== gsm8k: self-doubt marker frequency (answered-only) | categories: {active_str} ===")
+    print(f"=== {DATASET}: self-doubt marker frequency (answered-only) | categories: {active_str} ===")
     print("/1k = markers per 1,000 reasoning words (length-normalised);"
           " /tr = mean markers per answer\n")
     cols = [f"{SHORT[c]}/1k" for c in ACTIVE_CATS] + (["total/1k"] if multi else []) \

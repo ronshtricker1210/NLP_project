@@ -9,7 +9,7 @@
 \date{}
 \begin{document}
 \maketitle
-\noindent All tables are \emph{answered-only}: traces that hit the 4096-token cap before writing a final answer are excluded from the metrics (the cap rate is shown as \texttt{capped\_frac} in the accuracy table). Configs are named \texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words corrupted, \emph{real} = \% of typos that form real words. Baseline is the clean input.
+\noindent All tables are \emph{answered-only}: traces that hit the token cap before writing a final answer are excluded from the metrics. Configs are named \texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words corrupted, \emph{real} = \% of typos that form real words. Baseline is the clean input.
 
 \section*{Accuracy and Flips}
 \begin{table}[H]
@@ -305,18 +305,17 @@ typo75\_real70 & 0.0713 & 0.1204 & 1.689 \\
 \section*{Real-word Effect}
 \noindent This section isolates the effect of typo \emph{kind}
 (real-word vs non-word), holding the question, corrupted positions, and rate fixed ---
-something the vs-clean accuracy section cannot do. \textbf{Key results:}
+something the vs-clean accuracy section cannot do. Three views:
 \begin{itemize}\setlength{\itemsep}{1pt}
-  \item Converting non-word typos into real-word ones on the \emph{same} questions
-  significantly lowers accuracy at higher noise: real10$\to$real70 gives
-  $\Delta\mathrm{acc} = -5.0\%$ at rate~50 ($p = 0.04$) and $-8.9\%$ at rate~75
-  ($p < 0.001$); at rate~25 the effect is negligible (paired table).
-  \item Per typo, one real-word typo cuts the odds of a correct answer about
-  \emph{twice} as much as one non-word typo (odds $0.93$ vs $0.97$; logit table).
-  \item Yet real-word failures are flagged \emph{more}, not less (notice rate among
-  wrong answers rises with real ratio) --- so the damage is
-  ``noticed-but-unrecoverable'', not a silent confident failure.
+  \item a \textbf{controlled paired} comparison of low-real vs high-real variants on
+  the \emph{same} questions, with a McNemar test (paired table);
+  \item a \textbf{per-typo logistic regression} comparing the marginal harm of one
+  real-word vs one non-word typo (logit table);
+  \item whether wrong answers \textbf{flag the corruption} more or less as the
+  real-word share rises (silent-failure table).
 \end{itemize}
+\noindent Read the signs, deltas and $p$-values in the tables below for this
+dataset's result.
 \medskip
 
 \begin{table}[H]

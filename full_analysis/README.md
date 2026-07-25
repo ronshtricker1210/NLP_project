@@ -13,25 +13,40 @@ cd full_analysis
 # 1. install dependencies
 pip install huggingface_hub datasets numpy scikit-learn math_verify
 
-# 2. download the model-result files (~66 MB) into data/gsm8k/
-python download_data.py
+# 2. download the model-result files into data/<dataset>/
+python download_data.py                      # gsm8k (default)
 
 # 3. run every analysis and build the LaTeX report
-python run_all.py
+python run_all.py                            # -> report_gsm8k.tex
 ```
 
-`run_all.py` runs all the analysis modules (regenerating the CSVs in `tables/`)
-and then writes **`report.tex`** — a self-contained, Overleaf-ready document with
-every result table. Open `report.tex` in Overleaf (or `pdflatex report.tex`) to get
-the PDF. To only rebuild the `.tex` from existing CSVs: `python run_all.py --skip-run`.
+`run_all.py` runs all the analysis modules (regenerating the CSVs in
+`tables/<dataset>/`) and then writes **`report_<dataset>.tex`** — a self-contained,
+Overleaf-ready document with every result table. Open it in Overleaf (or
+`pdflatex report_gsm8k.tex`). To only rebuild the `.tex` from existing CSVs:
+`python run_all.py --skip-run`.
+
+## Other datasets (math500, gpqa, …)
+
+The pipeline is dataset-agnostic. Any dataset with the **same config grid**
+(`clean` + `typo{25,50,75}` × `real{10,40,70}`, one sample/question) works — just
+point everything at it with `--dataset` (scoring auto-switches: gsm8k = numeric,
+math500 = `math_verify` on `\boxed`, gpqa = multiple choice):
+
+```bash
+python download_data.py --dataset math500
+python run_all.py       --dataset math500     # -> report_math500.tex, tables/math500/
+```
+
+Under the hood every module reads the `NLP_DATASET` env var (set by `run_all.py`),
+so a single module can also be run standalone, e.g. `NLP_DATASET=math500 python self_doubt.py`.
 
 ## Data
 
 The inputs are the model result files on the Hub: **`Dolevabudi/typo-results`**
-(gsm8k: `clean` + `typo{25,50,75}` × `real{10,40,70}`). The raw JSONL is **not
-committed** (~66 MB, reproducible) — `download_data.py` fetches it into `data/gsm8k/`.
-Windows note: set `PYTHONIOENCODING=utf-8` if a console chokes on the Δ / → glyphs
-the modules print.
+(under `results/<dataset>/`). The raw JSONL is **not committed** (reproducible) —
+`download_data.py` fetches it into `data/<dataset>/`. Windows note: set
+`PYTHONIOENCODING=utf-8` if a console chokes on the Δ / → glyphs the modules print.
 
 ## Key policy (applies everywhere)
 
@@ -44,7 +59,7 @@ the modules print.
 
 ## Modules
 
-| file | dimension | output tables (in `tables/`) |
+| file | dimension | output tables (in `tables/<dataset>/`) |
 | --- | --- | --- |
 | `run_all.py` | **entry point** — runs every module below, then writes `report.tex` | writes `report.tex` |
 | `download_data.py` | fetch the gsm8k result JSONL from the Hub into `data/gsm8k/` | — |
