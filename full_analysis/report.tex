@@ -14,23 +14,23 @@
 \section*{Accuracy and Flips}
 \begin{table}[H]
 \centering
-\caption{Accuracy per config: answered-only and strict (truncated=wrong), with bootstrap CI and the token-cap rate.}
+\caption{Accuracy per config: answered-only and strict (truncated=wrong), with 95\% bootstrap CI on acc\_strict.}
 \small
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-\textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} & \textbf{capped\_frac} \\
+\textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
 \midrule
-clean & 500 & 0.9522 & 0.916 & 0.89 & 0.94 & 0.042 \\
-typo25\_real10 & 500 & 0.9075 & 0.824 & 0.792 & 0.856 & 0.1 \\
-typo25\_real40 & 500 & 0.9083 & 0.832 & 0.8 & 0.864 & 0.09 \\
-typo25\_real70 & 500 & 0.8943 & 0.812 & 0.776 & 0.848 & 0.104 \\
-typo50\_real10 & 500 & 0.843 & 0.752 & 0.714 & 0.788 & 0.118 \\
-typo50\_real40 & 500 & 0.8247 & 0.734 & 0.696 & 0.772 & 0.12 \\
-typo50\_real70 & 500 & 0.7898 & 0.684 & 0.642 & 0.724 & 0.152 \\
-typo75\_real10 & 500 & 0.7816 & 0.644 & 0.602 & 0.686 & 0.188 \\
-typo75\_real40 & 500 & 0.7626 & 0.636 & 0.594 & 0.68 & 0.17 \\
-typo75\_real70 & 500 & 0.7143 & 0.56 & 0.514 & 0.604 & 0.23 \\
+clean & 500 & 0.9522 & 0.916 & 0.89 & 0.94 \\
+typo25\_real10 & 500 & 0.9075 & 0.824 & 0.792 & 0.856 \\
+typo25\_real40 & 500 & 0.9083 & 0.832 & 0.8 & 0.864 \\
+typo25\_real70 & 500 & 0.8943 & 0.812 & 0.776 & 0.848 \\
+typo50\_real10 & 500 & 0.843 & 0.752 & 0.714 & 0.788 \\
+typo50\_real40 & 500 & 0.8247 & 0.734 & 0.696 & 0.772 \\
+typo50\_real70 & 500 & 0.7898 & 0.684 & 0.642 & 0.724 \\
+typo75\_real10 & 500 & 0.7816 & 0.644 & 0.602 & 0.686 \\
+typo75\_real40 & 500 & 0.7626 & 0.636 & 0.594 & 0.68 \\
+typo75\_real70 & 500 & 0.7143 & 0.56 & 0.514 & 0.604 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -38,7 +38,7 @@ typo75\_real70 & 500 & 0.7143 & 0.56 & 0.514 & 0.604 & 0.23 \\
 
 \begin{table}[H]
 \centering
-\caption{Answered-only flips vs the clean baseline (right->wrong, wrong->right) with McNemar test.}
+\caption{Answered-only flips vs clean, paired by question over n\_both (answered in both conditions). r2w / w2r = questions correct on clean but wrong on this config / wrong on clean but correct on this config; r2w\_ratio = r2w / n\_both, w2r\_ratio = w2r / n\_both; net\_flip\_ratio = r2w\_ratio - w2r\_ratio = (r2w - w2r) / n\_both, the net rate at which this config worsens answers relative to clean.}
 \small
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrrrrrrr}
@@ -58,6 +58,20 @@ typo75\_real70 & 383 & 97 & 3 & 0.2533 & 0.0078 & 0.2454 & 97 & 3 & 86.49 & 0.0 
 \end{tabular}
 \end{adjustbox}
 \end{table}
+
+\medskip
+\noindent\textbf{McNemar test (used in the flips table above).}
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{What it is:} a paired significance test for before/after binary
+  outcomes. It looks only at the questions that \emph{changed} (the discordant pairs:
+  $b$ = right$\to$wrong, $c$ = wrong$\to$right) and ignores those that stayed the same.
+  \item \textbf{Null hypothesis:} typos break correct answers as often as they fix
+  wrong ones ($b = c$, i.e.\ no net effect).
+  \item \textbf{Statistic:} $(|b - c| - 1)^2 / (b + c)$ (column mcnemar\_stat);
+  mcnemar\_p is its chi-square $p$-value with 1 degree of freedom.
+  \item \textbf{When we reject it:} when mcnemar\_p $< 0.05$ --- the
+  right$\to$wrong vs wrong$\to$right imbalance is too large to be chance.
+\end{itemize}
 
 \section*{Reasoning Length}
 \begin{table}[H]
@@ -109,6 +123,23 @@ typo75\_real70 & 1401.0 & 2058.8 & 1.4695 \\
 \end{table}
 
 \section*{Self-doubt}
+\noindent The self-doubt markers are curated words grouped into two
+\emph{banks}, each matched as a case-insensitive whole-word pattern in the reasoning
+text. Density is matches per 1000 reasoning words.
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{second\_guess} --- the proposal's canonical self-correction words plus
+  direct reversals: \emph{wait, hmm, actually, reconsider, but wait, hold on, on second
+  thought, let me recheck, double-check}.
+  \item \textbf{uncertainty} --- hedging / ``not certain'' words: \emph{maybe, perhaps,
+  possibly, might be, could be, not sure, I guess, presumably, or maybe / alternatively,
+  unclear / confused}.
+\end{itemize}
+\noindent Example reasoning: ``\emph{Wait, maybe the total is 12\dots\ hmm, actually let
+me recheck}'' contributes \emph{wait, hmm, actually} (second\_guess) and \emph{maybe}
+(uncertainty). A separate \emph{typo-noticing} bank (\emph{typo, misspelled, doesn't make
+sense, \dots}) is treated as repair behaviour, not self-doubt.
+\medskip
+
 \begin{table}[H]
 \centering
 \caption{Doubt-marker density per config: second\_guess and uncertainty, per 1k words and per trace.}
@@ -193,10 +224,10 @@ typo75\_real70 & 12.798 & 13.72 & 1.072 & 12.577 & 22.682 & 1.803 & 25.376 & 36.
 \end{adjustbox}
 \end{table}
 
-\section*{Repair Behaviour (word-level)}
+\section*{Repair Behaviour}
 \begin{table}[H]
 \centering
-\caption{How each corrupted word was handled, per config. Each corrupted word (recovered by diffing the clean vs typo question) is placed in one bucket by which form appears in the reasoning: silent\_fix = only the original word (quiet recovery); flagged = both the original and the corrupted form (noticed and fixed); misread = only the corrupted form (read as the wrong word); not\_used = neither form referenced. Columns *\_n are counts; *\_frac are the share of n\_corrupt\_words.}
+\caption{How each corrupted word was handled, per config (categories defined below the table).}
 \small
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrrrrrr}
@@ -217,6 +248,20 @@ typo75\_real70 & 7615 & 3943 & 1978 & 663 & 1031 & 0.5178 & 0.2598 & 0.0871 & 0.
 \end{adjustbox}
 \end{table}
 
+\noindent A \emph{corrupted word} is a word that received a
+typo --- it differs between the clean and typo question (e.g.\ \emph{sum} $\to$
+\emph{sun}). We recover these by diffing the two questions, then place each into one
+bucket by which form appears in the reasoning:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{silent\_fix} --- only the original word (\emph{sum}) appears: a quiet recovery.
+  \item \textbf{flagged} --- both forms appear (\emph{sum} and \emph{sun}): noticed and fixed.
+  \item \textbf{misread} --- only the corrupted form (\emph{sun}) appears: read as the wrong word.
+  \item \textbf{not\_used} --- neither form appears in the reasoning.
+\end{itemize}
+\noindent Columns \texttt{*\_n} are counts; \texttt{*\_frac} are the share of
+\texttt{n\_corrupt\_words}.
+\medskip
+
 \begin{table}[H]
 \centering
 \caption{Word handling pooled by real-word ratio: the non-word vs real-word contrast.}
@@ -236,7 +281,7 @@ typo75\_real70 & 7615 & 3943 & 1978 & 663 & 1031 & 0.5178 & 0.2598 & 0.0871 & 0.
 
 \begin{table}[H]
 \centering
-\caption{Misread rate split by final correctness. Within each outcome group, misread rate = (corrupted words used only in the corrupted form) / (all corrupted words examined), pooled over the group. misread\_correct = over problems answered correctly; misread\_wrong = over problems answered wrong; wrong\_over\_correct = misread\_wrong / misread\_correct.}
+\caption{Misread rate split by final correctness. A typo'd word is 'misread' when the reasoning uses only its corrupted form (e.g. sun instead of sum). Within each outcome group, misread rate = (typo'd words that were misread) / (all typo'd words examined), pooled over the group. misread\_correct = over problems answered correctly; misread\_wrong = over problems answered wrong; wrong\_over\_correct = misread\_wrong / misread\_correct.}
 \small
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrr}
@@ -258,6 +303,22 @@ typo75\_real70 & 0.0713 & 0.1204 & 1.689 \\
 \end{table}
 
 \section*{Real-word Effect}
+\noindent This section isolates the effect of typo \emph{kind}
+(real-word vs non-word), holding the question, corrupted positions, and rate fixed ---
+something the vs-clean accuracy section cannot do. \textbf{Key results:}
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item Converting non-word typos into real-word ones on the \emph{same} questions
+  significantly lowers accuracy at higher noise: real10$\to$real70 gives
+  $\Delta\mathrm{acc} = -5.0\%$ at rate~50 ($p = 0.04$) and $-8.9\%$ at rate~75
+  ($p < 0.001$); at rate~25 the effect is negligible (paired table).
+  \item Per typo, one real-word typo cuts the odds of a correct answer about
+  \emph{twice} as much as one non-word typo (odds $0.93$ vs $0.97$; logit table).
+  \item Yet real-word failures are flagged \emph{more}, not less (notice rate among
+  wrong answers rises with real ratio) --- so the damage is
+  ``noticed-but-unrecoverable'', not a silent confident failure.
+\end{itemize}
+\medskip
+
 \begin{table}[H]
 \centering
 \caption{Controlled paired comparison of two TYPO variants against EACH OTHER (baseline is the low-real variant, NOT clean -- so this is not the vs-clean accuracy table). Within a fixed rate the same questions are corrupted in the same positions, only the typo KIND differs. Restricted to questions answered in both variants. acc\_low\_real / acc\_high\_real = accuracy on the lower / higher real-word variant; delta\_acc = acc\_high\_real - acc\_low\_real; r2w = questions correct in the low-real variant but wrong in the high-real one; w2r = the reverse; mcnemar\_p = McNemar test on that paired change. Negative delta with r2w > w2r means real-word typos are more harmful than the non-word typos they replaced.}

@@ -74,8 +74,7 @@ def main():
         rows_csv.append(dict(config=tag, n=s["n"],
                              acc_answered=round(s["acc_answered"], 4),
                              acc_strict=round(s["acc_strict"], 4),
-                             ci_lo=round(s["ci"][0], 4), ci_hi=round(s["ci"][1], 4),
-                             capped_frac=round(s["capped"]/s["n"], 4)))
+                             ci_lo=round(s["ci"][0], 4), ci_hi=round(s["ci"][1], 4)))
     _write_csv(os.path.join(TABLES, "accuracy_per_config.csv"), rows_csv)
 
     # ---- flips vs clean: ANSWERED-only (truncated pairs excluded) ---------

@@ -5,24 +5,33 @@ proposal dimensions: **accuracy & flips**, **reasoning length**, **self-doubt**,
 and **repair behavior**. Correctness reuses [`../api-setup/score.py`](../api-setup/score.py);
 these modules add the rest.
 
+## Quick start (fresh clone)
+
+```bash
+cd full_analysis
+
+# 1. install dependencies
+pip install huggingface_hub datasets numpy scikit-learn math_verify
+
+# 2. download the model-result files (~66 MB) into data/gsm8k/
+python download_data.py
+
+# 3. run every analysis and build the LaTeX report
+python run_all.py
+```
+
+`run_all.py` runs all the analysis modules (regenerating the CSVs in `tables/`)
+and then writes **`report.tex`** — a self-contained, Overleaf-ready document with
+every result table. Open `report.tex` in Overleaf (or `pdflatex report.tex`) to get
+the PDF. To only rebuild the `.tex` from existing CSVs: `python run_all.py --skip-run`.
+
 ## Data
 
-Inputs are the model result files on the Hub: **`Dolevabudi/typo-results`**
+The inputs are the model result files on the Hub: **`Dolevabudi/typo-results`**
 (gsm8k: `clean` + `typo{25,50,75}` × `real{10,40,70}`). The raw JSONL is **not
-committed** (~66 MB, reproducible). Fetch it into `data/gsm8k/`:
-
-```python
-import os, shutil
-from huggingface_hub import HfApi, hf_hub_download
-repo = "Dolevabudi/typo-results"
-files = [f for f in HfApi().list_repo_files(repo, repo_type="dataset")
-         if f.endswith(".jsonl") and f.startswith("results/gsm8k/")]
-dest = "data/gsm8k"; os.makedirs(dest, exist_ok=True)
-for f in files:
-    tmp = hf_hub_download(repo, f, repo_type="dataset")
-    name = "gsm8k_" + f[len("results/gsm8k/"):].replace(".jsonl", "").replace("/", "_") + ".jsonl"
-    shutil.copyfile(tmp, os.path.join(dest, name))
-```
+committed** (~66 MB, reproducible) — `download_data.py` fetches it into `data/gsm8k/`.
+Windows note: set `PYTHONIOENCODING=utf-8` if a console chokes on the Δ / → glyphs
+the modules print.
 
 ## Key policy (applies everywhere)
 
@@ -37,9 +46,11 @@ for f in files:
 
 | file | dimension | output tables (in `tables/`) |
 | --- | --- | --- |
+| `run_all.py` | **entry point** — runs every module below, then writes `report.tex` | writes `report.tex` |
+| `download_data.py` | fetch the gsm8k result JSONL from the Hub into `data/gsm8k/` | — |
 | `common.py` | shared loaders, strict extraction, bootstrap, McNemar | — |
-| `accuracy_flips.py` | accuracy (strict / answered / completion), truncation, answered-only flips + McNemar | `accuracy_per_config`, `flips_vs_clean`, `accuracy_decomposition` |
-| `reasoning_length.py` | absolute tokens + typo/clean ratio (median/mean/p90), length by outcome | `reasoning_length`, `reasoning_length_absolute`, `length_by_outcome` |
+| `accuracy_flips.py` | accuracy (strict / answered), truncation-aware, answered-only flips + McNemar | `accuracy_per_config`, `flips_vs_clean` |
+| `reasoning_length.py` | absolute tokens (mean/median/p90), length by outcome | `reasoning_length_absolute`, `length_by_outcome` |
 | `self_doubt.py` | self-doubt = `second_guess` + `uncertainty` marker density | `self_doubt_per_config`, `self_doubt_by_marker`, `self_doubt_by_outcome` |
 | `repair_wordlevel.py` | **primary repair measure** — grounded in the actual corrupted words (diff clean vs typo). Per corrupted word: silent_fix / flagged / **misread** / not_used | `repair_wordlevel_per_config`, `repair_wordlevel_by_real`, `repair_wordlevel_by_outcome` |
 | `marker_banks.py` | shared repair-side word banks (typo-noticing, repair words) + `classify_trace` (imported, not run) | — |
@@ -62,19 +73,19 @@ But real-word failures are *noticed more*, not less — the harm is
 
 ## Run
 
+Normally just `python run_all.py` (see Quick start). To run a single dimension
+and read its printed tables:
+
 ```bash
-cd full_analysis
 python accuracy_flips.py
 python reasoning_length.py
-python self_doubt.py                 # both categories
+python self_doubt.py                 # both marker categories
 python self_doubt.py --no-2guess     # uncertainty only (second_guess is a flat baseline)
 python repair_wordlevel.py           # primary repair measure (silent_fix / flagged / misread)
-python lexical_grid.py
 python real_word_effect.py           # real-word isolation (paired + logit)
+python lexical_grid.py               # overview of all four marker families
 
 # retired keyword-based repair (reference only, not part of the active set):
 python repair_behavior_old_version.py
 python repair_behavior_old_version.py --judge --limit 50   # + LLM judge (needs HF_TOKEN)
 ```
-
-On Windows consoles set `PYTHONIOENCODING=utf-8` for the Δ / → glyphs.
