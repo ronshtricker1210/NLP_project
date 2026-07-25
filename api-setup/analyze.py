@@ -18,7 +18,7 @@ from collections import defaultdict
 from score import majority_correct, score_file
 
 
-def analyze(results_dir, dataset):
+def analyze(results_dir, dataset, strip_suffix=""):
     files = sorted(glob.glob(os.path.join(results_dir, f"{dataset}_*.jsonl")))
     if not files:
         raise SystemExit(f"no {dataset}_*.jsonl in {results_dir}")
@@ -27,6 +27,8 @@ def analyze(results_dir, dataset):
     per_cfg = {}  # tag -> {idx: [(correct, pred, gold), ...]}
     for fp in files:
         tag = os.path.basename(fp).removesuffix(".jsonl").split("_", 1)[1]
+        if strip_suffix:
+            tag = tag.removesuffix(f"_{strip_suffix}")
         _, per = score_file(fp)
         per_cfg[tag] = per
         recs = [json.loads(l) for l in open(fp)]
@@ -93,5 +95,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default=os.path.expanduser("~/nlp_project/results"))
     ap.add_argument("--dataset", default="gsm8k")
+    ap.add_argument("--strip-suffix", default="",
+                    help="strip a trailing _<suffix> from file tags, e.g. 20000")
     args = ap.parse_args()
-    analyze(args.results, args.dataset)
+    analyze(args.results, args.dataset, args.strip_suffix)

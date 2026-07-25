@@ -80,26 +80,27 @@ def build_prompt(kind, qtext, row, seed):
     return prompt, correct
 
 
-def hub_path(dataset, config, variant):
+def hub_path(dataset, config, variant, suffix=""):
     """Repo path for a result file: results/{dataset}/typo{rate}/real{ratio}.jsonl.
     Plain realY configs use the fixed ~30% corruption rate (see DATASET_USAGE.md),
     so they file under typo30; rateX_realY configs under typoX; clean baselines
-    under results/{dataset}/clean.jsonl."""
+    under results/{dataset}/clean.jsonl. A suffix (e.g. "_20000" for a different
+    max-token budget) lands before .jsonl so variants coexist."""
     if variant == "clean":
-        return f"results/{dataset}/clean.jsonl"
+        return f"results/{dataset}/clean{suffix}.jsonl"
     m = re.fullmatch(r"rate(\d+)_real(\d+)", config)
     if m:
-        return f"results/{dataset}/typo{m.group(1)}/real{m.group(2)}.jsonl"
+        return f"results/{dataset}/typo{m.group(1)}/real{m.group(2)}{suffix}.jsonl"
     m = re.fullmatch(r"real(\d+)", config)
     if m:
-        return f"results/{dataset}/typo30/real{m.group(1)}.jsonl"
-    return f"results/{dataset}/{config}.jsonl"
+        return f"results/{dataset}/typo30/real{m.group(1)}{suffix}.jsonl"
+    return f"results/{dataset}/{config}{suffix}.jsonl"
 
 
-def hub_config_name(dataset, config, variant):
+def hub_config_name(dataset, config, variant, suffix=""):
     """Config name for push_to_hub, unique across datasets sharing one repo:
-    math500_clean, math500_typo30_real40, gsm8k_typo25_real0, ..."""
-    leaf = hub_path(dataset, config, variant)              # results/ds/typoX/realY.jsonl
+    math500_clean, math500_typo30_real40, gsm8k_typo25_real0_20000, ..."""
+    leaf = hub_path(dataset, config, variant, suffix)      # results/ds/typoX/realY.jsonl
     parts = leaf.removeprefix("results/").removesuffix(".jsonl").split("/")
     return "_".join(parts)
 
@@ -113,11 +114,12 @@ def hub_upload(outpath, dataset, config, variant, args):
     from datasets import Dataset
     from huggingface_hub import HfApi
     token = os.environ.get("HF_WRITE_TOKEN") or os.environ.get("HF_TOKEN")
-    dest = hub_path(dataset, config, variant)
+    suffix = f"_{args.file_suffix}" if args.file_suffix else ""
+    dest = hub_path(dataset, config, variant, suffix)
     HfApi(token=token).upload_file(path_or_fileobj=outpath, path_in_repo=dest,
                                    repo_id=args.hub_repo, repo_type="dataset",
-                                   commit_message=f"results: {dataset}/{config} ({variant})")
-    cfg_name = hub_config_name(dataset, config, variant)
+                                   commit_message=f"results: {dataset}/{config} ({variant}{suffix})")
+    cfg_name = hub_config_name(dataset, config, variant, suffix)
     Dataset.from_json(outpath).push_to_hub(args.hub_repo, config_name=cfg_name,
                                            split="test", private=True, token=token)
     print(f"  pushed hf://datasets/{args.hub_repo}/{dest}  (config={cfg_name})", flush=True)
@@ -154,17 +156,24 @@ def ask_one(client, args, prompt, retries):
                 stream=True,
                 stream_options={"include_usage": True},
             )
-            reasoning_parts, content_parts, usage = [], [], None
+            reasoning_parts, content_parts, usage, finish = [], [], None, None
             for chunk in stream:
                 if chunk.usage:
                     usage = chunk.usage
                 if chunk.choices:
-                    delta = chunk.choices[0].delta
+                    choice = chunk.choices[0]
+                    delta = choice.delta
                     rc = getattr(delta, "reasoning_content", None)
                     if rc:
                         reasoning_parts.append(rc)
                     if delta.content:
                         content_parts.append(delta.content)
+                    if choice.finish_reason:
+                        finish = choice.finish_reason
+            if finish is None:
+                # server dropped the stream mid-generation; treat as a failed
+                # attempt, never as a (silently truncated) result
+                raise RuntimeError("stream ended without finish_reason")
             msg = types.SimpleNamespace(
                 reasoning_content="".join(reasoning_parts) or None,
                 content="".join(content_parts))
@@ -175,6 +184,7 @@ def ask_one(client, args, prompt, retries):
                                               completion_tokens=est(generation))
             return {
                 "generation": generation, "reasoning": reasoning, "final_answer_text": final,
+                "finish_reason": finish,
                 "n_prompt_tokens": usage.prompt_tokens, "n_gen_tokens": usage.completion_tokens,
                 "cost_usd": round((usage.prompt_tokens * PRICE_IN + usage.completion_tokens * PRICE_OUT) / 1e6, 8),
                 "latency_s": round(time.time() - t0, 1),
@@ -196,6 +206,8 @@ def run_one(client, dataset, spec, config, variant, args, totals):
         return
     n = ds.num_rows if args.limit == 0 else min(args.limit, ds.num_rows)
     tag = config if use_typo else "clean"
+    if args.file_suffix:
+        tag = f"{tag}_{args.file_suffix}"
     outpath = os.path.join(args.outdir, f"{dataset}_{tag}.jsonl")
     print(f"\n=== {dataset} / {config} ({variant}): {n} questions"
           f"{f' x{args.n_samples} samples' if args.n_samples > 1 else ''} ===", flush=True)
@@ -290,6 +302,10 @@ def main():
                     help="HF dataset repo to mirror results to, e.g. user/typo-results "
                          "(layout: results/{dataset}/typo{rate}/real{ratio}.jsonl; "
                          "needs a write token in HF_WRITE_TOKEN or HF_TOKEN)")
+    ap.add_argument("--file-suffix", default="",
+                    help="appended to local filenames and Hub paths/configs, e.g. "
+                         "'20000' -> gsm8k_rate25_real10_20000.jsonl, so runs with "
+                         "different budgets coexist")
     args = ap.parse_args()
 
     api_key = os.environ.get("HF_TOKEN")
