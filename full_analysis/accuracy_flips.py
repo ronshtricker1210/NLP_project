@@ -71,10 +71,7 @@ def main():
         print(f"{tag:16s}{s['n']:>5}{s['truncated']:>8.1%}{s['completion']:>8.1%}"
               f"{s['acc_answered']:>9.1%}{s['acc_strict']:>12.1%}{ci:>16}{d:>9}"
               f"{s['capped']/s['n']:>9.1%}")
-        rows_csv.append(dict(config=tag,
-                             n=s["n"], truncated=s["unanswered"],
-                             truncated_frac=round(s["truncated"], 4),
-                             completion=round(s["completion"], 4),
+        rows_csv.append(dict(config=tag, n=s["n"],
                              acc_answered=round(s["acc_answered"], 4),
                              acc_strict=round(s["acc_strict"], 4),
                              ci_lo=round(s["ci"][0], 4), ci_hi=round(s["ci"][1], 4),
@@ -113,7 +110,7 @@ def main():
         pstr = f"{p:.2e}" if p is not None else "n/a"
         print(f"{tag:16s}{n_both:>7}{dropped:>8}{r2w:>6}{w2r:>6}"
               f"{r2w_r:>7.1%}{w2r_r:>7.1%}{net_r:>7.1%}{pstr:>11}")
-        flip_csv.append(dict(config=tag, n_both=n_both, dropped_unanswered=dropped,
+        flip_csv.append(dict(config=tag, n_both=n_both,
                              r2w=r2w, w2r=w2r,
                              r2w_ratio=round(r2w_r, 4), w2r_ratio=round(w2r_r, 4),
                              net_flip_ratio=round(net_r, 4),

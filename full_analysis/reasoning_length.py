@@ -88,62 +88,9 @@ def main():
                             median_tok=median(vals), p90_tok=percentile(vals, 0.9),
                             max_tok=max(vals) if vals else 0))
     _write_csv(os.path.join(TABLES, "reasoning_length_absolute.csv"), abs_csv)
-    print()
-
-    print("=== gsm8k: reasoning-length ratio (typo tokens / clean tokens) ===")
-    print("paired per question, ANSWERED-in-both only. Ratios: median / geomean / "
-          "ratio-of-means. Lower bound (truncated pairs excluded).\n")
-    print(f"{'config':16s}{'n_both':>7}{'clean_tok':>10}{'typo_tok':>10}"
-          f"{'median':>9}{'geomean':>9}{'meanRatio':>10}{'p90':>7}{'excl_trunc':>11}")
-    rows_csv = []
-    for tag in tags:
-        if tag == "clean":
-            continue
-        ev, tok = EV[tag], TOK[tag]
-        ratios, ct, tt = [], [], []
-        n_both = excl = 0
-        for idx in base_tok:
-            if idx not in tok:
-                continue
-            if not (base_ev[idx]["answered"] and ev[idx]["answered"]):
-                excl += 1
-                continue
-            n_both += 1
-            c, t2 = base_tok[idx], tok[idx]
-            ct.append(c); tt.append(t2)
-            if c > 0:
-                ratios.append(t2 / c)
-        med = median(ratios); gm = geomean(ratios)
-        clean_mean = sum(ct) / len(ct) if ct else 0
-        typo_mean = sum(tt) / len(tt) if tt else 0
-        ratio_of_means = typo_mean / clean_mean if clean_mean else 0
-        p90 = percentile(ratios, 0.90)
-        print(f"{tag:16s}{n_both:>7}{clean_mean:>10.0f}{typo_mean:>10.0f}"
-              f"{med:>9.2f}{gm:>9.2f}{ratio_of_means:>10.2f}{p90:>7.2f}{excl:>11}")
-        rows_csv.append(dict(config=tag,
-                             n_both=n_both, excluded_truncated=excl,
-                             clean_mean_tok=round(clean_mean, 1),
-                             typo_mean_tok=round(typo_mean, 1),
-                             median_ratio=round(med, 4), geomean_ratio=round(gm, 4),
-                             ratio_of_means=round(ratio_of_means, 4),
-                             p90_ratio=round(p90, 4)))
-    _write_csv(os.path.join(TABLES, "reasoning_length.csv"), rows_csv)
-
-    # ---- median-ratio matrix ---------------------------------------------
-    S = {r["config"]: r for r in rows_csv}
-    rates = sorted({meta[t]["rate"] for t in tags if not meta[t]["is_clean"]})
-    reals = sorted({meta[t]["real"] for t in tags if not meta[t]["is_clean"]})
-    print("\n=== median length-ratio matrix (rows=typo rate, cols=real ratio) | clean=1.00x ===")
-    print("rate\\real" + "".join(f"{f'real{r}':>10}" for r in reals))
-    for rate in rates:
-        line = f"{rate:>7}% "
-        for real in reals:
-            tag = f"typo{rate}_real{real}"
-            cell = f"{S[tag]['median_ratio']:.2f}x" if tag in S else "-"
-            line += f"{cell:>10}"
-        print(line)
 
     # ---- length vs correctness (answered only) ---------------------------
+    # wrong_over_correct = mean tokens of wrong answers / mean tokens of correct answers
     print("\n=== mean tokens by outcome, answered-only (does wrongness cost length?) ===")
     print(f"{'config':16s}{'tok|correct':>13}{'tok|wrong':>11}{'wrong/correct':>15}")
     lc_csv = []

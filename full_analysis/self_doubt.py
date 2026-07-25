@@ -168,18 +168,25 @@ def main():
     # Shows which individual markers actually respond to typos (delta vs clean).
     clean_recs = DATA["clean"]
     typo_recs = [x for tag in tags if not meta[tag]["is_clean"] for x in DATA[tag]]
-    print("\n=== per-marker density (mk/1k words): clean vs pooled-typo, by category ===")
+    # All markers in the bank, RANKED by discrimination (typo minus clean density),
+    # so the strongest typo-responsive words are on top and the dead ones (e.g.
+    # reconsider = 0) fall to the bottom. Nothing is filtered out.
+    print("\n=== per-marker density (mk/1k words): clean vs pooled-typo, ranked by discrimination ===")
     print(f"{'marker':20s}{'cat':>14}{'clean':>9}{'typo':>9}{'Δ (signal)':>12}")
-    mk_csv = []
     def mdensity(recs, name):
         m = sum(x["counts"][name] for x in recs); w = sum(x["words"] for x in recs)
         return (m / w * 1000) if w else 0.0
+    marker_rows = []
     for cat in ACTIVE_CATS:
         for name in MARKER_CATS[cat]:
             dc, dt = mdensity(clean_recs, name), mdensity(typo_recs, name)
-            print(f"{name:20s}{cat:>14}{dc:>9.2f}{dt:>9.2f}{dt-dc:>+12.2f}")
-            mk_csv.append(dict(marker=name, category=cat, clean_per_1k=round(dc, 3),
-                               typo_per_1k=round(dt, 3), discrimination=round(dt-dc, 3)))
+            marker_rows.append((name, cat, dc, dt, dt - dc))
+    marker_rows.sort(key=lambda r: r[4], reverse=True)   # by discrimination, desc
+    mk_csv = []
+    for name, cat, dc, dt, disc in marker_rows:
+        print(f"{name:20s}{cat:>14}{dc:>9.2f}{dt:>9.2f}{disc:>+12.2f}")
+        mk_csv.append(dict(marker=name, category=cat, clean_per_1k=round(dc, 3),
+                           typo_per_1k=round(dt, 3), discrimination=round(disc, 3)))
     _write_csv(os.path.join(TABLES, "self_doubt_by_marker.csv"), mk_csv)
 
     # ---- doubt by outcome (correct vs wrong), split by category ----------
