@@ -20,7 +20,6 @@ Answered-only (truncated traces excluded). Outputs: printed tables + CSVs.
     python self_doubt.py
 """
 import os, sys, re, csv, json, argparse
-from collections import defaultdict
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -210,28 +209,9 @@ def main():
         oc_csv.append(row)
     _write_csv(os.path.join(TABLES, "self_doubt_by_outcome.csv"), oc_csv)
 
-    # ---- HYPOTHESIS: real-word typos -> silent wrong answers -------------
-    # Pool all typo configs; bucket by target real ratio; among WRONG answers,
-    # does doubt fall as real ratio rises? Also show correct for contrast.
-    print("\n=== silent-failure test: doubt density vs real-word ratio (pooled typo configs) ===")
-    print(f"{'real ratio':>12}{'doubt|wrong':>13}{'doubt|correct':>15}{'n_wrong':>9}{'n_correct':>11}")
-    by_real = defaultdict(list)
-    for tag in tags:
-        if meta[tag]["is_clean"]:
-            continue
-        for x in DATA[tag]:
-            by_real[meta[tag]["real"]].append(x)
-    hyp_csv = []
-    for real in sorted(by_real):
-        recs = by_real[real]
-        wrong = [x for x in recs if not x["correct"]]
-        corr = [x for x in recs if x["correct"]]
-        dw, dc = density(wrong), density(corr)
-        print(f"{f'real{real}':>12}{dw:>13.2f}{dc:>15.2f}{len(wrong):>9}{len(corr):>11}")
-        hyp_csv.append(dict(real_ratio=real, doubt_wrong=round(dw, 3),
-                            doubt_correct=round(dc, 3),
-                            n_wrong=len(wrong), n_correct=len(corr)))
-    _write_csv(os.path.join(TABLES, "self_doubt_vs_realratio.csv"), hyp_csv)
+    # NOTE: real-word-ratio comparisons (doubt vs real10/40/70, silent-failure test)
+    # live in real_word_effect.py, which isolates the real-word axis properly. They
+    # were removed here to keep self_doubt focused on the doubt dimension per config.
 
     print(f"\ntables written to {TABLES}")
 

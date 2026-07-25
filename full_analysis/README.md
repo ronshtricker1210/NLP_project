@@ -43,6 +43,14 @@ for f in files:
 | `self_doubt.py` | self-doubt = `second_guess` + `uncertainty` marker density | `self_doubt_per_config`, `self_doubt_by_marker`, `self_doubt_by_outcome` |
 | `repair_behavior.py` | repair = `typo-noticing` + `repair words`; notice×outcome; LLM-judge scaffold | `repair_notice_outcome`, `repair_words_per_config`, `repair_notice_vs_realratio` |
 | `lexical_grid.py` | all four marker families across the rate×real grid | `lexical_grid` |
+| `real_word_effect.py` | isolates the real-word axis: controlled paired real10-vs-real70 (same question/positions) + McNemar, per-typo logit (`num_real` vs `num_nonword`), silent-failure test | `realword_paired`, `realword_pertypo_logit`, `realword_silent_failure` |
+
+**Real-word finding (from `real_word_effect.py`):** because each rate corrupts the
+same positions across real variants, swapping non-word typos for real-word ones on
+the *same* questions lowers accuracy significantly at rate50/75 (−5% / −9%,
+McNemar p<0.05). Per-typo, a real-word typo does ~2× the damage of a non-word one.
+But real-word failures are *noticed more*, not less — the harm is
+"noticed-but-unrecoverable", not silent.
 
 ## Run
 
@@ -55,6 +63,7 @@ python self_doubt.py --no-2guess     # uncertainty only (second_guess is a flat 
 python repair_behavior.py            # lexical measure
 python repair_behavior.py --judge --limit 50   # + LLM judge (needs HF_TOKEN)
 python lexical_grid.py
+python real_word_effect.py           # real-word isolation (paired + logit)
 ```
 
 On Windows consoles set `PYTHONIOENCODING=utf-8` for the Δ / → glyphs.
