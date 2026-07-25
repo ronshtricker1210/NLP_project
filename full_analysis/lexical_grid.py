@@ -16,7 +16,7 @@ except Exception:
 
 from common import config_files, parse_tag, load_evals, _HERE
 from self_doubt import MARKER_CATS, COMPILED
-from repair_behavior import RM_COMPILED, TN_COMPILED
+from marker_banks import RM_COMPILED, TN_COMPILED
 
 TABLES = os.path.join(_HERE, "tables")
 

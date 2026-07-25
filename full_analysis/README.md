@@ -41,9 +41,17 @@ for f in files:
 | `accuracy_flips.py` | accuracy (strict / answered / completion), truncation, answered-only flips + McNemar | `accuracy_per_config`, `flips_vs_clean`, `accuracy_decomposition` |
 | `reasoning_length.py` | absolute tokens + typo/clean ratio (median/mean/p90), length by outcome | `reasoning_length`, `reasoning_length_absolute`, `length_by_outcome` |
 | `self_doubt.py` | self-doubt = `second_guess` + `uncertainty` marker density | `self_doubt_per_config`, `self_doubt_by_marker`, `self_doubt_by_outcome` |
-| `repair_behavior.py` | repair = `typo-noticing` + `repair words`; notice×outcome; LLM-judge scaffold | `repair_notice_outcome`, `repair_words_per_config`, `repair_notice_vs_realratio` |
+| `repair_wordlevel.py` | **primary repair measure** — grounded in the actual corrupted words (diff clean vs typo). Per corrupted word: silent_fix / flagged / **misread** / not_used | `repair_wordlevel_per_config`, `repair_wordlevel_by_real`, `repair_wordlevel_by_outcome` |
+| `marker_banks.py` | shared repair-side word banks (typo-noticing, repair words) + `classify_trace` (imported, not run) | — |
 | `lexical_grid.py` | all four marker families across the rate×real grid | `lexical_grid` |
 | `real_word_effect.py` | isolates the real-word axis: controlled paired real10-vs-real70 (same question/positions) + McNemar, per-typo logit (`num_real` vs `num_nonword`), silent-failure test | `realword_paired`, `realword_pertypo_logit`, `realword_silent_failure` |
+| `repair_behavior_old_version.py` | *retired* keyword-based repair (notice×outcome, repair-word density, LLM-judge scaffold). Superseded by `repair_wordlevel.py`; kept for reference, not part of the active set | `repair_notice_outcome`, `repair_words_per_config`, `repair_notice_vs_realratio` |
+
+**Repair note:** `repair_wordlevel.py` is the primary repair analysis — it checks
+the real corrupted words, so it separates a silent FIX from a silent MISREAD
+(the proposal's "silently reading through" vs "misreading as a different word").
+`repair_behavior_old_version.py` only detects typo-flagging *keywords* and is blind
+to that distinction; it is retired.
 
 **Real-word finding (from `real_word_effect.py`):** because each rate corrupts the
 same positions across real variants, swapping non-word typos for real-word ones on
@@ -60,10 +68,13 @@ python accuracy_flips.py
 python reasoning_length.py
 python self_doubt.py                 # both categories
 python self_doubt.py --no-2guess     # uncertainty only (second_guess is a flat baseline)
-python repair_behavior.py            # lexical measure
-python repair_behavior.py --judge --limit 50   # + LLM judge (needs HF_TOKEN)
+python repair_wordlevel.py           # primary repair measure (silent_fix / flagged / misread)
 python lexical_grid.py
 python real_word_effect.py           # real-word isolation (paired + logit)
+
+# retired keyword-based repair (reference only, not part of the active set):
+python repair_behavior_old_version.py
+python repair_behavior_old_version.py --judge --limit 50   # + LLM judge (needs HF_TOKEN)
 ```
 
 On Windows consoles set `PYTHONIOENCODING=utf-8` for the Δ / → glyphs.

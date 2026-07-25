@@ -1,4 +1,12 @@
-"""Dimension 4 of the proposal: REPAIR BEHAVIOR — how the model handled the typo.
+"""[RETIRED — kept for reference] Keyword-based repair measure.
+
+Superseded by repair_wordlevel.py, which grounds repair in the ACTUAL corrupted
+words (silent_fix / flagged / misread) instead of just detecting typo-flagging
+keywords. This file can no longer tell a silent FIX from a silent MISREAD — that
+was its blind spot. It is not part of the active analysis set; run it only to
+reproduce the old keyword tables.
+
+Dimension 4 of the proposal: REPAIR BEHAVIOR — how the model handled the typo.
 
 Two measures, per the proposal ("classify each trace ... using an LLM judge"):
 
@@ -31,56 +39,10 @@ except Exception:
     pass
 
 from common import config_files, parse_tag, load_evals, _HERE
+from marker_banks import TN_COMPILED, RM_COMPILED, classify_trace  # shared banks
 
 TABLES = os.path.join(_HERE, "tables")
 os.makedirs(TABLES, exist_ok=True)
-
-# Typo-NOTICING bank — the model explicitly flags/interprets the corrupted text.
-# This is repair behaviour (not self-doubt), so it lives here. Words chosen from the
-# clean-vs-typo discrimination test ("typo" is the star: 1.2% of clean traces vs
-# 44% of heavy-typo traces).
-TYPO_NOTICING = {
-    "typo":                 r"\btypos?\b",
-    "misspell":             r"\bmis-?spell(?:ed|ing|s|ings)?\b",
-    "probably/might mean":  r"\b(?:probably|might|could|must|likely|maybe)\s+(?:be\s+)?(?:a\s+typo|means?|meant)\b",
-    "they/user mean":       r"\b(?:they|the user|it|author|question)\s+(?:mean|means|meant)\b",
-    "assume/interpret":     r"\b(?:assum(?:e|es|ed|ing)|interpret(?:s|ed|ing)?)\b",
-    "should be/say/read":   r"\bshould\s+(?:be|say|read|probably\s+be)\b",
-    "doesn't make sense":   r"\b(?:does(?:n'?t| not)|didn'?t)\s+make\s+sense\b",
-    "seems like typo/error":r"\b(?:seems|looks)\s+like\s+(?:a\s+)?(?:typo|misspelling|error|mistake)\b",
-    "strange/weird/odd":    r"\b(?:strange|weird|odd|garbled)\b",
-    "meant to be/say":      r"\bmeant\s+to\s+(?:be|say|read|write)\b",
-    "error/mistake in":     r"\b(?:error|mistake|typos?)\s+in\s+the\b",
-}
-TN_COMPILED = {k: re.compile(v, re.I) for k, v in TYPO_NOTICING.items()}
-
-# Active repair / correction language (distinct from merely noticing a problem).
-REPAIR_MARKERS = {
-    "read/treat it as":  r"\b(?:read|take|treat|interpret)\s+(?:it|this|that|the word|the problem)\s+as\b",
-    "should be/say":     r"\bshould\s+(?:be|say|read|probably\s+be)\b",
-    "meant/supposed to": r"\b(?:meant|supposed|intended)\s+to\s+(?:be|say|read|write|mean)\b",
-    "assume/interpret":  r"\b(?:i(?:'?ll| will)?\s+)?(?:assum(?:e|es|ed|ing)|interpret(?:s|ed|ing)?)\b",
-    "typo for / means":  r"\b(?:typo for|(?:probably|likely|must)\s+means?|means?\s+to\s+say)\b",
-    "correct/fix typo":  r"\b(?:correct(?:ing|ed)?|fix(?:ing|ed)?)\s+(?:the\s+)?(?:typo|spelling|word|error|mistake)\b",
-    "rewrite/rephrase":  r"\b(?:rewrit\w+|rephras\w+|reinterpret\w+)\b",
-}
-RM_COMPILED = {k: re.compile(v, re.I) for k, v in REPAIR_MARKERS.items()}
-
-# A trace "explicitly notices" when it uses strong typo-flagging language. We
-# require the high-precision markers (saying "typo"/"misspell"/"error in the"/
-# "seems like a typo"/"doesn't make sense") rather than any interpretive verb,
-# so ordinary "assume"/"means" in clean math doesn't count as noticing.
-STRONG_NOTICE = {"typo", "misspell", "seems like typo/error", "doesn't make sense",
-                 "error/mistake in", "meant to be/say", "strange/weird/odd"}
-
-
-def classify_trace(reasoning):
-    """Return (notice_type, n_notice, n_repair) for one reasoning string."""
-    strong = sum(len(TN_COMPILED[k].findall(reasoning)) for k in STRONG_NOTICE)
-    n_notice = sum(len(rx.findall(reasoning)) for rx in TN_COMPILED.values())
-    n_repair = sum(len(rx.findall(reasoning)) for rx in RM_COMPILED.values())
-    notice_type = "explicit" if strong > 0 else "silent"
-    return notice_type, n_notice, n_repair
 
 
 def load_traces(path):
