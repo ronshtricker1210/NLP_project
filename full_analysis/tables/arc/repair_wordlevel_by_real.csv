@@ -1,0 +1,4 @@
+real_ratio,n_corrupt_words,silent_fix_frac,flagged_frac,misread_frac,not_used_frac
+10,11743,0.745,0.1035,0.0287,0.1228
+40,11505,0.6931,0.1359,0.0423,0.1287
+70,11644,0.6361,0.169,0.0611,0.1338

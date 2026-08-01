@@ -31,6 +31,7 @@ DATASETS = {
     "gsm8k":   {"repo": "idoazou/gsm8k-typos",   "clean": "question", "typo": "problem_typo", "gold": "answer",         "kind": "math"},
     "math500": {"repo": "idoazou/math500-typos", "clean": "problem",  "typo": "problem_typo", "gold": "answer",         "kind": "math"},
     "gpqa":    {"repo": "idoazou/gpqa-typos",    "clean": "Question", "typo": "problem_typo", "gold": "Correct Answer", "kind": "mc"},
+    "arc":     {"repo": "idoazou/arc-typos",     "clean": "Question", "typo": "problem_typo", "gold": "Correct Answer", "kind": "mc"},
 }
 META_COLS = ["target_real_ratio", "real_ratio", "num_total", "num_real", "num_nonword",
              "typo_techniques", "level", "subject", "unique_id", "Record ID"]
@@ -62,10 +63,19 @@ def resolve_configs(arg, repo):
     return [c.strip() for c in arg.split(",") if c.strip()]
 
 
-def build_prompt(kind, qtext, row, seed):
+def build_prompt(kind, qtext, row, seed, fix=None):
     # Identical to run_typo_vllm.py (same seeded shuffle => same GPQA letters).
+    # fix='rewrite' asks the model to correct typos before solving; fix='warn'
+    # only mentions typos may exist (proposal section "Test simple fixes").
     if kind == "math":
-        return qtext + "\n\nPlease reason step by step, and put your final answer within \\boxed{}.", None
+        instr = "Please reason step by step, and put your final answer within \\boxed{}."
+        if fix == "rewrite":
+            instr = ("First rewrite the question with all typos corrected, then solve it "
+                     "step by step, and put your final answer within \\boxed{}.")
+        prompt = qtext + "\n\n" + instr
+        if fix == "warn":
+            prompt = "Note: the text may contain typos.\n\n" + prompt
+        return prompt, None
     opts = [row["Correct Answer"], row["Incorrect Answer 1"], row["Incorrect Answer 2"], row["Incorrect Answer 3"]]
     order = list(range(4))
     random.Random(seed).shuffle(order)
@@ -75,8 +85,13 @@ def build_prompt(kind, qtext, row, seed):
         lines.append(f"{letters[i]}) {opts[o]}")
         if o == 0:
             correct = letters[i]
-    prompt = qtext + "\n\n" + "\n".join(lines) + \
-        "\n\nPlease reason step by step, and put the letter of the correct answer within \\boxed{}."
+    instr = "Please reason step by step, and put the letter of the correct answer within \\boxed{}."
+    if fix == "rewrite":
+        instr = ("First rewrite the question with all typos corrected, then reason step by "
+                 "step, and put the letter of the correct answer within \\boxed{}.")
+    prompt = qtext + "\n\n" + "\n".join(lines) + "\n\n" + instr
+    if fix == "warn":
+        prompt = "Note: the text may contain typos.\n\n" + prompt
     return prompt, correct
 
 
@@ -132,6 +147,9 @@ def split_generation(msg):
     content = msg.content or ""
     if reasoning:
         return reasoning.strip() + "\n</think>\n" + content.strip(), reasoning.strip(), content.strip()
+    if "<think>" not in content and "</think>" not in content:
+        # non-reasoning model: the whole output IS the final answer
+        return content.strip(), "", content.strip()
     text = content.removeprefix("<think>").lstrip("\n")
     reasoning, sep, final = text.partition("</think>")
     if not sep:
@@ -225,7 +243,7 @@ def run_one(client, dataset, spec, config, variant, args, totals):
         row = ds[idx]
         typo_q = row[spec["typo"]] if spec["typo"] in ds.column_names else None
         q_text = typo_q if use_typo else row[spec["clean"]]
-        prompt, gold_letter = build_prompt(spec["kind"], q_text, row, seed=idx)
+        prompt, gold_letter = build_prompt(spec["kind"], q_text, row, seed=idx, fix=args.fix)
         gold = gold_letter if spec["kind"] == "mc" else row[spec["gold"]]
         for s_idx in range(args.n_samples):
             if (idx, s_idx) not in done:
@@ -248,7 +266,7 @@ def run_one(client, dataset, spec, config, variant, args, totals):
                 continue
             rec = {
                 "dataset": dataset, "config": config, "variant": variant,
-                "idx": idx, "sample_idx": s_idx,
+                "fix": args.fix, "idx": idx, "sample_idx": s_idx,
                 "clean_question": row[spec["clean"]], "typo_question": typo_q, "prompt": prompt,
                 "gold_answer": gold, **gen,
             }
@@ -281,7 +299,7 @@ def run_one(client, dataset, spec, config, variant, args, totals):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dataset", default="gsm8k",
-                    help="gsm8k | math500 | gpqa | a comma list | 'all'")
+                    help="gsm8k | math500 | gpqa | arc | a comma list | 'all'")
     ap.add_argument("--configs", default=",".join(DEFAULT_CONFIGS),
                     help="comma list of typo configs, or 'all' for every config on the Hub")
     ap.add_argument("--variant", choices=["typo", "clean", "both"], default="typo",
@@ -302,11 +320,16 @@ def main():
                     help="HF dataset repo to mirror results to, e.g. user/typo-results "
                          "(layout: results/{dataset}/typo{rate}/real{ratio}.jsonl; "
                          "needs a write token in HF_WRITE_TOKEN or HF_TOKEN)")
+    ap.add_argument("--fix", choices=["rewrite", "warn"], default=None,
+                    help="typo mitigation to test: 'rewrite' = ask the model to correct "
+                         "typos before solving; 'warn' = only note typos may exist")
     ap.add_argument("--file-suffix", default="",
                     help="appended to local filenames and Hub paths/configs, e.g. "
                          "'20000' -> gsm8k_rate25_real10_20000.jsonl, so runs with "
                          "different budgets coexist")
     args = ap.parse_args()
+    if args.fix and not args.file_suffix:  # keep fix results apart from no-fix runs
+        args.file_suffix = f"fix-{args.fix}"
 
     api_key = os.environ.get("HF_TOKEN")
     if not api_key:

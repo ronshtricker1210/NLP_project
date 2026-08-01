@@ -26,6 +26,7 @@ DATASETS = {
     "gsm8k":   {"kind": "gsm8k_num", "gold": lambda r: gold_gsm8k(r["gold_answer"])},
     "math500": {"kind": "math",      "gold": lambda r: r["gold_answer"]},
     "gpqa":    {"kind": "mc",        "gold": lambda r: r["gold_answer"]},
+    "arc":     {"kind": "mc",        "gold": lambda r: r["gold_answer"]},
 }
 if DATASET not in DATASETS:
     raise SystemExit(f"unknown NLP_DATASET={DATASET!r}; choices: {list(DATASETS)}")
@@ -33,7 +34,8 @@ if DATASET not in DATASETS:
 DATA_DIR = os.path.join(_HERE, "data", DATASET)
 TABLES = os.path.join(_HERE, "tables", DATASET)
 os.makedirs(TABLES, exist_ok=True)
-MAX_NEW_TOKENS = 4096  # the cap used at generation time (run_typo_api.py default)
+# Cap used at generation time; math500/arc API runs used 17000 (NLP_MAX_NEW_TOKENS=17000).
+MAX_NEW_TOKENS = int(os.environ.get("NLP_MAX_NEW_TOKENS", 4096))
 
 
 # ---- config identity -------------------------------------------------------

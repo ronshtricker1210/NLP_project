@@ -26,6 +26,22 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # present, so generation is fully offline and deterministic).
 LOCAL_DATA_ROOT = REPO_ROOT.parent / "datasets"
 
+def _prepare_arc(dataset):
+    """Map ARC rows to the GPQA-style MC schema; drop non-4-choice questions.
+    The answerKey always matches the row's own label alphabet (A-D or 1-4)."""
+    dataset = dataset.filter(lambda r: len(r["choices"]["text"]) == 4)
+
+    def to_gpqa(row):
+        texts, labels = row["choices"]["text"], row["choices"]["label"]
+        i = labels.index(row["answerKey"])
+        wrong = [t for j, t in enumerate(texts) if j != i]
+        return {"Question": row["question"], "Correct Answer": texts[i],
+                "Incorrect Answer 1": wrong[0], "Incorrect Answer 2": wrong[1],
+                "Incorrect Answer 3": wrong[2], "Record ID": row["id"]}
+
+    return dataset.map(to_gpqa, remove_columns=dataset.column_names)
+
+
 PRESETS: Dict[str, Dict[str, Any]] = {
     "math500": {
         "dataset_name": "HuggingFaceH4/MATH-500",
@@ -67,6 +83,17 @@ PRESETS: Dict[str, Dict[str, Any]] = {
             "Record ID",
             "Canary String",
         ],
+    },
+    "arc": {
+        "dataset_name": "allenai/ai2_arc",
+        "dataset_config_name": "ARC-Challenge",
+        "dataset_split": "test",
+        "text_field": "Question",
+        "local_dir": "arc_challenge_test",
+        "hub_repo": "arc-typos",
+        "private": False,
+        "keep_columns": None,
+        "prepare": _prepare_arc,  # 1172 -> 1165 rows (4-choice only), GPQA schema
     },
 }
 
@@ -122,12 +149,14 @@ def parse_args() -> argparse.Namespace:
 
 def build_config(preset: Dict[str, Any], ratio: float, args: argparse.Namespace) -> Config:
     local_path = LOCAL_DATA_ROOT / preset["local_dir"]
+    # Presets with a prepare hook filter rows, so subsetting happens after it.
+    subset = 10**9 if preset.get("prepare") else (args.subset or 10**9)
     return Config(
         dataset_name=preset["dataset_name"],
         dataset_config_name=preset["dataset_config_name"],
         dataset_split=preset["dataset_split"],
         text_field=preset["text_field"],
-        subset_size=args.subset if args.subset else 10**9,
+        subset_size=subset,
         local_data_path=local_path if local_path.exists() else None,
         allow_offline_fallback=False,
         typo_rate=args.typo_rate,
@@ -162,6 +191,10 @@ def push_clean(args: argparse.Namespace) -> None:
     for preset_key in args.datasets:
         preset = PRESETS[preset_key]
         dataset = load_math_subset(build_config(preset, 0.0, args))
+        if preset.get("prepare"):
+            dataset = preset["prepare"](dataset)
+            if args.subset:
+                dataset = dataset.select(range(min(args.subset, len(dataset))))
         if preset["keep_columns"]:
             dataset = dataset.select_columns(
                 [c for c in preset["keep_columns"] if c in dataset.column_names]
@@ -193,6 +226,10 @@ def main() -> None:
                   f"(target={ratio:.2f}, rate={args.typo_rate}) ===")
 
             dataset = load_math_subset(config)
+            if preset.get("prepare"):
+                dataset = preset["prepare"](dataset)
+                if args.subset:
+                    dataset = dataset.select(range(min(args.subset, len(dataset))))
             keep = preset["keep_columns"]
             if keep:
                 dataset = dataset.select_columns(
