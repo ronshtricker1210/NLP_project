@@ -1,0 +1,140 @@
+\begin{thebibliography}{19}
+\providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Belinkov and Bisk(2018)}]{belinkov2018}
+Yonatan Belinkov and Yonatan Bisk. 2018.
+\newblock Synthetic and natural noise both break neural machine translation.
+\newblock In \emph{International Conference on Learning Representations}.
+
+\bibitem[{Chai et~al.(2024)Chai, Fang, Peng, and Li}]{chai2024}
+Yekun Chai, Yewei Fang, Qiwei Peng, and Xuhong Li. 2024.
+\newblock Tokenization falling short: On subword robustness in large language
+  models.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  EMNLP 2024}.
+
+\bibitem[{Clark et~al.(2018)Clark, Cowhey, Etzioni, Khot, Sabharwal, Schoenick,
+  and Tafjord}]{clark2018}
+Peter Clark, Isaac Cowhey, Oren Etzioni, Tushar Khot, Ashish Sabharwal, Carissa
+  Schoenick, and Oyvind Tafjord. 2018.
+\newblock Think you have solved question answering? try {ARC}, the {AI2}
+  reasoning challenge.
+\newblock \emph{arXiv preprint arXiv:1803.05457}.
+
+\bibitem[{Cobbe et~al.(2021)Cobbe, Kosaraju, Bavarian, Chen, Jun, Kaiser
+  et~al.}]{cobbe2021}
+Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz
+  Kaiser, et~al. 2021.
+\newblock Training verifiers to solve math word problems.
+\newblock \emph{arXiv preprint arXiv:2110.14168}.
+
+\bibitem[{Ebrahimi et~al.(2018)Ebrahimi, Rao, Lowd, and Dou}]{ebrahimi2018}
+Javid Ebrahimi, Anyi Rao, Daniel Lowd, and Dejing Dou. 2018.
+\newblock {HotFlip}: White-box adversarial examples for text classification.
+\newblock In \emph{Proceedings of the 56th Annual Meeting of the Association
+  for Computational Linguistics}.
+
+\bibitem[{Gan et~al.(2024)Gan, Zhao, Cheng, Mao, Goyal, Kawaguchi, Kan, and
+  Shieh}]{gan2024}
+Esther Gan, Yiran Zhao, Liying Cheng, Yancan Mao, Anirudh Goyal, Kenji
+  Kawaguchi, Min-Yen Kan, and Michael Shieh. 2024.
+\newblock Reasoning robustness of {LLM}s to adversarial typographical errors.
+\newblock In \emph{Proceedings of the 2024 Conference on Empirical Methods in
+  Natural Language Processing}.
+
+\bibitem[{Grattafiori et~al.(2024)Grattafiori, Dubey, Jauhri, Pandey
+  et~al.}]{llama3}
+Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, et~al.
+  2024.
+\newblock The {Llama} 3 herd of models.
+\newblock \emph{arXiv preprint arXiv:2407.21783}.
+
+\bibitem[{Guo et~al.(2025)Guo, Yang, Zhang, Song, Zhang, Xu
+  et~al.}]{deepseekr1}
+Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu,
+  et~al. 2025.
+\newblock {DeepSeek-R1}: Incentivizing reasoning capability in {LLM}s via
+  reinforcement learning.
+\newblock \emph{arXiv preprint arXiv:2501.12948}.
+
+\bibitem[{Hendrycks et~al.(2021)Hendrycks, Burns, Kadavath, Arora, Basart,
+  Tang, Song, and Steinhardt}]{hendrycks2021}
+Dan Hendrycks, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric
+  Tang, Dawn Song, and Jacob Steinhardt. 2021.
+\newblock Measuring mathematical problem solving with the {MATH} dataset.
+\newblock In \emph{Proceedings of the Neural Information Processing Systems
+  Track on Datasets and Benchmarks}.
+
+\bibitem[{Huang et~al.(2024)Huang, Chen, Mishra, Zheng, Yu, Song, and
+  Zhou}]{huang2024}
+Jie Huang, Xinyun Chen, Swaroop Mishra, Huaixiu~Steven Zheng, Adams~Wei Yu,
+  Xinying Song, and Denny Zhou. 2024.
+\newblock Large language models cannot self-correct reasoning yet.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}.
+
+\bibitem[{Jin et~al.(2020)Jin, Jin, Zhou, and Szolovits}]{jin2020}
+Di~Jin, Zhijing Jin, Joey~Tianyi Zhou, and Peter Szolovits. 2020.
+\newblock Is {BERT} really robust? a strong baseline for natural language
+  attack on text classification and entailment.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial
+  Intelligence}.
+
+\bibitem[{Lightman et~al.(2024)Lightman, Kosaraju, Burda, Edwards, Baker, Lee,
+  Leike, Schulman, Sutskever, and Cobbe}]{lightman2024}
+Hunter Lightman, Vineet Kosaraju, Yura Burda, Harri Edwards, Bowen Baker, Teddy
+  Lee, Jan Leike, John Schulman, Ilya Sutskever, and Karl Cobbe. 2024.
+\newblock Let's verify step by step.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}.
+
+\bibitem[{Pruthi et~al.(2019)Pruthi, Dhingra, and Lipton}]{pruthi2019}
+Danish Pruthi, Bhuwan Dhingra, and Zachary~C. Lipton. 2019.
+\newblock Combating adversarial misspellings with robust word recognition.
+\newblock In \emph{Proceedings of the 57th Annual Meeting of the Association
+  for Computational Linguistics}.
+
+\bibitem[{Turpin et~al.(2023)Turpin, Michael, Perez, and Bowman}]{turpin2023}
+Miles Turpin, Julian Michael, Ethan Perez, and Samuel~R. Bowman. 2023.
+\newblock Language models don't always say what they think: Unfaithful
+  explanations in chain-of-thought prompting.
+\newblock In \emph{Advances in Neural Information Processing Systems}.
+
+\bibitem[{Wei et~al.(2022)Wei, Wang, Schuurmans, Bosma, Ichter, Xia, Chi, Le,
+  and Zhou}]{wei2022}
+Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia,
+  Ed~Chi, Quoc Le, and Denny Zhou. 2022.
+\newblock Chain-of-thought prompting elicits reasoning in large language
+  models.
+\newblock In \emph{Advances in Neural Information Processing Systems}.
+
+\bibitem[{Yang et~al.(2024)Yang, Yang, Zhang, Hui, Zheng, Yu et~al.}]{qwen25}
+An~Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo~Zheng, Bowen Yu, et~al.
+  2024.
+\newblock {Qwen2.5} technical report.
+\newblock \emph{arXiv preprint arXiv:2412.15115}.
+
+\bibitem[{Zhao et~al.(2025)}]{zhao2025}
+Yiran Zhao et~al. 2025.
+\newblock Evaluating robustness of large language models against multilingual
+  typographical errors.
+\newblock \emph{arXiv preprint arXiv:2510.09536}.
+
+\bibitem[{Zheng et~al.(2023)Zheng, Chiang, Sheng, Zhuang, Wu, Zhuang, Lin, Li,
+  Li, Xing, Zhang, Gonzalez, and Stoica}]{zheng2023}
+Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao
+  Zhuang, Zi~Lin, Zhuohan Li, Dacheng Li, Eric Xing, Hao Zhang, Joseph~E.
+  Gonzalez, and Ion Stoica. 2023.
+\newblock Judging {LLM}-as-a-judge with {MT-Bench} and {Chatbot Arena}.
+\newblock In \emph{Advances in Neural Information Processing Systems}.
+
+\bibitem[{Zhu et~al.(2024)Zhu, Wang, Zhou, Wang, Chen, Wang, Yang, Ye, Zhang,
+  Gong, and Xie}]{zhu2024}
+Kaijie Zhu, Jindong Wang, Jiaheng Zhou, Zichen Wang, Hao Chen, Yidong Wang,
+  Linyi Yang, Wei Ye, Yue Zhang, Neil Gong, and Xing Xie. 2024.
+\newblock {PromptBench}: Towards evaluating the robustness of large language
+  models on adversarial prompts.
+\newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association
+  for Computational Linguistics}.
+
+\end{thebibliography}

@@ -1,0 +1,7 @@
+label,n,accuracy,share
+silent_readthrough,2159,0.8411,0.632
+explicit_notice_fix,926,0.7721,0.2711
+explicit_notice_nofix,127,0.5906,0.0372
+misread_wrong_word,202,0.5792,0.0591
+derailed,1,1.0,0.0003
+unclear,1,0.0,0.0003

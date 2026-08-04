@@ -1,3 +1,4 @@
 openai>=2.0
 datasets>=3.0
 math-verify
+pyspellchecker>=0.8

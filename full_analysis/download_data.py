@@ -1,18 +1,23 @@
 """Download a dataset's model-result files from the Hub into data/<dataset>/.
 
-The raw JSONL (~66 MB for gsm8k) is not committed; it lives on the public dataset
-repo Dolevabudi/typo-results under results/<dataset>/. Run once after cloning:
+The raw JSONL (~370 MB for everything) is not committed; it lives on the public
+dataset repo ronshtricker/typo-reasoning-results under results/<dataset>/.
+Run once after cloning:
 
     pip install huggingface_hub
     python download_data.py                 # gsm8k (default)
     python download_data.py --dataset math500
+    python download_data.py --dataset arc
+
+Valid datasets: gsm8k, math500, arc, gpqa, gsm8k_fix-spellcheck,
+gsm8k_fix-spellcheck_grid.
 
 Then run the analysis with:  python run_all.py --dataset <dataset>
 """
 import os, shutil, argparse
 from huggingface_hub import HfApi, hf_hub_download
 
-REPO = "Dolevabudi/typo-results"
+REPO = "ronshtricker/typo-reasoning-results"
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 

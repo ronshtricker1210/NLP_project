@@ -19,6 +19,12 @@ try:
 except Exception:
     HAVE_MATH_VERIFY = False
 
+# math_verify enforces its parsing timeout with a worker process, which cannot be
+# spawned on Windows here; without this the parse silently returns nothing and
+# every MATH500 answer is scored wrong. Disable the timeout on Windows only.
+_MV_KWARGS = {"parsing_timeout": None} if os.name == "nt" else {}
+_MV_VERIFY_KWARGS = {"timeout_seconds": None} if os.name == "nt" else {}
+
 
 def last_boxed(text):
     """Return the content of the last \\boxed{...}, handling nested braces."""
@@ -97,7 +103,9 @@ def is_correct(kind, pred, gold):
     # generic math (MATH500) - math_verify needs the LaTeX wrapped in $...$ to parse
     if HAVE_MATH_VERIFY:
         try:
-            return bool(mv_verify(mv_parse(f"${gold}$"), mv_parse(f"${pred}$")))
+            return bool(mv_verify(mv_parse(f"${gold}$", **_MV_KWARGS),
+                                  mv_parse(f"${pred}$", **_MV_KWARGS),
+                                  **_MV_VERIFY_KWARGS))
         except Exception:
             pass
     return norm_num(pred) is not None and norm_num(pred) == norm_num(gold)

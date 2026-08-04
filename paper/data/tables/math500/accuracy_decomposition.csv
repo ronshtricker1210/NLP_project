@@ -1,0 +1,10 @@
+config,delta_strict,completion_component,quality_component
+typo25_real10,-0.014,-0.0019,-0.0121
+typo25_real40,-0.014,0.0037,-0.0177
+typo25_real70,-0.016,-0.0038,-0.0122
+typo50_real10,-0.02,0.0037,-0.0237
+typo50_real40,-0.034,0.0037,-0.0377
+typo50_real70,-0.036,0.0,-0.036
+typo75_real10,-0.064,-0.0036,-0.0604
+typo75_real40,-0.07,0.0,-0.07
+typo75_real70,-0.08,0.0017,-0.0817

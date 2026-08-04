@@ -1,0 +1,453 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\title{The Silent Tax: Typo-Robustness Analysis (GSM8K)\\\large DeepSeek-R1-Distill-Qwen-7B}
+\date{}
+\begin{document}
+\maketitle
+\noindent All tables are \emph{answered-only}: traces that hit the token cap before writing a final answer are excluded from the metrics. Configs are named \texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words corrupted, \emph{real} = \% of typos that form real words. Baseline is the clean input.
+
+\section*{Accuracy and Flips}
+\begin{table}[H]
+\centering
+\caption{Accuracy per config: answered-only and strict (truncated=wrong), with 95\% bootstrap CI on acc\_strict.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
+\midrule
+clean & 20 & 0.7 & 0.7 & 0.5 & 0.9 \\
+clean\_fix-spellcheck & 1319 & 0.8407 & 0.8324 & 0.8112 & 0.8537 \\
+rate25\_real0\_fix-spellcheck & 500 & 0.7867 & 0.76 & 0.724 & 0.798 \\
+rate25\_real10\_fix-spellcheck & 500 & 0.7732 & 0.75 & 0.712 & 0.784 \\
+rate25\_real20\_fix-spellcheck & 500 & 0.7651 & 0.736 & 0.696 & 0.774 \\
+rate25\_real30\_fix-spellcheck & 500 & 0.7495 & 0.73 & 0.692 & 0.768 \\
+rate25\_real40\_fix-spellcheck & 500 & 0.7377 & 0.72 & 0.68 & 0.756 \\
+rate25\_real50\_fix-spellcheck & 500 & 0.7299 & 0.708 & 0.668 & 0.748 \\
+rate25\_real60\_fix-spellcheck & 500 & 0.7479 & 0.724 & 0.682 & 0.762 \\
+rate25\_real70\_fix-spellcheck & 500 & 0.7618 & 0.742 & 0.702 & 0.78 \\
+rate50\_real0\_fix-spellcheck & 500 & 0.714 & 0.694 & 0.654 & 0.732 \\
+rate50\_real10\_fix-spellcheck & 500 & 0.6934 & 0.674 & 0.634 & 0.714 \\
+rate50\_real20\_fix-spellcheck & 500 & 0.6756 & 0.658 & 0.616 & 0.702 \\
+rate50\_real30\_fix-spellcheck & 500 & 0.6687 & 0.65 & 0.608 & 0.69 \\
+rate50\_real40\_fix-spellcheck & 500 & 0.6646 & 0.65 & 0.608 & 0.694 \\
+rate50\_real50\_fix-spellcheck & 500 & 0.628 & 0.618 & 0.576 & 0.66 \\
+rate50\_real60\_fix-spellcheck & 500 & 0.6196 & 0.606 & 0.564 & 0.648 \\
+rate50\_real70\_fix-spellcheck & 500 & 0.6053 & 0.592 & 0.548 & 0.638 \\
+rate75\_real0\_fix-spellcheck & 500 & 0.6562 & 0.63 & 0.588 & 0.674 \\
+rate75\_real10\_fix-spellcheck & 500 & 0.6286 & 0.616 & 0.576 & 0.658 \\
+rate75\_real20\_fix-spellcheck & 500 & 0.5825 & 0.572 & 0.53 & 0.616 \\
+rate75\_real30\_fix-spellcheck & 500 & 0.5496 & 0.532 & 0.49 & 0.578 \\
+rate75\_real40\_fix-spellcheck & 500 & 0.5456 & 0.538 & 0.494 & 0.582 \\
+rate75\_real50\_fix-spellcheck & 500 & 0.4939 & 0.486 & 0.444 & 0.528 \\
+rate75\_real60\_fix-spellcheck & 500 & 0.5155 & 0.5 & 0.458 & 0.546 \\
+rate75\_real70\_fix-spellcheck & 500 & 0.4776 & 0.468 & 0.424 & 0.512 \\
+typo30\_real0\_fix-spellcheck & 500 & 0.7778 & 0.756 & 0.716 & 0.792 \\
+typo30\_real10\_fix-spellcheck & 500 & 0.7906 & 0.77 & 0.73 & 0.806 \\
+typo30\_real20\_fix-spellcheck & 500 & 0.7791 & 0.762 & 0.724 & 0.798 \\
+typo30\_real30\_fix-spellcheck & 500 & 0.7563 & 0.72 & 0.682 & 0.758 \\
+typo30\_real40\_fix-spellcheck & 500 & 0.77 & 0.75 & 0.712 & 0.788 \\
+typo30\_real50\_fix-spellcheck & 500 & 0.7438 & 0.72 & 0.68 & 0.756 \\
+typo30\_real60\_fix-spellcheck & 500 & 0.734 & 0.712 & 0.672 & 0.752 \\
+typo30\_real70\_fix-spellcheck & 500 & 0.7288 & 0.704 & 0.662 & 0.744 \\
+typo30\_real10 & 20 & 0.55 & 0.55 & 0.35 & 0.75 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Answered-only flips vs clean, paired by question over n\_both (answered in both conditions). r2w / w2r = questions correct on clean but wrong on this config / wrong on clean but correct on this config; r2w\_ratio = r2w / n\_both, w2r\_ratio = w2r / n\_both; net\_flip\_ratio = r2w\_ratio - w2r\_ratio = (r2w - w2r) / n\_both, the net rate at which this config worsens answers relative to clean.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_both} & \textbf{r2w} & \textbf{w2r} & \textbf{r2w\_ratio} & \textbf{w2r\_ratio} & \textbf{net\_flip\_ratio} & \textbf{mcnemar\_b} & \textbf{mcnemar\_c} & \textbf{mcnemar\_stat} & \textbf{mcnemar\_p} \\
+\midrule
+clean\_fix-spellcheck & 19 & 0 & 2 & 0.0 & 0.1053 & -0.1053 & 0 & 2 & 0.5 & 0.47950012 \\
+rate25\_real0\_fix-spellcheck & 19 & 4 & 2 & 0.2105 & 0.1053 & 0.1053 & 4 & 2 & 0.167 & 0.6830914 \\
+rate25\_real10\_fix-spellcheck & 20 & 2 & 2 & 0.1 & 0.1 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
+rate25\_real20\_fix-spellcheck & 20 & 4 & 1 & 0.2 & 0.05 & 0.15 & 4 & 1 & 0.8 & 0.37109337 \\
+rate25\_real30\_fix-spellcheck & 20 & 2 & 1 & 0.1 & 0.05 & 0.05 & 2 & 1 & 0.0 & 1.0 \\
+rate25\_real40\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
+rate25\_real50\_fix-spellcheck & 20 & 1 & 1 & 0.05 & 0.05 & 0.0 & 1 & 1 & 0.5 & 0.47950012 \\
+rate25\_real60\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
+rate25\_real70\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
+rate50\_real0\_fix-spellcheck & 20 & 1 & 2 & 0.05 & 0.1 & -0.05 & 1 & 2 & 0.0 & 1.0 \\
+rate50\_real10\_fix-spellcheck & 19 & 3 & 2 & 0.1579 & 0.1053 & 0.0526 & 3 & 2 & 0.0 & 1.0 \\
+rate50\_real20\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
+rate50\_real30\_fix-spellcheck & 19 & 6 & 2 & 0.3158 & 0.1053 & 0.2105 & 6 & 2 & 1.125 & 0.28884437 \\
+rate50\_real40\_fix-spellcheck & 20 & 7 & 1 & 0.35 & 0.05 & 0.3 & 7 & 1 & 3.125 & 0.07709987 \\
+rate50\_real50\_fix-spellcheck & 20 & 6 & 1 & 0.3 & 0.05 & 0.25 & 6 & 1 & 2.286 & 0.13057002 \\
+rate50\_real60\_fix-spellcheck & 20 & 6 & 1 & 0.3 & 0.05 & 0.25 & 6 & 1 & 2.286 & 0.13057002 \\
+rate50\_real70\_fix-spellcheck & 20 & 6 & 1 & 0.3 & 0.05 & 0.25 & 6 & 1 & 2.286 & 0.13057002 \\
+rate75\_real0\_fix-spellcheck & 20 & 5 & 3 & 0.25 & 0.15 & 0.1 & 5 & 3 & 0.125 & 0.72367361 \\
+rate75\_real10\_fix-spellcheck & 20 & 7 & 0 & 0.35 & 0.0 & 0.35 & 7 & 0 & 5.143 & 0.0233422 \\
+rate75\_real20\_fix-spellcheck & 19 & 2 & 2 & 0.1053 & 0.1053 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
+rate75\_real30\_fix-spellcheck & 20 & 5 & 1 & 0.25 & 0.05 & 0.2 & 5 & 1 & 1.5 & 0.22067136 \\
+rate75\_real40\_fix-spellcheck & 20 & 9 & 2 & 0.45 & 0.1 & 0.35 & 9 & 2 & 3.273 & 0.07044043 \\
+rate75\_real50\_fix-spellcheck & 20 & 7 & 2 & 0.35 & 0.1 & 0.25 & 7 & 2 & 1.778 & 0.18242244 \\
+rate75\_real60\_fix-spellcheck & 19 & 7 & 1 & 0.3684 & 0.0526 & 0.3158 & 7 & 1 & 3.125 & 0.07709987 \\
+rate75\_real70\_fix-spellcheck & 20 & 9 & 2 & 0.45 & 0.1 & 0.35 & 9 & 2 & 3.273 & 0.07044043 \\
+typo30\_real0\_fix-spellcheck & 20 & 3 & 3 & 0.15 & 0.15 & 0.0 & 3 & 3 & 0.167 & 0.6830914 \\
+typo30\_real10\_fix-spellcheck & 19 & 3 & 2 & 0.1579 & 0.1053 & 0.0526 & 3 & 2 & 0.0 & 1.0 \\
+typo30\_real20\_fix-spellcheck & 20 & 2 & 2 & 0.1 & 0.1 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
+typo30\_real30\_fix-spellcheck & 18 & 2 & 2 & 0.1111 & 0.1111 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
+typo30\_real40\_fix-spellcheck & 19 & 0 & 3 & 0.0 & 0.1579 & -0.1579 & 0 & 3 & 1.333 & 0.24821308 \\
+typo30\_real50\_fix-spellcheck & 19 & 3 & 1 & 0.1579 & 0.0526 & 0.1053 & 3 & 1 & 0.25 & 0.61707508 \\
+typo30\_real60\_fix-spellcheck & 19 & 3 & 1 & 0.1579 & 0.0526 & 0.1053 & 3 & 1 & 0.25 & 0.61707508 \\
+typo30\_real70\_fix-spellcheck & 19 & 3 & 2 & 0.1579 & 0.1053 & 0.0526 & 3 & 2 & 0.0 & 1.0 \\
+typo30\_real10 & 20 & 5 & 2 & 0.25 & 0.1 & 0.15 & 5 & 2 & 0.571 & 0.4496918 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\medskip
+\noindent\textbf{McNemar test (used in the flips table above).}
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{What it is:} a paired significance test for before/after binary
+  outcomes. It looks only at the questions that \emph{changed} (the discordant pairs:
+  $b$ = right$\to$wrong, $c$ = wrong$\to$right) and ignores those that stayed the same.
+  \item \textbf{Null hypothesis:} typos break correct answers as often as they fix
+  wrong ones ($b = c$, i.e.\ no net effect).
+  \item \textbf{Statistic:} $(|b - c| - 1)^2 / (b + c)$ (column mcnemar\_stat);
+  mcnemar\_p is its chi-square $p$-value with 1 degree of freedom.
+  \item \textbf{When we reject it:} when mcnemar\_p $< 0.05$ --- the
+  right$\to$wrong vs wrong$\to$right imbalance is too large to be chance.
+\end{itemize}
+
+\section*{Reasoning Length}
+\begin{table}[H]
+\centering
+\caption{Absolute generated tokens per config (answered-only).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_answered} & \textbf{mean\_tok} & \textbf{median\_tok} & \textbf{p90\_tok} & \textbf{max\_tok} \\
+\midrule
+clean & 20 & 596.0 & 443.5 & 1467 & 2467 \\
+typo30\_real10 & 20 & 603.2 & 517.0 & 1078 & 2140 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean generated tokens for correct vs wrong answers. wrong\_over\_correct = tok\_wrong / tok\_correct (mean tokens of wrong answers divided by mean tokens of correct answers).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{config} & \textbf{tok\_correct} & \textbf{tok\_wrong} & \textbf{wrong\_over\_correct} \\
+\midrule
+clean & 629.9 & 516.7 & 0.8202 \\
+typo30\_real10 & 664.5 & 528.2 & 0.7949 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Self-doubt}
+\noindent The self-doubt markers are curated words grouped into two
+\emph{banks}, each matched as a case-insensitive whole-word pattern in the reasoning
+text. Density is matches per 1000 reasoning words.
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{second\_guess} --- the proposal's canonical self-correction words plus
+  direct reversals: \emph{wait, hmm, actually, reconsider, but wait, hold on, on second
+  thought, let me recheck, double-check}.
+  \item \textbf{uncertainty} --- hedging / ``not certain'' words: \emph{maybe, perhaps,
+  possibly, might be, could be, not sure, I guess, presumably, or maybe / alternatively,
+  unclear / confused}.
+\end{itemize}
+\noindent Example reasoning: ``\emph{Wait, maybe the total is 12\dots\ hmm, actually let
+me recheck}'' contributes \emph{wait, hmm, actually} (second\_guess) and \emph{maybe}
+(uncertainty). A separate \emph{typo-noticing} bank (\emph{typo, misspelled, doesn't make
+sense, \dots}) is treated as repair behaviour, not self-doubt.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Doubt-marker density per config: second\_guess and uncertainty, per 1k words and per trace.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_answered} & \textbf{second\_guess\_per\_1k} & \textbf{second\_guess\_per\_trace} & \textbf{uncertainty\_per\_1k} & \textbf{uncertainty\_per\_trace} & \textbf{total\_per\_1k} & \textbf{total\_per\_trace} \\
+\midrule
+clean & 20 & 5.773 & 1.15 & 3.514 & 0.7 & 9.287 & 1.85 \\
+typo30\_real10 & 20 & 5.047 & 1.05 & 5.768 & 1.2 & 10.815 & 2.25 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Per-marker density (markers per 1000 reasoning words): clean vs pooled-typo. discrimination = typo minus clean (larger = more typo-responsive). All bank markers, ranked by discrimination.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{marker} & \textbf{category} & \textbf{clean\_per\_1k} & \textbf{typo\_per\_1k} & \textbf{discrimination} \\
+\midrule
+maybe & uncertainty & 1.757 & 2.403 & 0.646 \\
+actually & second\_guess & 0.0 & 0.481 & 0.481 \\
+unclear/confused & uncertainty & 0.0 & 0.481 & 0.481 \\
+or maybe/alt & uncertainty & 1.757 & 2.163 & 0.406 \\
+wait & second\_guess & 2.51 & 2.884 & 0.374 \\
+might be & uncertainty & 0.0 & 0.24 & 0.24 \\
+could be & uncertainty & 0.0 & 0.24 & 0.24 \\
+I assume & uncertainty & 0.0 & 0.24 & 0.24 \\
+reconsider & second\_guess & 0.0 & 0.0 & 0.0 \\
+wait/actually no & second\_guess & 0.0 & 0.0 & 0.0 \\
+on second thought & second\_guess & 0.0 & 0.0 & 0.0 \\
+not sure & uncertainty & 0.0 & 0.0 & 0.0 \\
+perhaps & uncertainty & 0.0 & 0.0 & 0.0 \\
+possibly & uncertainty & 0.0 & 0.0 & 0.0 \\
+I guess & uncertainty & 0.0 & 0.0 & 0.0 \\
+presumably & uncertainty & 0.0 & 0.0 & 0.0 \\
+not entirely & uncertainty & 0.0 & 0.0 & 0.0 \\
+but wait & second\_guess & 0.502 & 0.24 & -0.262 \\
+hold on & second\_guess & 0.502 & 0.24 & -0.262 \\
+let me recheck & second\_guess & 0.502 & 0.24 & -0.262 \\
+hmm & second\_guess & 1.255 & 0.961 & -0.294 \\
+double-check & second\_guess & 0.502 & 0.0 & -0.502 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Doubt density (markers per 1000 reasoning words) split by final outcome, per category (2g = second\_guess, un = uncertainty, tot = both). For a group, density = total markers in that group / total reasoning words in that group x 1000. *\_correct = over correct-answer traces; *\_wrong = over wrong-answer traces; *\_wrong\_over\_correct = \_wrong / \_correct.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{2g\_correct} & \textbf{2g\_wrong} & \textbf{2g\_wrong\_over\_correct} & \textbf{un\_correct} & \textbf{un\_wrong} & \textbf{un\_wrong\_over\_correct} & \textbf{tot\_correct} & \textbf{tot\_wrong} & \textbf{tot\_wrong\_over\_correct} \\
+\midrule
+clean & 7.012 & 0.0 & 0.0 & 4.268 & 0.0 & 0.0 & 11.28 & 0.0 & 0.0 \\
+typo30\_real10 & 6.947 & 0.0 & 0.0 & 7.608 & 0.879 & 0.115 & 14.555 & 0.879 & 0.06 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Repair Behaviour}
+\begin{table}[H]
+\centering
+\caption{How each corrupted word was handled, per config (categories defined below the table).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_n} & \textbf{flagged\_n} & \textbf{misread\_n} & \textbf{not\_used\_n} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
+\midrule
+typo30\_real10 & 174 & 113 & 1 & 2 & 58 & 0.6494 & 0.0057 & 0.0115 & 0.3333 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\noindent A \emph{corrupted word} is a word that received a
+typo --- it differs between the clean and typo question (e.g.\ \emph{sum} $\to$
+\emph{sun}). We recover these by diffing the two questions, then place each into one
+bucket by which form appears in the reasoning:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{silent\_fix} --- only the original word (\emph{sum}) appears: a quiet recovery.
+  \item \textbf{flagged} --- both forms appear (\emph{sum} and \emph{sun}): noticed and fixed.
+  \item \textbf{misread} --- only the corrupted form (\emph{sun}) appears: read as the wrong word.
+  \item \textbf{not\_used} --- neither form appears in the reasoning.
+\end{itemize}
+\noindent Columns \texttt{*\_n} are counts; \texttt{*\_frac} are the share of
+\texttt{n\_corrupt\_words}.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Word handling pooled by real-word ratio: the non-word vs real-word contrast.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
+\midrule
+10 & 174 & 0.6494 & 0.0057 & 0.0115 & 0.3333 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Misread rate split by final correctness. A typo'd word is 'misread' when the reasoning uses only its corrupted form (e.g. sun instead of sum). Within each outcome group, misread rate = (typo'd words that were misread) / (all typo'd words examined), pooled over the group. misread\_correct = over problems answered correctly; misread\_wrong = over problems answered wrong; wrong\_over\_correct = misread\_wrong / misread\_correct.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{config} & \textbf{misread\_correct} & \textbf{misread\_wrong} & \textbf{wrong\_over\_correct} \\
+\midrule
+typo30\_real10 & 0.0108 & 0.0123 & 1.148 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Real-word Effect}
+\noindent This section isolates the effect of typo \emph{kind}
+(real-word vs non-word), holding the question, corrupted positions, and rate fixed ---
+something the vs-clean accuracy section cannot do. Three views:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item a \textbf{controlled paired} comparison of low-real vs high-real variants on
+  the \emph{same} questions, with a McNemar test (paired table);
+  \item a \textbf{per-typo logistic regression} comparing the marginal harm of one
+  real-word vs one non-word typo (logit table);
+  \item whether wrong answers \textbf{flag the corruption} more or less as the
+  real-word share rises (silent-failure table).
+\end{itemize}
+\noindent Read the signs, deltas and $p$-values in the tables below for this
+dataset's result.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Controlled paired comparison of two TYPO variants against EACH OTHER (baseline is the low-real variant, NOT clean -- so this is not the vs-clean accuracy table). Within a fixed rate the same questions are corrupted in the same positions, only the typo KIND differs. Restricted to questions answered in both variants. acc\_low\_real / acc\_high\_real = accuracy on the lower / higher real-word variant; delta\_acc = acc\_high\_real - acc\_low\_real; r2w = questions correct in the low-real variant but wrong in the high-real one; w2r = the reverse; mcnemar\_p = McNemar test on that paired change. Negative delta with r2w > w2r means real-word typos are more harmful than the non-word typos they replaced.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{rate} & \textbf{compare} & \textbf{n\_both} & \textbf{acc\_low\_real} & \textbf{acc\_high\_real} & \textbf{delta\_acc} & \textbf{r2w} & \textbf{w2r} & \textbf{mcnemar\_p} \\
+\midrule
+25 & real10\_to\_real70 & 425 & 0.9176 & 0.9129 & -0.0047 & 21 & 19 & 0.87436706 \\
+25 & real10\_to\_real40 & 429 & 0.9138 & 0.9161 & 0.0023 & 17 & 18 & 1.0 \\
+25 & real40\_to\_real70 & 433 & 0.9169 & 0.9007 & -0.0162 & 30 & 23 & 0.40984673 \\
+50 & real10\_to\_real70 & 399 & 0.8521 & 0.802 & -0.0501 & 52 & 32 & 0.03816577 \\
+50 & real10\_to\_real40 & 411 & 0.8564 & 0.8418 & -0.0146 & 37 & 31 & 0.54428962 \\
+50 & real40\_to\_real70 & 411 & 0.8345 & 0.8078 & -0.0268 & 39 & 28 & 0.2218232 \\
+75 & real10\_to\_real70 & 346 & 0.8237 & 0.7341 & -0.0896 & 56 & 25 & 0.00085812 \\
+75 & real10\_to\_real40 & 366 & 0.8033 & 0.7978 & -0.0055 & 44 & 42 & 0.91412835 \\
+75 & real40\_to\_real70 & 354 & 0.7994 & 0.7514 & -0.048 & 42 & 25 & 0.05061718 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Logistic regression correct \textasciitilde{} num\_real + num\_nonword over all answered typo traces (num\_real / num\_nonword = count of real-word / non-word typos in the problem). coef\_* = change in log-odds of a correct answer per one added typo of that kind (more negative = more harmful); odds\_* = exp(coef); intercept is the model constant. n = number of traces fit.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{n} & \textbf{coef\_num\_real} & \textbf{coef\_num\_nonword} & \textbf{odds\_real} & \textbf{odds\_nonword} & \textbf{intercept} \\
+\midrule
+20 & -0.55966 & -0.0458 & 0.5714 & 0.9552 & 1.11723 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Among WRONG answers only, does the model flag the corruption, by real ratio? explicit\_notice\_frac = fraction of wrong-answer traces whose reasoning uses strong typo-flagging language (typo / misspelled / doesn't make sense / ...); silent\_frac = 1 - explicit\_notice\_frac. The proposal predicts real-word failures are quieter (explicit\_notice\_frac should fall as real rises).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n\_wrong} & \textbf{explicit\_notice\_frac} & \textbf{silent\_frac} \\
+\midrule
+10 & 9 & 0.0 & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Lexical Grid (overview)}
+\begin{table}[H]
+\centering
+\caption{All four marker families (second\_guess, uncertainty, typo\_noticing, repair\_words) across configs.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{config} & \textbf{second\_guess} & \textbf{uncertainty} & \textbf{typo\_noticing} & \textbf{repair\_words} \\
+\midrule
+clean & 5.773 & 3.514 & 0.753 & 0.502 \\
+typo30\_real10 & 5.047 & 5.768 & 1.682 & 1.202 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Spellcheck Recovery}
+\begin{table}[H]
+\centering
+\caption{External spellcheck recovery by config. restored\_exact\_pct = percentage of typo words that were corrected back to exactly their original clean word.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_questions} & \textbf{total\_typo\_words} & \textbf{restored\_exact\_n} & \textbf{changed\_other\_n} & \textbf{not\_restored\_n} & \textbf{restored\_exact\_frac} & \textbf{restored\_exact\_pct} \\
+\midrule
+rate25\_real0\_fix-spellcheck & 500 & 6500 & 3500 & 1500 & 3000 & 0.538462 & 53.85 \\
+rate25\_real10\_fix-spellcheck & 500 & 6500 & 4000 & 1000 & 2500 & 0.615385 & 61.54 \\
+rate25\_real20\_fix-spellcheck & 500 & 6500 & 3500 & 1000 & 3000 & 0.538462 & 53.85 \\
+rate25\_real30\_fix-spellcheck & 500 & 6500 & 3500 & 0 & 3000 & 0.538462 & 53.85 \\
+rate25\_real40\_fix-spellcheck & 500 & 6500 & 3500 & 500 & 3000 & 0.538462 & 53.85 \\
+rate25\_real50\_fix-spellcheck & 500 & 6500 & 3000 & 0 & 3500 & 0.461538 & 46.15 \\
+rate25\_real60\_fix-spellcheck & 500 & 6500 & 2500 & 0 & 4000 & 0.384615 & 38.46 \\
+rate25\_real70\_fix-spellcheck & 500 & 6500 & 2500 & 0 & 4000 & 0.384615 & 38.46 \\
+rate50\_real0\_fix-spellcheck & 500 & 13000 & 9500 & 1000 & 3500 & 0.730769 & 73.08 \\
+rate50\_real10\_fix-spellcheck & 500 & 13000 & 8500 & 500 & 4500 & 0.653846 & 65.38 \\
+rate50\_real20\_fix-spellcheck & 500 & 13000 & 8000 & 1000 & 5000 & 0.615385 & 61.54 \\
+rate50\_real30\_fix-spellcheck & 500 & 13000 & 6000 & 1500 & 7000 & 0.461538 & 46.15 \\
+rate50\_real40\_fix-spellcheck & 500 & 13000 & 7000 & 500 & 6000 & 0.538462 & 53.85 \\
+rate50\_real50\_fix-spellcheck & 500 & 13000 & 4500 & 1000 & 8500 & 0.346154 & 34.62 \\
+rate50\_real60\_fix-spellcheck & 500 & 13000 & 5000 & 500 & 8000 & 0.384615 & 38.46 \\
+rate50\_real70\_fix-spellcheck & 500 & 13000 & 4000 & 500 & 9000 & 0.307692 & 30.77 \\
+rate75\_real0\_fix-spellcheck & 500 & 20000 & 12000 & 3500 & 8000 & 0.6 & 60.0 \\
+rate75\_real10\_fix-spellcheck & 500 & 20000 & 11500 & 3500 & 8500 & 0.575 & 57.5 \\
+rate75\_real20\_fix-spellcheck & 500 & 20000 & 12500 & 2000 & 7500 & 0.625 & 62.5 \\
+rate75\_real30\_fix-spellcheck & 500 & 20000 & 8500 & 3500 & 11500 & 0.425 & 42.5 \\
+rate75\_real40\_fix-spellcheck & 500 & 20000 & 9000 & 1500 & 11000 & 0.45 & 45.0 \\
+rate75\_real50\_fix-spellcheck & 500 & 20000 & 8000 & 2000 & 12000 & 0.4 & 40.0 \\
+rate75\_real60\_fix-spellcheck & 500 & 20000 & 6500 & 2000 & 13500 & 0.325 & 32.5 \\
+rate75\_real70\_fix-spellcheck & 500 & 20000 & 5000 & 1000 & 15000 & 0.25 & 25.0 \\
+typo30\_real0\_fix-spellcheck & 500 & 8000 & 4500 & 1500 & 3500 & 0.5625 & 56.25 \\
+typo30\_real10\_fix-spellcheck & 500 & 7900 & 4940 & 1000 & 2960 & 0.625316 & 62.53 \\
+typo30\_real20\_fix-spellcheck & 500 & 8000 & 5000 & 500 & 3000 & 0.625 & 62.5 \\
+typo30\_real30\_fix-spellcheck & 500 & 8000 & 4500 & 500 & 3500 & 0.5625 & 56.25 \\
+typo30\_real40\_fix-spellcheck & 500 & 8000 & 5000 & 0 & 3000 & 0.625 & 62.5 \\
+typo30\_real50\_fix-spellcheck & 500 & 8000 & 5000 & 0 & 3000 & 0.625 & 62.5 \\
+typo30\_real60\_fix-spellcheck & 500 & 8000 & 3000 & 500 & 5000 & 0.375 & 37.5 \\
+typo30\_real70\_fix-spellcheck & 500 & 8000 & 3500 & 500 & 4500 & 0.4375 & 43.75 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Overall external spellcheck recovery for this dataset (pooled across spellcheck result files).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{dataset} & \textbf{configs\_count} & \textbf{total\_typo\_words} & \textbf{restored\_exact\_n} & \textbf{changed\_other\_n} & \textbf{not\_restored\_n} & \textbf{restored\_exact\_frac} & \textbf{restored\_exact\_pct} \\
+\midrule
+gsm8k & 32 & 379900 & 186940 & 34000 & 192960 & 0.492077 & 49.21 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\end{document}

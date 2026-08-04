@@ -1,0 +1,610 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\title{The Silent Tax: Typo-Robustness Analysis (GSM8K)\\\large DeepSeek-R1-Distill-Qwen-7B}
+\date{}
+\begin{document}
+\maketitle
+\noindent All tables are \emph{answered-only}: traces that hit the token cap before writing a final answer are excluded from the metrics. Configs are named \texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words corrupted, \emph{real} = \% of typos that form real words. Baseline is the clean input.
+
+\section*{Accuracy and Flips}
+\begin{table}[H]
+\centering
+\caption{Accuracy per config: answered-only and strict (truncated=wrong), with 95\% bootstrap CI on acc\_strict.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
+\midrule
+clean & 500 & 0.837 & 0.832 & 0.798 & 0.864 \\
+typo25\_real10 & 500 & 0.7732 & 0.75 & 0.712 & 0.784 \\
+typo25\_real40 & 500 & 0.7377 & 0.72 & 0.68 & 0.756 \\
+typo25\_real70 & 500 & 0.7618 & 0.742 & 0.702 & 0.78 \\
+typo50\_real10 & 500 & 0.6934 & 0.674 & 0.634 & 0.714 \\
+typo50\_real40 & 500 & 0.6646 & 0.65 & 0.608 & 0.694 \\
+typo50\_real70 & 500 & 0.6053 & 0.592 & 0.548 & 0.638 \\
+typo75\_real10 & 500 & 0.6286 & 0.616 & 0.576 & 0.658 \\
+typo75\_real40 & 500 & 0.5456 & 0.538 & 0.494 & 0.582 \\
+typo75\_real70 & 500 & 0.4776 & 0.468 & 0.424 & 0.512 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Answered-only flips vs clean, paired by question over n\_both (answered in both conditions). r2w / w2r = questions correct on clean but wrong on this config / wrong on clean but correct on this config; r2w\_ratio = r2w / n\_both, w2r\_ratio = w2r / n\_both; net\_flip\_ratio = r2w\_ratio - w2r\_ratio = (r2w - w2r) / n\_both, the net rate at which this config worsens answers relative to clean.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_both} & \textbf{r2w} & \textbf{w2r} & \textbf{r2w\_ratio} & \textbf{w2r\_ratio} & \textbf{net\_flip\_ratio} & \textbf{mcnemar\_b} & \textbf{mcnemar\_c} & \textbf{mcnemar\_stat} & \textbf{mcnemar\_p} \\
+\midrule
+typo25\_real10 & 483 & 57 & 27 & 0.118 & 0.0559 & 0.0621 & 57 & 27 & 10.012 & 0.00155532 \\
+typo25\_real40 & 486 & 72 & 19 & 0.1481 & 0.0391 & 0.1091 & 72 & 19 & 29.714 & 5e-08 \\
+typo25\_real70 & 485 & 64 & 27 & 0.132 & 0.0557 & 0.0763 & 64 & 27 & 14.242 & 0.00016076 \\
+typo50\_real10 & 484 & 92 & 23 & 0.1901 & 0.0475 & 0.1426 & 92 & 23 & 40.209 & 0.0 \\
+typo50\_real40 & 488 & 103 & 19 & 0.2111 & 0.0389 & 0.1721 & 103 & 19 & 56.467 & 0.0 \\
+typo50\_real70 & 487 & 129 & 17 & 0.2649 & 0.0349 & 0.23 & 129 & 17 & 84.39 & 0.0 \\
+typo75\_real10 & 488 & 125 & 23 & 0.2561 & 0.0471 & 0.209 & 125 & 23 & 68.926 & 0.0 \\
+typo75\_real40 & 490 & 160 & 17 & 0.3265 & 0.0347 & 0.2918 & 160 & 17 & 113.921 & 0.0 \\
+typo75\_real70 & 487 & 189 & 16 & 0.3881 & 0.0329 & 0.3552 & 189 & 16 & 144.312 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\medskip
+\noindent\textbf{McNemar test (used in the flips table above).}
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{What it is:} a paired significance test for before/after binary
+  outcomes. It looks only at the questions that \emph{changed} (the discordant pairs:
+  $b$ = right$\to$wrong, $c$ = wrong$\to$right) and ignores those that stayed the same.
+  \item \textbf{Null hypothesis:} typos break correct answers as often as they fix
+  wrong ones ($b = c$, i.e.\ no net effect).
+  \item \textbf{Statistic:} $(|b - c| - 1)^2 / (b + c)$ (column mcnemar\_stat);
+  mcnemar\_p is its chi-square $p$-value with 1 degree of freedom.
+  \item \textbf{When we reject it:} when mcnemar\_p $< 0.05$ --- the
+  right$\to$wrong vs wrong$\to$right imbalance is too large to be chance.
+\end{itemize}
+
+\section*{Reasoning Length}
+\begin{table}[H]
+\centering
+\caption{Absolute generated tokens per config (answered-only).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_answered} & \textbf{mean\_tok} & \textbf{median\_tok} & \textbf{p90\_tok} & \textbf{max\_tok} \\
+\midrule
+clean & 497 & 590.5 & 450 & 1098 & 3966 \\
+typo25\_real10 & 485 & 695.2 & 487 & 1395 & 4096 \\
+typo25\_real40 & 488 & 661.6 & 462.0 & 1429 & 4096 \\
+typo25\_real70 & 487 & 646.4 & 469 & 1209 & 3972 \\
+typo50\_real10 & 486 & 622.9 & 457.0 & 1179 & 4096 \\
+typo50\_real40 & 489 & 610.5 & 456 & 1001 & 4096 \\
+typo50\_real70 & 489 & 584.6 & 454 & 975 & 4096 \\
+typo75\_real10 & 490 & 666.6 & 467.0 & 1236 & 4096 \\
+typo75\_real40 & 493 & 601.9 & 459 & 946 & 4096 \\
+typo75\_real70 & 490 & 570.3 & 458.5 & 768 & 4096 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean generated tokens for correct vs wrong answers. wrong\_over\_correct = tok\_wrong / tok\_correct (mean tokens of wrong answers divided by mean tokens of correct answers).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{config} & \textbf{tok\_correct} & \textbf{tok\_wrong} & \textbf{wrong\_over\_correct} \\
+\midrule
+clean & 574.4 & 673.2 & 1.1719 \\
+typo25\_real10 & 660.6 & 813.4 & 1.2313 \\
+typo25\_real40 & 649.7 & 695.0 & 1.0698 \\
+typo25\_real70 & 629.9 & 699.1 & 1.1098 \\
+typo50\_real10 & 636.7 & 591.7 & 0.9294 \\
+typo50\_real40 & 593.6 & 644.0 & 1.0849 \\
+typo50\_real70 & 595.6 & 567.8 & 0.9533 \\
+typo75\_real10 & 614.0 & 755.6 & 1.2306 \\
+typo75\_real40 & 581.9 & 626.0 & 1.0758 \\
+typo75\_real70 & 529.7 & 607.3 & 1.1465 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Self-doubt}
+\noindent The self-doubt markers are curated words grouped into two
+\emph{banks}, each matched as a case-insensitive whole-word pattern in the reasoning
+text. Density is matches per 1000 reasoning words.
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{second\_guess} --- the proposal's canonical self-correction words plus
+  direct reversals: \emph{wait, hmm, actually, reconsider, but wait, hold on, on second
+  thought, let me recheck, double-check}.
+  \item \textbf{uncertainty} --- hedging / ``not certain'' words: \emph{maybe, perhaps,
+  possibly, might be, could be, not sure, I guess, presumably, or maybe / alternatively,
+  unclear / confused}.
+\end{itemize}
+\noindent Example reasoning: ``\emph{Wait, maybe the total is 12\dots\ hmm, actually let
+me recheck}'' contributes \emph{wait, hmm, actually} (second\_guess) and \emph{maybe}
+(uncertainty). A separate \emph{typo-noticing} bank (\emph{typo, misspelled, doesn't make
+sense, \dots}) is treated as repair behaviour, not self-doubt.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Doubt-marker density per config: second\_guess and uncertainty, per 1k words and per trace.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_answered} & \textbf{second\_guess\_per\_1k} & \textbf{second\_guess\_per\_trace} & \textbf{uncertainty\_per\_1k} & \textbf{uncertainty\_per\_trace} & \textbf{total\_per\_1k} & \textbf{total\_per\_trace} \\
+\midrule
+clean & 497 & 7.625 & 1.64 & 3.705 & 0.797 & 11.329 & 2.437 \\
+typo25\_real10 & 485 & 9.811 & 2.746 & 6.593 & 1.845 & 16.404 & 4.592 \\
+typo25\_real40 & 488 & 8.918 & 2.328 & 8.706 & 2.273 & 17.623 & 4.6 \\
+typo25\_real70 & 487 & 8.554 & 2.133 & 7.525 & 1.877 & 16.08 & 4.01 \\
+typo50\_real10 & 486 & 8.421 & 1.977 & 9.297 & 2.183 & 17.717 & 4.16 \\
+typo50\_real40 & 489 & 7.765 & 1.697 & 8.121 & 1.775 & 15.886 & 3.472 \\
+typo50\_real70 & 489 & 7.044 & 1.466 & 7.506 & 1.562 & 14.55 & 3.029 \\
+typo75\_real10 & 490 & 8.944 & 2.324 & 11.834 & 3.076 & 20.778 & 5.4 \\
+typo75\_real40 & 493 & 6.252 & 1.331 & 10.074 & 2.144 & 16.326 & 3.475 \\
+typo75\_real70 & 490 & 5.984 & 1.112 & 9.575 & 1.78 & 15.559 & 2.892 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Per-marker density (markers per 1000 reasoning words): clean vs pooled-typo. discrimination = typo minus clean (larger = more typo-responsive). All bank markers, ranked by discrimination.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{marker} & \textbf{category} & \textbf{clean\_per\_1k} & \textbf{typo\_per\_1k} & \textbf{discrimination} \\
+\midrule
+maybe & uncertainty & 1.665 & 4.535 & 2.869 \\
+or maybe/alt & uncertainty & 1.038 & 2.075 & 1.037 \\
+perhaps & uncertainty & 0.346 & 1.005 & 0.659 \\
+wait & second\_guess & 3.583 & 4.14 & 0.557 \\
+unclear/confused & uncertainty & 0.29 & 0.558 & 0.268 \\
+hmm & second\_guess & 1.59 & 1.802 & 0.211 \\
+might be & uncertainty & 0.065 & 0.216 & 0.151 \\
+not sure & uncertainty & 0.037 & 0.12 & 0.083 \\
+I assume & uncertainty & 0.009 & 0.072 & 0.062 \\
+actually & second\_guess & 0.225 & 0.264 & 0.039 \\
+not entirely & uncertainty & 0.009 & 0.027 & 0.018 \\
+but wait & second\_guess & 0.402 & 0.412 & 0.01 \\
+reconsider & second\_guess & 0.0 & 0.0 & 0.0 \\
+on second thought & second\_guess & 0.0 & 0.0 & 0.0 \\
+possibly & uncertainty & 0.009 & 0.004 & -0.005 \\
+presumably & uncertainty & 0.009 & 0.004 & -0.005 \\
+could be & uncertainty & 0.122 & 0.09 & -0.031 \\
+I guess & uncertainty & 0.103 & 0.071 & -0.032 \\
+hold on & second\_guess & 0.458 & 0.406 & -0.052 \\
+let me recheck & second\_guess & 0.505 & 0.438 & -0.068 \\
+wait/actually no & second\_guess & 0.299 & 0.192 & -0.107 \\
+double-check & second\_guess & 0.561 & 0.452 & -0.109 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Doubt density (markers per 1000 reasoning words) split by final outcome, per category (2g = second\_guess, un = uncertainty, tot = both). For a group, density = total markers in that group / total reasoning words in that group x 1000. *\_correct = over correct-answer traces; *\_wrong = over wrong-answer traces; *\_wrong\_over\_correct = \_wrong / \_correct.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{2g\_correct} & \textbf{2g\_wrong} & \textbf{2g\_wrong\_over\_correct} & \textbf{un\_correct} & \textbf{un\_wrong} & \textbf{un\_wrong\_over\_correct} & \textbf{tot\_correct} & \textbf{tot\_wrong} & \textbf{tot\_wrong\_over\_correct} \\
+\midrule
+clean & 7.608 & 7.699 & 1.012 & 3.233 & 5.839 & 1.806 & 10.841 & 13.537 & 1.249 \\
+typo25\_real10 & 9.765 & 9.939 & 1.018 & 5.43 & 9.8 & 1.805 & 15.195 & 19.739 & 1.299 \\
+typo25\_real40 & 9.001 & 8.673 & 0.964 & 8.233 & 10.098 & 1.226 & 17.234 & 18.77 & 1.089 \\
+typo25\_real70 & 9.031 & 7.109 & 0.787 & 5.692 & 13.088 & 2.299 & 14.723 & 20.197 & 1.372 \\
+typo50\_real10 & 9.268 & 5.945 & 0.642 & 8.927 & 10.378 & 1.163 & 18.194 & 16.324 & 0.897 \\
+typo50\_real40 & 8.789 & 5.65 & 0.643 & 6.887 & 10.668 & 1.549 & 15.676 & 16.318 & 1.041 \\
+typo50\_real70 & 7.719 & 5.715 & 0.74 & 8.786 & 4.986 & 0.568 & 16.505 & 10.701 & 0.648 \\
+typo75\_real10 & 8.248 & 9.86 & 1.195 & 7.792 & 17.155 & 2.202 & 16.041 & 27.015 & 1.684 \\
+typo75\_real40 & 6.718 & 5.689 & 0.847 & 9.05 & 11.315 & 1.25 & 15.767 & 17.003 & 1.078 \\
+typo75\_real70 & 6.22 & 5.798 & 0.932 & 8.534 & 10.397 & 1.218 & 14.754 & 16.195 & 1.098 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\noindent\textbf{LLM judge.} The proposal specifies a second,
+non-lexical measure for both dimensions: a separate model with a fixed, strict prompt.
+The judge is a different model from the one under test, called at temperature 0 on a
+seeded random subsample of answered traces per config. It is shown the corrupted-word
+list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
+(head+tail window), and must return JSON with one repair label, a 0--4 self-doubt
+rating, and a \emph{verbatim quote} from the trace as evidence for each; rows whose
+quote is not found in the trace are flagged. Repair labels:
+\emph{silent\_readthrough} (never mentions the corruption),
+\emph{explicit\_notice\_fix} (flags it and recovers the intended word),
+\emph{explicit\_notice\_nofix} (flags it but never resolves it),
+\emph{misread\_wrong\_word} (reasons from a different real word),
+\emph{derailed} (stuck on the corruption), \emph{unclear}, \emph{not\_applicable} (clean).
+Doubt rating: 0 = no hesitation, 2 = re-checks a step, 4 = pervasive doubt / cannot settle.
+The judge is a subsample measure; the lexical tables above remain the full-data result,
+and the agreement tables say how far the two independent measures coincide.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{LLM-judge self-doubt rating per config on the judged subsample. mean\_rating = mean 0-4 rating; frac\_ge2 / frac\_ge3 = share of traces rated at least 2 / at least 3; marker\_per\_1k = the lexical doubt density of the SAME traces, for side-by-side comparison.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{mean\_rating} & \textbf{frac\_ge2} & \textbf{frac\_ge3} & \textbf{marker\_per\_1k} \\
+\midrule
+clean & 481 & 0.347 & 0.1331 & 0.0811 & 2.305 \\
+typo25\_real10 & 469 & 0.533 & 0.2026 & 0.1279 & 4.16 \\
+typo25\_real40 & 476 & 0.481 & 0.1828 & 0.1134 & 4.178 \\
+typo25\_real70 & 474 & 0.435 & 0.1624 & 0.1055 & 3.433 \\
+typo50\_real10 & 477 & 0.432 & 0.1614 & 0.1027 & 4.007 \\
+typo50\_real40 & 477 & 0.331 & 0.1237 & 0.0755 & 2.789 \\
+typo50\_real70 & 482 & 0.369 & 0.1307 & 0.0954 & 2.89 \\
+typo75\_real10 & 480 & 0.379 & 0.1375 & 0.1 & 3.685 \\
+typo75\_real40 & 489 & 0.323 & 0.1145 & 0.0838 & 3.102 \\
+typo75\_real70 & 485 & 0.266 & 0.0948 & 0.0577 & 2.807 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{LLM-judge doubt rating split by final outcome. rating\_correct / rating\_wrong = mean rating over correct / wrong traces; wrong\_over\_correct = rating\_wrong / rating\_correct.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{rating\_correct} & \textbf{rating\_wrong} & \textbf{wrong\_over\_correct} & \textbf{n\_correct} & \textbf{n\_wrong} \\
+\midrule
+clean & 0.352 & 0.325 & 0.924 & 401 & 80 \\
+typo25\_real10 & 0.576 & 0.389 & 0.675 & 361 & 108 \\
+typo25\_real40 & 0.53 & 0.346 & 0.654 & 349 & 127 \\
+typo25\_real70 & 0.472 & 0.319 & 0.676 & 358 & 116 \\
+typo50\_real10 & 0.514 & 0.25 & 0.487 & 329 & 148 \\
+typo50\_real40 & 0.346 & 0.302 & 0.874 & 315 & 162 \\
+typo50\_real70 & 0.433 & 0.275 & 0.635 & 289 & 193 \\
+typo75\_real10 & 0.397 & 0.35 & 0.882 & 300 & 180 \\
+typo75\_real40 & 0.372 & 0.265 & 0.711 & 266 & 223 \\
+typo75\_real70 & 0.169 & 0.354 & 2.099 & 231 & 254 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Convergent validity of the two self-doubt measures: per-trace correlation between the judge's 0-4 rating and the lexical marker density, per config and pooled (\_\_all\_\_). Positive values mean the independent measures agree.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{pearson} & \textbf{spearman} \\
+\midrule
+clean & 481 & 0.9104 & 0.9764 \\
+typo25\_real10 & 469 & 0.8941 & 0.9477 \\
+typo25\_real40 & 476 & 0.8641 & 0.954 \\
+typo25\_real70 & 474 & 0.8798 & 0.978 \\
+typo50\_real10 & 477 & 0.828 & 0.8993 \\
+typo50\_real40 & 477 & 0.8304 & 0.9229 \\
+typo50\_real70 & 482 & 0.8276 & 0.8997 \\
+typo75\_real10 & 480 & 0.8537 & 0.8816 \\
+typo75\_real40 & 489 & 0.8412 & 0.9061 \\
+typo75\_real70 & 485 & 0.844 & 0.8085 \\
+\_\_all\_\_ & 4790 & 0.8487 & 0.9221 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Repair Behaviour}
+\begin{table}[H]
+\centering
+\caption{How each corrupted word was handled, per config (categories defined below the table).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_n} & \textbf{flagged\_n} & \textbf{misread\_n} & \textbf{not\_used\_n} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
+\midrule
+typo25\_real10 & 3537 & 2395 & 50 & 24 & 1068 & 0.6771 & 0.0141 & 0.0068 & 0.302 \\
+typo25\_real40 & 3574 & 2282 & 132 & 55 & 1105 & 0.6385 & 0.0369 & 0.0154 & 0.3092 \\
+typo25\_real70 & 3548 & 2119 & 216 & 90 & 1123 & 0.5972 & 0.0609 & 0.0254 & 0.3165 \\
+typo50\_real10 & 6926 & 4516 & 86 & 42 & 2282 & 0.652 & 0.0124 & 0.0061 & 0.3295 \\
+typo50\_real40 & 6989 & 4239 & 218 & 127 & 2405 & 0.6065 & 0.0312 & 0.0182 & 0.3441 \\
+typo50\_real70 & 6967 & 3972 & 353 & 199 & 2443 & 0.5701 & 0.0507 & 0.0286 & 0.3507 \\
+typo75\_real10 & 9839 & 6215 & 126 & 106 & 3392 & 0.6317 & 0.0128 & 0.0108 & 0.3448 \\
+typo75\_real40 & 9776 & 5621 & 363 & 209 & 3583 & 0.575 & 0.0371 & 0.0214 & 0.3665 \\
+typo75\_real70 & 9653 & 5105 & 466 & 383 & 3699 & 0.5289 & 0.0483 & 0.0397 & 0.3832 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\noindent A \emph{corrupted word} is a word that received a
+typo --- it differs between the clean and typo question (e.g.\ \emph{sum} $\to$
+\emph{sun}). We recover these by diffing the two questions, then place each into one
+bucket by which form appears in the reasoning:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{silent\_fix} --- only the original word (\emph{sum}) appears: a quiet recovery.
+  \item \textbf{flagged} --- both forms appear (\emph{sum} and \emph{sun}): noticed and fixed.
+  \item \textbf{misread} --- only the corrupted form (\emph{sun}) appears: read as the wrong word.
+  \item \textbf{not\_used} --- neither form appears in the reasoning.
+\end{itemize}
+\noindent Columns \texttt{*\_n} are counts; \texttt{*\_frac} are the share of
+\texttt{n\_corrupt\_words}.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Word handling pooled by real-word ratio: the non-word vs real-word contrast.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
+\midrule
+10 & 20302 & 0.6465 & 0.0129 & 0.0085 & 0.3321 \\
+40 & 20339 & 0.597 & 0.0351 & 0.0192 & 0.3487 \\
+70 & 20168 & 0.5551 & 0.0513 & 0.0333 & 0.3602 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Misread rate split by final correctness. A typo'd word is 'misread' when the reasoning uses only its corrupted form (e.g. sun instead of sum). Within each outcome group, misread rate = (typo'd words that were misread) / (all typo'd words examined), pooled over the group. misread\_correct = over problems answered correctly; misread\_wrong = over problems answered wrong; wrong\_over\_correct = misread\_wrong / misread\_correct.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{config} & \textbf{misread\_correct} & \textbf{misread\_wrong} & \textbf{wrong\_over\_correct} \\
+\midrule
+typo25\_real10 & 0.0066 & 0.0076 & 1.152 \\
+typo25\_real40 & 0.0143 & 0.0183 & 1.286 \\
+typo25\_real70 & 0.0222 & 0.035 & 1.581 \\
+typo50\_real10 & 0.0062 & 0.0058 & 0.945 \\
+typo50\_real40 & 0.0167 & 0.0207 & 1.236 \\
+typo50\_real70 & 0.0283 & 0.0289 & 1.018 \\
+typo75\_real10 & 0.0093 & 0.0131 & 1.408 \\
+typo75\_real40 & 0.0205 & 0.0224 & 1.092 \\
+typo75\_real70 & 0.0355 & 0.0431 & 1.216 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{LLM-judge repair category per config (share of judged traces per label; labels defined in the note in the Self-doubt section). Unlike the word-level table above, the unit here is the whole trace, not a single corrupted word.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{silent\_readthrough} & \textbf{explicit\_notice\_fix} & \textbf{explicit\_notice\_nofix} & \textbf{misread\_wrong\_word} & \textbf{derailed} & \textbf{unclear} & \textbf{not\_applicable} \\
+\midrule
+clean & 481 & 0.0 & 0.0021 & 0.0062 & 0.0 & 0.0 & 0.0 & 0.9917 \\
+typo25\_real10 & 469 & 0.9275 & 0.0426 & 0.0171 & 0.0107 & 0.0 & 0.0021 & 0.0 \\
+typo25\_real40 & 476 & 0.8761 & 0.0714 & 0.0273 & 0.0252 & 0.0 & 0.0 & 0.0 \\
+typo25\_real70 & 474 & 0.903 & 0.0485 & 0.0148 & 0.0295 & 0.0021 & 0.0021 & 0.0 \\
+typo50\_real10 & 477 & 0.9099 & 0.0671 & 0.0189 & 0.0021 & 0.0021 & 0.0 & 0.0 \\
+typo50\_real40 & 477 & 0.9182 & 0.0482 & 0.0189 & 0.0105 & 0.0021 & 0.0021 & 0.0 \\
+typo50\_real70 & 482 & 0.8963 & 0.0539 & 0.027 & 0.0124 & 0.0041 & 0.0062 & 0.0 \\
+typo75\_real10 & 480 & 0.8979 & 0.0646 & 0.0292 & 0.0042 & 0.0042 & 0.0 & 0.0 \\
+typo75\_real40 & 489 & 0.8855 & 0.0838 & 0.0184 & 0.0102 & 0.002 & 0.0 & 0.0 \\
+typo75\_real70 & 485 & 0.8907 & 0.0722 & 0.0247 & 0.0124 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{LLM-judge repair category pooled by real-word ratio, rates pooled. The proposal predicts misread\_wrong\_word rises and the explicit\_notice\_* labels fall as the real-word share grows.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{silent\_readthrough} & \textbf{explicit\_notice\_fix} & \textbf{explicit\_notice\_nofix} & \textbf{misread\_wrong\_word} & \textbf{derailed} & \textbf{unclear} & \textbf{not\_applicable} \\
+\midrule
+10 & 1426 & 0.9116 & 0.0582 & 0.0217 & 0.0056 & 0.0021 & 0.0007 & 0.0 \\
+40 & 1442 & 0.8932 & 0.068 & 0.0215 & 0.0153 & 0.0014 & 0.0007 & 0.0 \\
+70 & 1441 & 0.8966 & 0.0583 & 0.0222 & 0.018 & 0.0021 & 0.0028 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Accuracy within each judge label over typo configs. accuracy = share of traces with that label that answered correctly; share = that label's share of all judged typo traces. Low accuracy on silent\_readthrough / misread\_wrong\_word is the confident-silent-failure case.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{label} & \textbf{n} & \textbf{accuracy} & \textbf{share} \\
+\midrule
+silent\_readthrough & 3880 & 0.6634 & 0.9004 \\
+explicit\_notice\_fix & 265 & 0.6075 & 0.0615 \\
+explicit\_notice\_nofix & 94 & 0.3404 & 0.0218 \\
+misread\_wrong\_word & 56 & 0.4821 & 0.013 \\
+derailed & 8 & 0.25 & 0.0019 \\
+unclear & 6 & 0.3333 & 0.0014 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Agreement between the two independent repair measures on the same traces, after collapsing the judge labels onto the word-level buckets (silent\_readthrough -> silent\_fix, explicit\_notice\_* -> flagged, misread\_wrong\_word -> misread). The first rows are the confusion matrix (rows = judge, columns = word-level); the \_\_summary\_\_ row gives n\_comparable, raw\_agreement, cohen\_kappa, and evidence\_verbatim\_frac (share of judged traces whose quoted evidence was found verbatim in the trace).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{judge} & \textbf{wordlevel\_silent\_fix} & \textbf{wordlevel\_flagged} & \textbf{wordlevel\_misread} & \textbf{n\_comparable} & \textbf{raw\_agreement} & \textbf{cohen\_kappa} & \textbf{evidence\_verbatim\_frac} \\
+\midrule
+silent\_fix & 2481 & 618 & 765 &  &  &  &  \\
+flagged & 76 & 152 & 131 &  &  &  &  \\
+misread & 15 & 23 & 18 &  &  &  &  \\
+\_\_summary\_\_ &  &  &  & 4279 & 0.6195 & 0.1331 & 0.9666 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Real-word Effect}
+\noindent This section isolates the effect of typo \emph{kind}
+(real-word vs non-word), holding the question, corrupted positions, and rate fixed ---
+something the vs-clean accuracy section cannot do. Three views:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item a \textbf{controlled paired} comparison of low-real vs high-real variants on
+  the \emph{same} questions, with a McNemar test (paired table);
+  \item a \textbf{per-typo logistic regression} comparing the marginal harm of one
+  real-word vs one non-word typo (logit table);
+  \item whether wrong answers \textbf{flag the corruption} more or less as the
+  real-word share rises (silent-failure table).
+\end{itemize}
+\noindent Read the signs, deltas and $p$-values in the tables below for this
+dataset's result.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Controlled paired comparison of two TYPO variants against EACH OTHER (baseline is the low-real variant, NOT clean -- so this is not the vs-clean accuracy table). Within a fixed rate the same questions are corrupted in the same positions, only the typo KIND differs. Restricted to questions answered in both variants. acc\_low\_real / acc\_high\_real = accuracy on the lower / higher real-word variant; delta\_acc = acc\_high\_real - acc\_low\_real; r2w = questions correct in the low-real variant but wrong in the high-real one; w2r = the reverse; mcnemar\_p = McNemar test on that paired change. Negative delta with r2w > w2r means real-word typos are more harmful than the non-word typos they replaced.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{rate} & \textbf{compare} & \textbf{n\_both} & \textbf{acc\_low\_real} & \textbf{acc\_high\_real} & \textbf{delta\_acc} & \textbf{r2w} & \textbf{w2r} & \textbf{mcnemar\_p} \\
+\midrule
+25 & real10\_to\_real70 & 476 & 0.7794 & 0.7605 & -0.0189 & 50 & 41 & 0.40167817 \\
+25 & real10\_to\_real40 & 477 & 0.7778 & 0.7358 & -0.0419 & 58 & 38 & 0.0524795 \\
+25 & real40\_to\_real70 & 479 & 0.7411 & 0.7641 & 0.023 & 38 & 49 & 0.28366949 \\
+50 & real10\_to\_real70 & 479 & 0.6931 & 0.6138 & -0.0793 & 87 & 49 & 0.00151016 \\
+50 & real10\_to\_real40 & 478 & 0.6946 & 0.6736 & -0.0209 & 69 & 59 & 0.42632554 \\
+50 & real40\_to\_real70 & 482 & 0.668 & 0.6079 & -0.0602 & 66 & 37 & 0.00579924 \\
+75 & real10\_to\_real70 & 482 & 0.6307 & 0.4772 & -0.1535 & 115 & 41 & 1e-08 \\
+75 & real10\_to\_real40 & 484 & 0.6281 & 0.5537 & -0.0744 & 94 & 58 & 0.00452729 \\
+75 & real40\_to\_real70 & 485 & 0.5505 & 0.4804 & -0.0701 & 77 & 43 & 0.00259128 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Logistic regression correct \textasciitilde{} num\_real + num\_nonword over all answered typo traces (num\_real / num\_nonword = count of real-word / non-word typos in the problem). coef\_* = change in log-odds of a correct answer per one added typo of that kind (more negative = more harmful); odds\_* = exp(coef); intercept is the model constant. n = number of traces fit.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{n} & \textbf{coef\_num\_real} & \textbf{coef\_num\_nonword} & \textbf{odds\_real} & \textbf{odds\_nonword} & \textbf{intercept} \\
+\midrule
+4397 & -0.07196 & -0.02779 & 0.9306 & 0.9726 & 1.34769 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Among WRONG answers only, does the model flag the corruption, by real ratio? explicit\_notice\_frac = fraction of wrong-answer traces whose reasoning uses strong typo-flagging language (typo / misspelled / doesn't make sense / ...); silent\_frac = 1 - explicit\_notice\_frac. The proposal predicts real-word failures are quieter (explicit\_notice\_frac should fall as real rises).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n\_wrong} & \textbf{explicit\_notice\_frac} & \textbf{silent\_frac} \\
+\midrule
+10 & 441 & 0.0907 & 0.9093 \\
+40 & 516 & 0.0775 & 0.9225 \\
+70 & 565 & 0.0761 & 0.9239 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Lexical Grid (overview)}
+\begin{table}[H]
+\centering
+\caption{All four marker families (second\_guess, uncertainty, typo\_noticing, repair\_words) across configs.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{config} & \textbf{second\_guess} & \textbf{uncertainty} & \textbf{typo\_noticing} & \textbf{repair\_words} \\
+\midrule
+clean & 7.625 & 3.705 & 0.851 & 0.73 \\
+typo25\_real10 & 9.811 & 6.593 & 1.959 & 1.363 \\
+typo25\_real40 & 8.918 & 8.706 & 3.14 & 2.355 \\
+typo25\_real70 & 8.554 & 7.525 & 2.486 & 1.713 \\
+typo50\_real10 & 8.421 & 9.297 & 2.795 & 2.156 \\
+typo50\_real40 & 7.765 & 8.121 & 2.18 & 1.852 \\
+typo50\_real70 & 7.044 & 7.506 & 2.21 & 1.798 \\
+typo75\_real10 & 8.944 & 11.834 & 3.141 & 2.434 \\
+typo75\_real40 & 6.252 & 10.074 & 3.374 & 2.316 \\
+typo75\_real70 & 5.984 & 9.575 & 2.591 & 2.009 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Spellcheck Recovery}
+\begin{table}[H]
+\centering
+\caption{External spellcheck recovery by config. restored\_exact\_pct = percentage of typo words that were corrected back to exactly their original clean word.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_questions} & \textbf{total\_typo\_words} & \textbf{restored\_exact\_n} & \textbf{changed\_other\_n} & \textbf{not\_restored\_n} & \textbf{restored\_exact\_frac} & \textbf{restored\_exact\_pct} \\
+\midrule
+typo25\_real10 & 500 & 6500 & 4000 & 1000 & 2500 & 0.615385 & 61.54 \\
+typo25\_real40 & 500 & 6500 & 3500 & 500 & 3000 & 0.538462 & 53.85 \\
+typo25\_real70 & 500 & 6500 & 2500 & 0 & 4000 & 0.384615 & 38.46 \\
+typo50\_real10 & 500 & 13000 & 8500 & 500 & 4500 & 0.653846 & 65.38 \\
+typo50\_real40 & 500 & 13000 & 7000 & 500 & 6000 & 0.538462 & 53.85 \\
+typo50\_real70 & 500 & 13000 & 4000 & 500 & 9000 & 0.307692 & 30.77 \\
+typo75\_real10 & 500 & 20000 & 11500 & 3500 & 8500 & 0.575 & 57.5 \\
+typo75\_real40 & 500 & 20000 & 9000 & 1500 & 11000 & 0.45 & 45.0 \\
+typo75\_real70 & 500 & 20000 & 5000 & 1000 & 15000 & 0.25 & 25.0 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Overall external spellcheck recovery for this dataset (pooled across spellcheck result files).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{dataset} & \textbf{configs\_count} & \textbf{total\_typo\_words} & \textbf{restored\_exact\_n} & \textbf{changed\_other\_n} & \textbf{not\_restored\_n} & \textbf{restored\_exact\_frac} & \textbf{restored\_exact\_pct} \\
+\midrule
+gsm8k & 9 & 118500 & 55000 & 9000 & 63500 & 0.464135 & 46.41 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\end{document}

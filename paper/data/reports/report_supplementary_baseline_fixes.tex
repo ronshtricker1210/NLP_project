@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\title{Supplementary results: non-reasoning baseline \& prompt-level fixes}
+\author{The Silent Tax --- typo robustness of reasoning LLMs}
+\date{\today}
+\begin{document}\maketitle
+
+\section{Reasoning vs.\ non-reasoning model}
+Answered-only accuracy of DeepSeek-R1-Distill-Qwen-7B (R1) vs.\ Qwen2.5-7B-Instruct
+(same family/size, no reasoning training), identical questions and prompts, 500 per config.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{l rr rr rr}
+\toprule
+ & \multicolumn{2}{c}{GSM8K} & \multicolumn{2}{c}{ARC-C} & \multicolumn{2}{c}{MATH-500} \\
+config & R1 & Qwen & R1 & Qwen & R1 & Qwen \\
+\midrule
+clean & 92.4\% & 92.4\% & 83.1\% & 91.6\% & 95.2\% & 76.2\% \\
+typo25\_real10 & 85.0\% & 87.8\% & 85.6\% & 92.2\% & 93.9\% & 75.5\% \\
+typo25\_real40 & 87.0\% & 85.8\% & 85.0\% & 90.9\% & 93.4\% & 72.9\% \\
+typo25\_real70 & 86.2\% & 85.4\% & 81.5\% & 90.3\% & 93.9\% & 73.7\% \\
+typo50\_real10 & 79.6\% & 83.0\% & 81.2\% & 90.6\% & 92.8\% & 72.7\% \\
+typo50\_real40 & 79.0\% & 79.6\% & 82.0\% & 88.8\% & 91.4\% & 72.3\% \\
+typo50\_real70 & 72.8\% & 75.4\% & 82.3\% & 87.9\% & 91.4\% & 72.1\% \\
+typo75\_real10 & 73.0\% & 73.6\% & 79.7\% & 87.4\% & 89.1\% & 68.0\% \\
+typo75\_real40 & 66.8\% & 72.0\% & 76.4\% & 89.0\% & 88.1\% & 66.1\% \\
+typo75\_real70 & 62.7\% & 65.6\% & 74.1\% & 83.9\% & 86.9\% & 69.3\% \\
+\bottomrule
+\end{tabular}
+\caption{Reasoning training does not confer typo robustness: on GSM8K both models start
+at 92.4\% clean yet R1 degrades slightly more. The real-word effect appears in both models.}
+\end{table}
+
+\section{Prompt-level fixes (GSM8K, R1)}
+\begin{table}[h]\centering\small
+\begin{tabular}{l r rr rr}
+\toprule
+config & no-fix & rewrite & $\Delta$ & warn & $\Delta$ \\
+\midrule
+clean & 92.4\% & 91.4\% & -1.0\% & 92.4\% & +0.0\% \\
+typo25\_real10 & 85.0\% & 83.6\% & -1.4\% & 85.4\% & +0.4\% \\
+typo25\_real40 & 87.0\% & 82.4\% & -4.6\% & 87.0\% & +0.0\% \\
+typo25\_real70 & 86.2\% & 80.0\% & -6.2\% & 84.8\% & -1.4\% \\
+typo50\_real10 & 79.6\% & 76.2\% & -3.4\% & 78.2\% & -1.4\% \\
+typo50\_real40 & 79.0\% & 71.6\% & -7.4\% & 73.2\% & -5.8\% \\
+typo50\_real70 & 72.8\% & 68.0\% & -4.8\% & 73.8\% & +1.0\% \\
+typo75\_real10 & 73.0\% & 65.8\% & -7.2\% & 70.0\% & -3.0\% \\
+typo75\_real40 & 66.8\% & 62.6\% & -4.2\% & 64.0\% & -2.8\% \\
+typo75\_real70 & 62.7\% & 56.2\% & -6.5\% & 61.4\% & -1.3\% \\
+\bottomrule
+\end{tabular}
+\caption{Neither fix recovers accuracy. \emph{rewrite} (``first correct the typos, then
+solve'') hurts in every cell (mean $-5.1$ over typo configs): it shortens reasoning by
+$\sim$35\% and locks in early misreadings. \emph{warn} (``the text may contain typos'')
+is null-to-slightly-negative (mean $-1.6$).}
+\end{table}
+\end{document}

@@ -28,6 +28,11 @@ source api-setup/env.sh && python api-setup/api_smoke.py   # one-request sanity 
 
 bash api-setup/run.sh --dataset math500 --variant both --limit 20   # small sweep + scoring
 bash api-setup/run.sh --detach --dataset all --configs all --n-samples 5   # the real thing
+
+# mitigation runs from the proposal
+python api-setup/run_typo_api.py --dataset gsm8k --configs real10,real40,real70 --fix rewrite
+python api-setup/run_typo_api.py --dataset gsm8k --configs real10,real40,real70 --fix warn
+python api-setup/run_typo_api.py --dataset gsm8k --configs real10,real40,real70 --fix spellcheck
 ```
 
 Results land in `$OUTDIR` (default `~/nlp_project/results`) as
@@ -74,6 +79,25 @@ rerun completes it — the Hub only ever sees whole files.
   MATH-500 accuracy matches, so any difference is negligible.
 - `--n-samples N` issues N independent requests per question (the router has
   no batched `n`), which parallelizes freely.
+
+## Mitigation modes (`--fix`)
+
+- `rewrite`: prompt-level fix that asks the model to rewrite the question with corrected typos first.
+- `warn`: prompt-level fix that only warns "the text may contain typos".
+- `spellcheck`: **external spell-check preprocessor** before prompting (proposal baseline).
+
+The `spellcheck` mode is intentionally conservative: it only edits plain prose
+words, never LaTeX commands/spans or numbers, and writes metadata
+(`spellcheck_applied`, `spellcheck_num_changes`, `spellchecked_question`,
+`spellcheck_changes`) into each JSONL record for analysis.
+
+It also writes typo-recovery quality fields (for direct report tables):
+
+- `spellcheck_total_typo_words`: number of typo words in that question.
+- `spellcheck_restored_exact_n`: how many typo words were corrected back to exactly the original word.
+- `spellcheck_changed_other_n`: typo words that were changed, but not to the original word.
+- `spellcheck_not_restored_n`: typo words not restored exactly (`total - restored_exact_n`).
+- `spellcheck_restored_exact_frac` / `spellcheck_restored_exact_pct`: per-question restoration rate.
 
 ## Known billing caveat (2026-07-24)
 

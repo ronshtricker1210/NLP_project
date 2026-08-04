@@ -18,9 +18,13 @@ DATASET = os.environ.get("NLP_DATASET", "gsm8k")
 TABLES = os.path.join(_HERE, "tables", DATASET)
 REPORT = os.path.join(_HERE, f"report_{DATASET}.tex")
 
-# active modules to run (imported-only files are excluded, so is the retired one)
+# active modules to run (imported-only files are excluded, so is the retired one).
+# llm_judge.py is NOT here on purpose: it needs HF_TOKEN and spends API credits.
+# Run it yourself (python llm_judge.py --limit 150); its tables are picked up below
+# if they exist, and silently skipped if they don't.
 MODULES = ["accuracy_flips", "reasoning_length", "self_doubt",
-           "repair_wordlevel", "real_word_effect", "lexical_grid"]
+           "repair_wordlevel", "real_word_effect", "lexical_grid",
+           "spellcheck_recovery"]
 
 # Free-text explanatory notes inserted into the report as raw LaTeX (via "__note__").
 SELF_DOUBT_NOTE = r"""\noindent The self-doubt markers are curated words grouped into two
@@ -38,6 +42,25 @@ text. Density is matches per 1000 reasoning words.
 me recheck}'' contributes \emph{wait, hmm, actually} (second\_guess) and \emph{maybe}
 (uncertainty). A separate \emph{typo-noticing} bank (\emph{typo, misspelled, doesn't make
 sense, \dots}) is treated as repair behaviour, not self-doubt.
+\medskip
+"""
+
+JUDGE_NOTE = r"""\noindent\textbf{LLM judge.} The proposal specifies a second,
+non-lexical measure for both dimensions: a separate model with a fixed, strict prompt.
+The judge is a different model from the one under test, called at temperature 0 on a
+seeded random subsample of answered traces per config. It is shown the corrupted-word
+list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
+(head+tail window), and must return JSON with one repair label, a 0--4 self-doubt
+rating, and a \emph{verbatim quote} from the trace as evidence for each; rows whose
+quote is not found in the trace are flagged. Repair labels:
+\emph{silent\_readthrough} (never mentions the corruption),
+\emph{explicit\_notice\_fix} (flags it and recovers the intended word),
+\emph{explicit\_notice\_nofix} (flags it but never resolves it),
+\emph{misread\_wrong\_word} (reasons from a different real word),
+\emph{derailed} (stuck on the corruption), \emph{unclear}, \emph{not\_applicable} (clean).
+Doubt rating: 0 = no hesitation, 2 = re-checks a step, 4 = pervasive doubt / cannot settle.
+The judge is a subsample measure; the lexical tables above remain the full-data result,
+and the agreement tables say how far the two independent measures coincide.
 \medskip
 """
 
@@ -103,12 +126,20 @@ SECTIONS = [
         ("self_doubt_per_config.csv", "Doubt-marker density per config: second_guess and uncertainty, per 1k words and per trace."),
         ("self_doubt_by_marker.csv", "Per-marker density (markers per 1000 reasoning words): clean vs pooled-typo. discrimination = typo minus clean (larger = more typo-responsive). All bank markers, ranked by discrimination."),
         ("self_doubt_by_outcome.csv", "Doubt density (markers per 1000 reasoning words) split by final outcome, per category (2g = second_guess, un = uncertainty, tot = both). For a group, density = total markers in that group / total reasoning words in that group x 1000. *_correct = over correct-answer traces; *_wrong = over wrong-answer traces; *_wrong_over_correct = _wrong / _correct."),
+        ("__note__", JUDGE_NOTE),
+        ("judge_doubt_per_config.csv", "LLM-judge self-doubt rating per config on the judged subsample. mean_rating = mean 0-4 rating; frac_ge2 / frac_ge3 = share of traces rated at least 2 / at least 3; marker_per_1k = the lexical doubt density of the SAME traces, for side-by-side comparison."),
+        ("judge_doubt_by_outcome.csv", "LLM-judge doubt rating split by final outcome. rating_correct / rating_wrong = mean rating over correct / wrong traces; wrong_over_correct = rating_wrong / rating_correct."),
+        ("judge_doubt_vs_markers.csv", "Convergent validity of the two self-doubt measures: per-trace correlation between the judge's 0-4 rating and the lexical marker density, per config and pooled (__all__). Positive values mean the independent measures agree."),
     ]),
     ("Repair Behaviour", [
         ("repair_wordlevel_per_config.csv", "How each corrupted word was handled, per config (categories defined below the table)."),
         ("__note__", REPAIR_CATEGORIES_NOTE),
         ("repair_wordlevel_by_real.csv", "Word handling pooled by real-word ratio: the non-word vs real-word contrast."),
         ("repair_wordlevel_by_outcome.csv", "Misread rate split by final correctness. A typo'd word is 'misread' when the reasoning uses only its corrupted form (e.g. sun instead of sum). Within each outcome group, misread rate = (typo'd words that were misread) / (all typo'd words examined), pooled over the group. misread_correct = over problems answered correctly; misread_wrong = over problems answered wrong; wrong_over_correct = misread_wrong / misread_correct."),
+        ("judge_repair_per_config.csv", "LLM-judge repair category per config (share of judged traces per label; labels defined in the note in the Self-doubt section). Unlike the word-level table above, the unit here is the whole trace, not a single corrupted word."),
+        ("judge_repair_by_real.csv", "LLM-judge repair category pooled by real-word ratio, rates pooled. The proposal predicts misread_wrong_word rises and the explicit_notice_* labels fall as the real-word share grows."),
+        ("judge_repair_by_outcome.csv", "Accuracy within each judge label over typo configs. accuracy = share of traces with that label that answered correctly; share = that label's share of all judged typo traces. Low accuracy on silent_readthrough / misread_wrong_word is the confident-silent-failure case."),
+        ("judge_repair_vs_wordlevel.csv", "Agreement between the two independent repair measures on the same traces, after collapsing the judge labels onto the word-level buckets (silent_readthrough -> silent_fix, explicit_notice_* -> flagged, misread_wrong_word -> misread). The first rows are the confusion matrix (rows = judge, columns = word-level); the __summary__ row gives n_comparable, raw_agreement, cohen_kappa, and evidence_verbatim_frac (share of judged traces whose quoted evidence was found verbatim in the trace)."),
     ]),
     ("Real-word Effect", [
         ("__note__", REALWORD_NOTE),
@@ -118,6 +149,10 @@ SECTIONS = [
     ]),
     ("Lexical Grid (overview)", [
         ("lexical_grid.csv", "All four marker families (second_guess, uncertainty, typo_noticing, repair_words) across configs."),
+    ]),
+    ("Spellcheck Recovery", [
+        ("spellcheck_recovery_per_config.csv", "External spellcheck recovery by config. restored_exact_pct = percentage of typo words that were corrected back to exactly their original clean word."),
+        ("spellcheck_recovery_overall.csv", "Overall external spellcheck recovery for this dataset (pooled across spellcheck result files)."),
     ]),
 ]
 
