@@ -1,0 +1,4 @@
+real_ratio,n,mean_self_doubt,mean_repair_understanding,frac_self_doubt_ge5,frac_repair_understanding_ge3
+10,1442,5.327,0.938,0.6949,0.0777
+40,1412,5.273,1.099,0.682,0.1147
+70,1447,5.452,1.314,0.7008,0.1513

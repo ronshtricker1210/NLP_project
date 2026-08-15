@@ -1,0 +1,85 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+
+\usepackage{float}
+
+\usepackage{adjustbox}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Repair-understanding\\\large GSM8K}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What is measured?} Repair-understanding is the judge's assessment of how much the model loses the intended meaning of the question because of the corrupted wording. A score of 0 means the meaning is fully understood; 5 means the model is fundamentally lost. This is not a label for whether the arithmetic answer is correct.
+
+\section*{How to read the score} The judge uses a 0--5 scale. The reported value in the tables and graphs is the arithmetic mean over valid judged traces in the group. These are behavioral scores, not correctness scores: a model can be wrong without showing doubt, and it can be correct while expressing uncertainty.
+
+\section*{Examples} The typo-percentage trend supports the requested direction: the pooled mean increases from 0.053 at 0\% to 0.580 at 25\%, 0.576 at 50\%, and 0.764 at 75\%. The real-word ratio comparison is less monotonic: it is 0.554 at 10\%, 0.697 at 40\%, and 0.669 at 70\%. Thus more typo corruption is associated with lower understanding in this sample, while the real-word-ratio effect peaks at 40\% rather than increasing through 70\%.
+
+\begin{table}[H]
+\centering
+\caption{Examples from the per-configuration aggregate table. The relevant score is shown alongside both judge dimensions for context.}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{selected score} & \textbf{self-doubt} & \textbf{repair-understanding} \\
+\midrule
+clean & 494 & 0.053 & 0.053 & 0.053 \\
+typo75\_real10 & 482 & 0.660 & 0.660 & 0.660 \\
+typo75\_real70 & 486 & 0.817 & 0.817 & 0.817 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Aggregate result by typo percentage} \begin{table}[H]
+\centering
+\caption{Mean score pooled by typo percentage. Clean is the 0\% baseline; typo points pool all three real-word ratios.}
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{typo \%} & \textbf{n} & \textbf{mean score} \\
+\midrule
+0 & 494 & 0.053 \\
+25 & 1450 & 0.580 \\
+50 & 1454 & 0.576 \\
+75 & 1455 & 0.764 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering\includegraphics[width=0.82\textwidth]{graphs/repair\_understanding\_score\_by\_typo\_rate.png}\caption{Repair-understanding pooled by typo percentage.}\end{figure}
+
+\section*{Aggregate result by real-word ratio} \begin{table}[H]
+\centering
+\caption{Mean score pooled by real-word ratio. Each point pools the 25\%, 50\%, and 75\% typo configurations.}
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{real-word ratio \%} & \textbf{n} & \textbf{mean score} \\
+\midrule
+10 & 1447 & 0.554 \\
+40 & 1457 & 0.697 \\
+70 & 1455 & 0.669 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering\includegraphics[width=0.82\textwidth]{graphs/repair\_understanding\_score\_by\_real\_ratio.png}\caption{Repair-understanding pooled by real-word ratio.}\end{figure}
+
+\section*{Conclusion}
+
+The typo-percentage trend supports the requested direction: the pooled mean increases from 0.053 at 0\% to 0.580 at 25\%, 0.576 at 50\%, and 0.764 at 75\%. The real-word ratio comparison is less monotonic: it is 0.554 at 10\%, 0.697 at 40\%, and 0.669 at 70\%. Thus more typo corruption is associated with lower understanding in this sample, while the real-word-ratio effect peaks at 40\% rather than increasing through 70\%.
+
+\end{document}

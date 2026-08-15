@@ -1,0 +1,103 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{adjustbox}
+
+\usepackage{float}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Self-doubt\\\large ARC}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What was measured?} The judge scores visible self-questioning in the reasoning trace, independently of whether the final answer is correct. A score of 0 means a straight-line trace with no hesitation; 10 means pervasive uncertainty, reversals, or looping. The judge returns the score, a verbatim evidence quote when available, and a one-line summary. The tables below use 0--10 scores and include only valid answered traces from arc\_judge\_traces.jsonl.
+
+\section*{Examples at different scores} The examples below show the score, final-answer outcome, the judge's evidence, and its one-line summary. An empty evidence field means that the trace contained no suitable verbatim cue for that dimension.
+
+\paragraph{Trace typo25\_real70, index 44.}
+\textbf{Score:} 0 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}I don't see any flaws in this reasoning.\end{quote}
+\textbf{One-line summary:} The trace led to these scores because it presented a clean straight-line solution with no noticeable hedging or confusion about the meaning of the question.\medskip
+\paragraph{Trace typo25\_real10, index 0.}
+\textbf{Score:} 2 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Let me just go through them again\end{quote}
+\textbf{One-line summary:} The trace shows a straightforward analysis with brief moments of reconsideration, leading to a confident conclusion\medskip
+\paragraph{Trace clean, index 0.}
+\textbf{Score:} 5 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}But let me think about the options again.\end{quote}
+\textbf{One-line summary:} The trace exhibits clear hesitation and multiple second-guessing moments, as evidenced by repeated reconsiderations of the options.\medskip
+\paragraph{Trace typo25\_real70, index 0.}
+\textbf{Score:} 8 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Wait, but the question is asking for the most likely effect. So, if a planet's rotation speeds up, its rotational period decreases, making days shorter. So, option B seems correct. But let me think again.\end{quote}
+\textbf{One-line summary:} The model's repeated reconsiderations and second-guessing, as seen in its back-and-forth analysis of the options, led to the high self-doubt score.\medskip
+\paragraph{Trace clean, index 54.}
+\textbf{Score:} 10 on the 0--10 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}Wait, I think I'm getting confused. Maybe the correct answer is B) tectonic movements. Because even though the moon is small, tectonic movements can cause stress on the surface, leading to cracks.\end{quote}
+\textbf{One-line summary:} The trace exhibits extreme uncertainty and looping, with the model repeatedly reconsidering and reversing its answer, leading to a high self-doubt score.\medskip
+
+\section*{Aggregate tables}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by real-word typo ratio}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+10 & 1442 & 5.327 \\
+40 & 1412 & 5.273 \\
+70 & 1447 & 5.452 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by typo percentage}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{typo\_percentage} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+0 & 443 & 4.693 \\
+25 & 1448 & 5.119 \\
+50 & 1415 & 5.31 \\
+75 & 1438 & 5.627 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by final-answer correctness}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{outcome} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+correct & 3888 & 4.941 \\
+wrong & 856 & 6.877 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Consequences} In this run, self-doubt decreases as the real-word ratio increases: the mean is 1.001 at 10 percent real-word typos, 0.889 at 40 percent, and 0.826 at 70 percent. This is consistent with the interpretation that non-real-word typos are more visibly strange and can trigger more doubt, while real-word typos can be read fluently and silently.
+
+\end{document}

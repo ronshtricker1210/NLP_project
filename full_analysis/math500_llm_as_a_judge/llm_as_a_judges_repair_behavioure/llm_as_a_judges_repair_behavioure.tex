@@ -1,0 +1,95 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{adjustbox}
+
+\usepackage{float}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Repair-understanding\\\large MATH500}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What was measured?} The judge scores how much the model loses the intended meaning of the question because of corrupted wording. A score of 0 means the meaning is fully understood; 5 means the model is fundamentally lost. This is a semantic-understanding score, not a direct correctness label. The judge returns the score, a verbatim evidence quote when available, and a one-line summary. The tables below use 0--5 scores and include only valid answered traces from math500\_judge\_traces.jsonl.
+
+\section*{Examples at different scores} The examples below show the score, final-answer outcome, the judge's evidence, and its one-line summary. An empty evidence field means that the trace contained no suitable verbatim cue for that dimension.
+
+\paragraph{Trace typo75\_real40, index 0.}
+\textbf{Score:} 0 on the 0--5 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Alright, so I need to convert the point (0, 3) from rectangular (Cartesian) coordinates to polar coordinates.\end{quote}
+\textbf{One-line summary:} The trace led to the scores because it showed a brief hesitation with phrases like 'Let me confirm that' and 'I don't think I made any mistakes here', but overall understood the task correctly.\medskip
+\paragraph{Trace typo25\_real40, index 4.}
+\textbf{Score:} 2 on the 0--5 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}Okay, so I have this Asymptote graph here, and it's supposed to show the results of aross-county team's graining run.\end{quote}
+\textbf{One-line summary:} The trace is filled with repeated reconsiderations and second-guessing moments, such as 'Wait, hold on' and 'Maybe each student's performance is represented by a single point', indicating significant self-doubt.\medskip
+\paragraph{Trace typo50\_real70, index 184.}
+\textbf{Score:} 5 on the 0--5 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}Okay, so I have this problem where a, b, and c are opposite real numbers. Hmm, opposite real numbers... I think that means they are negatives of each other, right?\end{quote}
+\textbf{One-line summary:} The trace is filled with repeated reconsideration and self-doubt due to the ambiguous term 'opposite real numbers' which led to multiple interpretations and confusion.\medskip
+
+\section*{Aggregate tables}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by real-word typo ratio}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+10 & 1379 & 0.318 \\
+40 & 1352 & 0.39 \\
+70 & 1369 & 0.473 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by typo percentage}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{typo\_percentage} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+0 & 464 & 0.032 \\
+25 & 1365 & 0.349 \\
+50 & 1360 & 0.351 \\
+75 & 1375 & 0.48 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by final-answer correctness}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{outcome} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+correct & 4174 & 0.268 \\
+wrong & 390 & 1.305 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Consequences} In this run, more typos are associated with less ability to recover and understand the question meaning: the mean rises from 0.053 for clean traces to 0.580 at 25 percent typos, 0.576 at 50 percent, and 0.764 at 75 percent. Higher scores mean more loss of the intended meaning.
+
+\end{document}

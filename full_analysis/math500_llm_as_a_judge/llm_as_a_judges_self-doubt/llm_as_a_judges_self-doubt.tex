@@ -1,0 +1,99 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{adjustbox}
+
+\usepackage{float}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Self-doubt\\\large MATH500}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What was measured?} The judge scores visible self-questioning in the reasoning trace, independently of whether the final answer is correct. A score of 0 means a straight-line trace with no hesitation; 10 means pervasive uncertainty, reversals, or looping. The judge returns the score, a verbatim evidence quote when available, and a one-line summary. The tables below use 0--10 scores and include only valid answered traces from math500\_judge\_traces.jsonl.
+
+\section*{Examples at different scores} The examples below show the score, final-answer outcome, the judge's evidence, and its one-line summary. An empty evidence field means that the trace contained no suitable verbatim cue for that dimension.
+
+\paragraph{Trace typo75\_real70, index 6.}
+\textbf{Score:} 0 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Therefore, I'm pretty confident that the answer is 27.\end{quote}
+\textbf{One-line summary:} The trace shows a straightforward and confident solution with no signs of uncertainty or misunderstanding of the corrupted question.\medskip
+\paragraph{Trace typo25\_real10, index 0.}
+\textbf{Score:} 2 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Wait, but just to be thorough, let me think about the general formula.\end{quote}
+\textbf{One-line summary:} The model's brief hesitations and additional checks, as seen in phrases like 'Wait, but just to be thorough', led to the scores.\medskip
+\paragraph{Trace typo25\_real70, index 0.}
+\textbf{Score:} 5 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Wait, just to make sure, let me visualize the coordinate system.\end{quote}
+\textbf{One-line summary:} The trace led to the scores due to the model's repeated double-checking and verification of its calculations, such as when it states 'Let me also recall' and 'Wait, just to make sure'.\medskip
+\paragraph{Trace clean, index 2.}
+\textbf{Score:} 8 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Wait, is that right? Let me check:\end{quote}
+\textbf{One-line summary:} The trace exhibits high self-doubt due to repeated re-checking and second-guessing of calculations, as seen in phrases like 'Wait, is that right? Let me check:'\medskip
+
+\section*{Aggregate tables}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by real-word typo ratio}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+10 & 1379 & 3.867 \\
+40 & 1352 & 4.027 \\
+70 & 1369 & 3.993 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by typo percentage}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{typo\_percentage} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+0 & 464 & 3.657 \\
+25 & 1365 & 3.895 \\
+50 & 1360 & 3.982 \\
+75 & 1375 & 4.007 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by final-answer correctness}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{outcome} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+correct & 4174 & 3.755 \\
+wrong & 390 & 5.808 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Consequences} In this run, self-doubt decreases as the real-word ratio increases: the mean is 1.001 at 10 percent real-word typos, 0.889 at 40 percent, and 0.826 at 70 percent. This is consistent with the interpretation that non-real-word typos are more visibly strange and can trigger more doubt, while real-word typos can be read fluently and silently.
+
+\end{document}

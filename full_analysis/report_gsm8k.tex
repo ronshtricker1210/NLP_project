@@ -229,38 +229,34 @@ non-lexical measure for both dimensions: a separate model with a fixed, strict p
 The judge is a different model from the one under test, called at temperature 0 on a
 seeded random subsample of answered traces per config. It is shown the corrupted-word
 list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
-(head+tail window), and must return JSON with one repair label, a 0--4 self-doubt
-rating, and a \emph{verbatim quote} from the trace as evidence for each; rows whose
-quote is not found in the trace are flagged. Repair labels:
-\emph{silent\_readthrough} (never mentions the corruption),
-\emph{explicit\_notice\_fix} (flags it and recovers the intended word),
-\emph{explicit\_notice\_nofix} (flags it but never resolves it),
-\emph{misread\_wrong\_word} (reasons from a different real word),
-\emph{derailed} (stuck on the corruption), \emph{unclear}, \emph{not\_applicable} (clean).
-Doubt rating: 0 = no hesitation, 2 = re-checks a step, 4 = pervasive doubt / cannot settle.
-The judge is a subsample measure; the lexical tables above remain the full-data result,
-and the agreement tables say how far the two independent measures coincide.
+(head+tail window). It returns two scalar ratings and evidence: \emph{self\_doubt\_score}
+from 0--10, where 0 means no second-guessing and 10 means pervasive uncertainty or
+looping; and \emph{repair\_understanding\_score} from 0--5, where 0 means the question's
+meaning is fully understood and 5 means the model is fundamentally lost because of the
+corruption. The judge also returns a one-line justification and verbatim evidence quotes;
+quotes are checked against the reasoning trace. The judge is a subsample measure, while
+the lexical tables remain the full-data result.
 \medskip
 
 \begin{table}[H]
 \centering
-\caption{LLM-judge self-doubt rating per config on the judged subsample. mean\_rating = mean 0-4 rating; frac\_ge2 / frac\_ge3 = share of traces rated at least 2 / at least 3; marker\_per\_1k = the lexical doubt density of the SAME traces, for side-by-side comparison.}
+\caption{New scalar LLM-judge analysis per config. mean/median self\_doubt\_score use the 0-10 scale; mean/median repair\_understanding\_score use the 0-5 scale; threshold columns show the share of traces with substantial doubt (>=5) or substantial loss of meaning (>=3).}
 \small
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrrrrr}
 \toprule
-\textbf{config} & \textbf{n} & \textbf{mean\_rating} & \textbf{frac\_ge2} & \textbf{frac\_ge3} & \textbf{marker\_per\_1k} \\
+\textbf{config} & \textbf{n} & \textbf{mean\_self\_doubt} & \textbf{median\_self\_doubt} & \textbf{frac\_self\_doubt\_ge5} & \textbf{mean\_repair\_understanding} & \textbf{median\_repair\_understanding} & \textbf{frac\_repair\_understanding\_ge3} & \textbf{evidence\_self\_doubt\_frac} & \textbf{evidence\_repair\_frac} \\
 \midrule
-clean & 482 & 0.351 & 0.1349 & 0.0809 & 2.32 \\
-typo25\_real10 & 470 & 0.538 & 0.2043 & 0.1298 & 4.219 \\
-typo25\_real40 & 479 & 0.493 & 0.1879 & 0.1148 & 4.237 \\
-typo25\_real70 & 475 & 0.438 & 0.1642 & 0.1053 & 3.454 \\
-typo50\_real10 & 478 & 0.437 & 0.1632 & 0.1046 & 4.029 \\
-typo50\_real40 & 479 & 0.342 & 0.1273 & 0.0793 & 2.819 \\
-typo50\_real70 & 483 & 0.373 & 0.1325 & 0.0952 & 2.904 \\
-typo75\_real10 & 486 & 0.407 & 0.1481 & 0.107 & 3.954 \\
-typo75\_real40 & 490 & 0.327 & 0.1163 & 0.0837 & 3.149 \\
-typo75\_real70 & 488 & 0.279 & 0.1004 & 0.0594 & 2.846 \\
+clean & 12 & 1.0 & 0 & 0.0833 & 0.167 & 0 & 0.0 & 1.0 & 0.9167 \\
+typo25\_real10 & 12 & 0.917 & 0 & 0.0833 & 0.167 & 0 & 0.0 & 0.9167 & 1.0 \\
+typo25\_real40 & 12 & 0.917 & 0 & 0.1667 & 1.083 & 0 & 0.1667 & 1.0 & 1.0 \\
+typo25\_real70 & 11 & 0.909 & 0 & 0.0909 & 0.545 & 0 & 0.0 & 0.9091 & 1.0 \\
+typo50\_real10 & 12 & 1.667 & 0 & 0.1667 & 0.583 & 0 & 0.0833 & 1.0 & 0.9167 \\
+typo50\_real40 & 12 & 0.333 & 0 & 0.0 & 0.0 & 0 & 0.0 & 1.0 & 1.0 \\
+typo50\_real70 & 12 & 1.417 & 0 & 0.0833 & 0.5 & 0 & 0.0 & 1.0 & 0.8333 \\
+typo75\_real10 & 12 & 0.833 & 0 & 0.0833 & 0.25 & 0 & 0.0833 & 1.0 & 1.0 \\
+typo75\_real40 & 12 & 0.833 & 0 & 0.0833 & 1.417 & 0 & 0.3333 & 1.0 & 0.9167 \\
+typo75\_real70 & 12 & 0.0 & 0 & 0.0 & 0.917 & 0 & 0.0833 & 1.0 & 1.0 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -268,23 +264,24 @@ typo75\_real70 & 488 & 0.279 & 0.1004 & 0.0594 & 2.846 \\
 
 \begin{table}[H]
 \centering
-\caption{LLM-judge doubt rating split by final outcome. rating\_correct / rating\_wrong = mean rating over correct / wrong traces; wrong\_over\_correct = rating\_wrong / rating\_correct.}
+\caption{New scalar LLM-judge scores split by final answer outcome. The correct/wrong columns are means over traces whose final answer was correct or wrong.}
 \small
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-\textbf{config} & \textbf{rating\_correct} & \textbf{rating\_wrong} & \textbf{wrong\_over\_correct} & \textbf{n\_correct} & \textbf{n\_wrong} \\
+\textbf{config} & \textbf{n} & \textbf{n\_correct} & \textbf{n\_wrong} & \textbf{mean\_doubt\_correct} & \textbf{mean\_doubt\_wrong} & \textbf{mean\_repair\_correct} & \textbf{mean\_repair\_wrong} \\
 \midrule
-clean & 0.356 & 0.325 & 0.914 & 402 & 80 \\
-typo25\_real10 & 0.576 & 0.413 & 0.717 & 361 & 109 \\
-typo25\_real40 & 0.545 & 0.346 & 0.635 & 352 & 127 \\
-typo25\_real70 & 0.476 & 0.319 & 0.67 & 359 & 116 \\
-typo50\_real10 & 0.521 & 0.25 & 0.48 & 330 & 148 \\
-typo50\_real40 & 0.354 & 0.319 & 0.9 & 316 & 163 \\
-typo50\_real70 & 0.438 & 0.275 & 0.627 & 290 & 193 \\
-typo75\_real10 & 0.424 & 0.379 & 0.893 & 304 & 182 \\
-typo75\_real40 & 0.378 & 0.265 & 0.699 & 267 & 223 \\
-typo75\_real70 & 0.189 & 0.361 & 1.911 & 233 & 255 \\
+clean & 12 & 11 & 1 & 1.091 & 0.0 & 0.182 & 0.0 \\
+typo25\_real10 & 12 & 9 & 3 & 0.222 & 3.0 & 0.0 & 0.667 \\
+typo25\_real40 & 12 & 8 & 4 & 1.375 & 0.0 & 0.75 & 1.75 \\
+typo25\_real70 & 11 & 10 & 1 & 1.0 & 0.0 & 0.6 & 0.0 \\
+typo50\_real10 & 12 & 8 & 4 & 1.875 & 1.25 & 0.5 & 0.75 \\
+typo50\_real40 & 12 & 8 & 4 & 0.0 & 1.0 & 0.0 & 0.0 \\
+typo50\_real70 & 12 & 8 & 4 & 1.5 & 1.25 & 0.25 & 1.0 \\
+typo75\_real10 & 12 & 7 & 5 & 1.429 & 0.0 & 0.429 & 0.0 \\
+typo75\_real40 & 12 & 6 & 6 & 1.5 & 0.167 & 0.833 & 2.0 \\
+typo75\_real70 & 12 & 5 & 7 & 0.0 & 0.0 & 0.0 & 1.571 \\
+\_\_all\_\_ & 119 & 80 & 39 & 1.012 & 0.615 & 0.35 & 1.0 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -292,24 +289,149 @@ typo75\_real70 & 0.189 & 0.361 & 1.911 & 233 & 255 \\
 
 \begin{table}[H]
 \centering
-\caption{Convergent validity of the two self-doubt measures: per-trace correlation between the judge's 0-4 rating and the lexical marker density, per config and pooled (\_\_all\_\_). Positive values mean the independent measures agree.}
+\caption{New scalar LLM-judge scores pooled by real-word typo ratio, showing whether higher real-word corruption is associated with more doubt or loss of understanding.}
 \small
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-\textbf{config} & \textbf{n} & \textbf{pearson} & \textbf{spearman} \\
+\textbf{real\_ratio} & \textbf{n} & \textbf{mean\_self\_doubt} & \textbf{mean\_repair\_understanding} & \textbf{frac\_self\_doubt\_ge5} & \textbf{frac\_repair\_understanding\_ge3} \\
 \midrule
-clean & 482 & 0.9102 & 0.9767 \\
-typo25\_real10 & 470 & 0.8951 & 0.9482 \\
-typo25\_real40 & 479 & 0.8635 & 0.9551 \\
-typo25\_real70 & 475 & 0.88 & 0.9782 \\
-typo50\_real10 & 478 & 0.8268 & 0.9002 \\
-typo50\_real40 & 479 & 0.8238 & 0.9246 \\
-typo50\_real70 & 483 & 0.8272 & 0.901 \\
-typo75\_real10 & 486 & 0.8594 & 0.8912 \\
-typo75\_real40 & 490 & 0.8424 & 0.9074 \\
-typo75\_real70 & 488 & 0.8359 & 0.8074 \\
-\_\_all\_\_ & 4810 & 0.8485 & 0.9233 \\
+10 & 36 & 1.139 & 0.333 & 0.1111 & 0.0556 \\
+40 & 36 & 0.694 & 0.833 & 0.0833 & 0.1667 \\
+70 & 35 & 0.771 & 0.657 & 0.0571 & 0.0286 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Per-trace scalar judge records used to build the aggregate tables, including config, original index, correctness, both ratings, and evidence-validation flags.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{idx} & \textbf{real\_ratio} & \textbf{typo\_rate} & \textbf{correct} & \textbf{self\_doubt\_score} & \textbf{repair\_understanding\_score} & \textbf{self\_doubt\_evidence\_ok} & \textbf{repair\_understanding\_evidence\_ok} \\
+\midrule
+clean & 435 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 199 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 391 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 458 &  & 0 & 1 & 2 & 0 & 1 & 1 \\
+clean & 217 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 21 &  & 0 & 0 & 0 & 0 & 1 & 1 \\
+clean & 134 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 497 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 263 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+clean & 250 &  & 0 & 1 & 2 & 0 & 1 & 1 \\
+clean & 209 &  & 0 & 1 & 8 & 2 & 1 & 0 \\
+clean & 473 &  & 0 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 446 & 10 & 25 & 0 & 9 & 2 & 0 & 1 \\
+typo25\_real10 & 201 & 10 & 25 & 0 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 401 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 470 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 222 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 20 & 10 & 25 & 0 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 135 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 269 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 256 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 212 & 10 & 25 & 1 & 2 & 0 & 1 & 1 \\
+typo25\_real10 & 485 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real10 & 414 & 10 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 444 & 40 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 202 & 40 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 398 & 40 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 467 & 40 & 25 & 0 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 220 & 40 & 25 & 1 & 0 & 2 & 1 & 1 \\
+typo25\_real40 & 20 & 40 & 25 & 1 & 6 & 2 & 1 & 1 \\
+typo25\_real40 & 136 & 40 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 267 & 40 & 25 & 0 & 0 & 3 & 1 & 1 \\
+typo25\_real40 & 254 & 40 & 25 & 0 & 0 & 4 & 1 & 1 \\
+typo25\_real40 & 212 & 40 & 25 & 1 & 5 & 2 & 1 & 1 \\
+typo25\_real40 & 482 & 40 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real40 & 411 & 40 & 25 & 0 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 445 & 70 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 206 & 70 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 400 & 70 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 468 & 70 & 25 & 0 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 224 & 70 & 25 & 1 & 0 & 2 & 1 & 1 \\
+typo25\_real70 & 138 & 70 & 25 & 1 & 8 & 2 & 0 & 1 \\
+typo25\_real70 & 271 & 70 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 258 & 70 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo25\_real70 & 216 & 70 & 25 & 1 & 0 & 2 & 1 & 1 \\
+typo25\_real70 & 483 & 70 & 25 & 1 & 2 & 0 & 1 & 1 \\
+typo25\_real70 & 413 & 70 & 25 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real10 & 446 & 10 & 50 & 1 & 2 & 0 & 1 & 1 \\
+typo50\_real10 & 205 & 10 & 50 & 1 & 8 & 2 & 1 & 0 \\
+typo50\_real10 & 401 & 10 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real10 & 469 & 10 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real10 & 223 & 10 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real10 & 21 & 10 & 50 & 0 & 0 & 3 & 1 & 1 \\
+typo50\_real10 & 136 & 10 & 50 & 1 & 3 & 0 & 1 & 1 \\
+typo50\_real10 & 269 & 10 & 50 & 0 & 5 & 0 & 1 & 1 \\
+typo50\_real10 & 256 & 10 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real10 & 215 & 10 & 50 & 1 & 2 & 0 & 1 & 1 \\
+typo50\_real10 & 484 & 10 & 50 & 1 & 0 & 2 & 1 & 1 \\
+typo50\_real10 & 414 & 10 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 443 & 40 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 202 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 397 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 466 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 221 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 20 & 40 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 137 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 267 & 40 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 254 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 213 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real40 & 481 & 40 & 50 & 0 & 4 & 0 & 1 & 1 \\
+typo50\_real40 & 411 & 40 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 442 & 70 & 50 & 1 & 6 & 2 & 1 & 1 \\
+typo50\_real70 & 200 & 70 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 397 & 70 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 466 & 70 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 219 & 70 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 20 & 70 & 50 & 1 & 4 & 0 & 1 & 1 \\
+typo50\_real70 & 134 & 70 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 265 & 70 & 50 & 0 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 252 & 70 & 50 & 0 & 1 & 2 & 1 & 0 \\
+typo50\_real70 & 210 & 70 & 50 & 1 & 0 & 0 & 1 & 1 \\
+typo50\_real70 & 481 & 70 & 50 & 0 & 4 & 2 & 1 & 0 \\
+typo50\_real70 & 410 & 70 & 50 & 1 & 2 & 0 & 1 & 1 \\
+typo75\_real10 & 440 & 10 & 75 & 1 & 2 & 0 & 1 & 1 \\
+typo75\_real10 & 201 & 10 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 395 & 10 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 464 & 10 & 75 & 1 & 8 & 3 & 1 & 1 \\
+typo75\_real10 & 220 & 10 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 20 & 10 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 134 & 10 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 266 & 10 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 253 & 10 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 211 & 10 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 479 & 10 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real10 & 408 & 10 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 439 & 40 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 200 & 40 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 394 & 40 & 75 & 0 & 1 & 2 & 1 & 0 \\
+typo75\_real40 & 462 & 40 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 218 & 40 & 75 & 0 & 0 & 4 & 1 & 1 \\
+typo75\_real40 & 20 & 40 & 75 & 0 & 0 & 3 & 1 & 1 \\
+typo75\_real40 & 134 & 40 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 264 & 40 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 251 & 40 & 75 & 1 & 9 & 5 & 1 & 1 \\
+typo75\_real40 & 210 & 40 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real40 & 477 & 40 & 75 & 0 & 0 & 3 & 1 & 1 \\
+typo75\_real40 & 407 & 40 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 442 & 70 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 200 & 70 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 398 & 70 & 75 & 0 & 0 & 2 & 1 & 1 \\
+typo75\_real70 & 465 & 70 & 75 & 0 & 0 & 3 & 1 & 1 \\
+typo75\_real70 & 219 & 70 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 20 & 70 & 75 & 0 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 134 & 70 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 267 & 70 & 75 & 0 & 0 & 2 & 1 & 1 \\
+typo75\_real70 & 253 & 70 & 75 & 0 & 0 & 2 & 1 & 1 \\
+typo75\_real70 & 210 & 70 & 75 & 1 & 0 & 0 & 1 & 1 \\
+typo75\_real70 & 480 & 70 & 75 & 0 & 0 & 2 & 1 & 1 \\
+typo75\_real70 & 411 & 70 & 75 & 0 & 0 & 0 & 1 & 1 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -388,85 +510,6 @@ typo50\_real70 & 0.0283 & 0.0289 & 1.018 \\
 typo75\_real10 & 0.0093 & 0.0131 & 1.408 \\
 typo75\_real40 & 0.0205 & 0.0224 & 1.092 \\
 typo75\_real70 & 0.0355 & 0.0431 & 1.216 \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{LLM-judge repair category per config (share of judged traces per label; labels defined in the note in the Self-doubt section). Unlike the word-level table above, the unit here is the whole trace, not a single corrupted word.}
-\small
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrrrr}
-\toprule
-\textbf{config} & \textbf{n} & \textbf{silent\_readthrough} & \textbf{explicit\_notice\_fix} & \textbf{explicit\_notice\_nofix} & \textbf{misread\_wrong\_word} & \textbf{derailed} & \textbf{unclear} & \textbf{not\_applicable} \\
-\midrule
-clean & 482 & 0.0 & 0.0021 & 0.0062 & 0.0 & 0.0 & 0.0 & 0.9917 \\
-typo25\_real10 & 470 & 0.9255 & 0.0447 & 0.017 & 0.0106 & 0.0 & 0.0021 & 0.0 \\
-typo25\_real40 & 479 & 0.8768 & 0.071 & 0.0271 & 0.0251 & 0.0 & 0.0 & 0.0 \\
-typo25\_real70 & 475 & 0.9032 & 0.0484 & 0.0147 & 0.0295 & 0.0021 & 0.0021 & 0.0 \\
-typo50\_real10 & 478 & 0.91 & 0.0669 & 0.0188 & 0.0021 & 0.0021 & 0.0 & 0.0 \\
-typo50\_real40 & 479 & 0.9165 & 0.048 & 0.0209 & 0.0104 & 0.0021 & 0.0021 & 0.0 \\
-typo50\_real70 & 483 & 0.8965 & 0.0538 & 0.0269 & 0.0124 & 0.0041 & 0.0062 & 0.0 \\
-typo75\_real10 & 486 & 0.8971 & 0.0658 & 0.0288 & 0.0041 & 0.0041 & 0.0 & 0.0 \\
-typo75\_real40 & 490 & 0.8857 & 0.0837 & 0.0184 & 0.0102 & 0.002 & 0.0 & 0.0 \\
-typo75\_real70 & 488 & 0.8873 & 0.0738 & 0.0246 & 0.0123 & 0.0 & 0.002 & 0.0 \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{LLM-judge repair category pooled by real-word ratio, rates pooled. The proposal predicts misread\_wrong\_word rises and the explicit\_notice\_* labels fall as the real-word share grows.}
-\small
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrrrr}
-\toprule
-\textbf{real\_ratio} & \textbf{n} & \textbf{silent\_readthrough} & \textbf{explicit\_notice\_fix} & \textbf{explicit\_notice\_nofix} & \textbf{misread\_wrong\_word} & \textbf{derailed} & \textbf{unclear} & \textbf{not\_applicable} \\
-\midrule
-10 & 1434 & 0.9107 & 0.0593 & 0.0216 & 0.0056 & 0.0021 & 0.0007 & 0.0 \\
-40 & 1448 & 0.893 & 0.0677 & 0.0221 & 0.0152 & 0.0014 & 0.0007 & 0.0 \\
-70 & 1446 & 0.8956 & 0.0588 & 0.0221 & 0.018 & 0.0021 & 0.0035 & 0.0 \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Accuracy within each judge label over typo configs. accuracy = share of traces with that label that answered correctly; share = that label's share of all judged typo traces. Low accuracy on silent\_readthrough / misread\_wrong\_word is the confident-silent-failure case.}
-\small
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrr}
-\toprule
-\textbf{label} & \textbf{n} & \textbf{accuracy} & \textbf{share} \\
-\midrule
-silent\_readthrough & 3894 & 0.6644 & 0.8997 \\
-explicit\_notice\_fix & 268 & 0.6045 & 0.0619 \\
-explicit\_notice\_nofix & 95 & 0.3368 & 0.022 \\
-misread\_wrong\_word & 56 & 0.4821 & 0.0129 \\
-derailed & 8 & 0.25 & 0.0018 \\
-unclear & 7 & 0.2857 & 0.0016 \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Agreement between the two independent repair measures on the same traces, after collapsing the judge labels onto the word-level buckets (silent\_readthrough -> silent\_fix, explicit\_notice\_* -> flagged, misread\_wrong\_word -> misread). The first rows are the confusion matrix (rows = judge, columns = word-level); the \_\_summary\_\_ row gives n\_comparable, raw\_agreement, cohen\_kappa, and evidence\_verbatim\_frac (share of judged traces whose quoted evidence was found verbatim in the trace).}
-\small
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrrr}
-\toprule
-\textbf{judge} & \textbf{wordlevel\_silent\_fix} & \textbf{wordlevel\_flagged} & \textbf{wordlevel\_misread} & \textbf{n\_comparable} & \textbf{raw\_agreement} & \textbf{cohen\_kappa} & \textbf{evidence\_verbatim\_frac} \\
-\midrule
-silent\_fix & 2489 & 623 & 766 &  &  &  &  \\
-flagged & 77 & 153 & 133 &  &  &  &  \\
-misread & 15 & 23 & 18 &  &  &  &  \\
-\_\_summary\_\_ &  &  &  & 4297 & 0.619 & 0.133 & 0.9663 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}

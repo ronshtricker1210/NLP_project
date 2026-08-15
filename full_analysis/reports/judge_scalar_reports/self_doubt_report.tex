@@ -1,0 +1,85 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+
+\usepackage{float}
+
+\usepackage{adjustbox}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Self-doubt\\\large GSM8K}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What is measured?} Self-doubt is the judge's assessment of how much the reasoning trace second-guesses itself, independently of whether the final answer is correct. A score of 0 means a straight-line trace with no hesitation; 10 means pervasive uncertainty, reversals, or looping. The judge also returns verbatim evidence and a one-line justification, which are retained in the manual-check JSONL.
+
+\section*{How to read the score} The judge uses a 0--10 scale. The reported value in the tables and graphs is the arithmetic mean over valid judged traces in the group. These are behavioral scores, not correctness scores: a model can be wrong without showing doubt, and it can be correct while expressing uncertainty.
+
+\section*{Examples} The typo-percentage trend rises above the clean baseline (0.684 at 0\% versus 1.052 at 25\%), but it is not monotonic: it falls to 0.865 at 50\% and 0.799 at 75\%. For real-word ratio, the requested increasing claim is not supported in this run: the pooled means decrease from 1.001 at 10\% to 0.889 at 40\% and 0.826 at 70\%. The graph therefore reports the observed result rather than drawing an increasing line that the data does not show.
+
+\begin{table}[H]
+\centering
+\caption{Examples from the per-configuration aggregate table. The relevant score is shown alongside both judge dimensions for context.}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{selected score} & \textbf{self-doubt} & \textbf{repair-understanding} \\
+\midrule
+clean & 494 & 0.684 & 0.684 & 0.053 \\
+typo75\_real10 & 482 & 0.934 & 0.934 & 0.660 \\
+typo75\_real70 & 486 & 0.712 & 0.712 & 0.817 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Aggregate result by typo percentage} \begin{table}[H]
+\centering
+\caption{Mean score pooled by typo percentage. Clean is the 0\% baseline; typo points pool all three real-word ratios.}
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{typo \%} & \textbf{n} & \textbf{mean score} \\
+\midrule
+0 & 494 & 0.684 \\
+25 & 1450 & 1.052 \\
+50 & 1454 & 0.865 \\
+75 & 1455 & 0.799 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering\includegraphics[width=0.82\textwidth]{graphs/self\_doubt\_score\_by\_typo\_rate.png}\caption{Self-doubt pooled by typo percentage.}\end{figure}
+
+\section*{Aggregate result by real-word ratio} \begin{table}[H]
+\centering
+\caption{Mean score pooled by real-word ratio. Each point pools the 25\%, 50\%, and 75\% typo configurations.}
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{real-word ratio \%} & \textbf{n} & \textbf{mean score} \\
+\midrule
+10 & 1447 & 1.001 \\
+40 & 1457 & 0.889 \\
+70 & 1455 & 0.826 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering\includegraphics[width=0.82\textwidth]{graphs/self\_doubt\_score\_by\_real\_ratio.png}\caption{Self-doubt pooled by real-word ratio.}\end{figure}
+
+\section*{Conclusion}
+
+The typo-percentage trend rises above the clean baseline (0.684 at 0\% versus 1.052 at 25\%), but it is not monotonic: it falls to 0.865 at 50\% and 0.799 at 75\%. For real-word ratio, the requested increasing claim is not supported in this run: the pooled means decrease from 1.001 at 10\% to 0.889 at 40\% and 0.826 at 70\%. The graph therefore reports the observed result rather than drawing an increasing line that the data does not show.
+
+\end{document}

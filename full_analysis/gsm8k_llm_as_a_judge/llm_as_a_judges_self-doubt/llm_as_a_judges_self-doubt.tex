@@ -1,0 +1,99 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{adjustbox}
+
+\usepackage{float}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Self-doubt\\\large GSM8K}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What was measured?} The judge scores visible self-questioning in the reasoning trace, independently of whether the final answer is correct. A score of 0 means a straight-line trace with no hesitation; 10 means pervasive uncertainty, reversals, or looping. The judge returns the score, a verbatim evidence quote when available, and a one-line summary. The tables below use 0--10 scores and include only valid answered traces from gsm8k\_first2\_5.jsonl.
+
+\section*{Examples at different scores} The examples below show the score, final-answer outcome, the judge's evidence, and its one-line summary. An empty evidence field means that the trace contained no suitable verbatim cue for that dimension.
+
+\paragraph{Trace typo25\_real10, index 54.}
+\textbf{Score:} 0 on the 0--10 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}This equation is always true, indicating that the number of kittens adopted (x) can be any non-negative integer.\end{quote}
+\textbf{One-line summary:} The trace led to the scores because it provided a clear and direct solution to the problem without any noticeable hesitation or confusion.\medskip
+\paragraph{Trace clean, index 8.}
+\textbf{Score:} 2 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Wait a second, let me double-check to make sure I didn't make any mistakes\end{quote}
+\textbf{One-line summary:} The trace led to the scores due to a brief moment of hesitation and double-checking, as seen in the phrase 'Wait a second, let me double-check to make sure I didn't make any mistakes'.\medskip
+\paragraph{Trace typo50\_real40, index 19.}
+\textbf{Score:} 5 on the 0--10 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Wait a second, 6 mph seems pretty fast for hiking. Is that correct?\end{quote}
+\textbf{One-line summary:} The model's repeated checks and second-guessing, as seen in phrases like 'Wait a second, 6 mph seems pretty fast for hiking. Is that correct?', led to the scores.\medskip
+\paragraph{Trace typo25\_real40, index 7.}
+\textbf{Score:} 8 on the 0--10 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}Wait, hold on. The problem says 'Ten Carla as to recant the download from the beginning.' Hmm, maybe that was a typo or something.\end{quote}
+\textbf{One-line summary:} The trace is marked by frequent re-evaluations and second-guessing, particularly when encountering typos such as 'Ten Carla as to recant the download from the beginning' and 'how load does it take'.\medskip
+
+\section*{Aggregate tables}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by real-word typo ratio}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+10 & 1447 & 1.001 \\
+40 & 1457 & 0.889 \\
+70 & 1455 & 0.826 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by typo percentage}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{typo\_percentage} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+0 & 494 & 0.684 \\
+25 & 1450 & 1.052 \\
+50 & 1454 & 0.865 \\
+75 & 1455 & 0.799 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by final-answer correctness}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{outcome} & \textbf{n} & \textbf{self\_doubt\_score\_mean} \\
+\midrule
+correct & 3267 & 0.852 \\
+wrong & 1586 & 0.946 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Consequences} In this run, self-doubt decreases as the real-word ratio increases: the mean is 1.001 at 10 percent real-word typos, 0.889 at 40 percent, and 0.826 at 70 percent. This is consistent with the interpretation that non-real-word typos are more visibly strange and can trigger more doubt, while real-word typos can be read fluently and silently.
+
+\end{document}

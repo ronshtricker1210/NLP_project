@@ -129,6 +129,7 @@ upstream — the non-reasoning control. There is **no** GSM8K control run.
 | `report_gsm8k_20000.tex`, `nlp_project_analysis_gsm8k_20kmax.pdf` | main GSM8K |
 | `report_math500.tex`, `nlp_project_analysis_math500.pdf` | main MATH-500 |
 | `report_arc.tex`, `nlp_project_analysis_arc.pdf` | main ARC |
+| `report_arc_judge.{tex,pdf}` | main ARC rebuilt with the LLM-judge tables — the judge evidence cited in §5.3 |
 | `report_gsm8k_fix-warn.tex` | warn mitigation |
 | `report_gsm8k_fix-rewrite.tex` | rewrite mitigation |
 | `report_gsm8k_fix-spellcheck_500.{tex,pdf}` | spellcheck mitigation |

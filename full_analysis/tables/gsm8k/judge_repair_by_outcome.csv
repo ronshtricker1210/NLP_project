@@ -1,7 +1,4 @@
 label,n,accuracy,share
-silent_readthrough,3894,0.6644,0.8997
-explicit_notice_fix,268,0.6045,0.0619
-explicit_notice_nofix,95,0.3368,0.022
-misread_wrong_word,56,0.4821,0.0129
-derailed,8,0.25,0.0018
-unclear,7,0.2857,0.0016
+silent_readthrough,15,0.7333,0.8333
+explicit_notice_fix,2,1.0,0.1111
+misread_wrong_word,1,0.0,0.0556

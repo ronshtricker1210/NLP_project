@@ -1,5 +1,5 @@
 judge,wordlevel_silent_fix,wordlevel_flagged,wordlevel_misread,n_comparable,raw_agreement,cohen_kappa,evidence_verbatim_frac
-silent_fix,2489,623,766,,,,
-flagged,77,153,133,,,,
-misread,15,23,18,,,,
-__summary__,,,,4297,0.619,0.133,0.9663
+silent_fix,10,4,1,,,,
+flagged,1,0,1,,,,
+misread,0,1,0,,,,
+__summary__,,,,18,0.5556,0.0204,1.0

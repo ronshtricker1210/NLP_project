@@ -81,30 +81,42 @@ QUESTION SHOWN TO THE MODEL:
 REASONING TRACE:
 {reasoning}
 
-Task 1 - repair_label. Exactly one of:
-- silent_readthrough: the trace never mentions a typo/error and simply uses the intended words.
-- explicit_notice_fix: the trace explicitly flags a typo/misspelling/odd wording AND recovers the intended word.
-- explicit_notice_nofix: the trace explicitly flags a corruption but never resolves it, or resolves it to the wrong word.
-- misread_wrong_word: the trace treats a corrupted word as a DIFFERENT real word than intended and reasons from that.
-- derailed: the trace gets stuck, loops, or abandons the problem because of the corruption.
-- unclear: the trace gives too little evidence to decide.
-- not_applicable: there are no corrupted words to handle.
-Rule: if different corrupted words were handled differently, label by the word that
-mattered most to the solution. Prefer a concrete label over "unclear" only when the
-trace states the evidence explicitly.
+Task 1 - self_doubt_score. Give a single integer from 0 to 10.
+Interpretation:
+0 = no doubt at all; straight-line solution; no second-guessing.
+1 = tiny hedge or mild uncertainty, still clear.
+2 = one brief hesitation or check.
+3 = some re-checking but still mostly stable.
+4 = noticeable self-doubt, repeated minor checks.
+5 = clear hesitation and multiple second-guessing moments.
+6 = repeated reconsideration, several reversals or checks.
+7 = strong uncertainty, multiple pauses and reversals.
+8 = heavy self-doubt, frequent re-reads and re-evaluations.
+9 = pervasive doubt, many reversals and almost no stable plan.
+10 = extreme uncertainty and looping / unable to settle.
+The score should reflect the model's own second-guessing and uncertainty, independent of whether
+the typo was bad or not.
 
-Task 2 - doubt_rating. How much the trace second-guesses ITSELF (independent of typos):
-0 = straight-line solution, no hesitation.
-1 = one passing hedge ("maybe", "I think").
-2 = noticeable hesitation, re-checks a step once.
-3 = repeated second-guessing, revisits several steps or reverses a conclusion.
-4 = pervasive doubt, loops or cannot settle on an approach.
+Task 2 - repair_understanding_score. Give a single integer from 0 to 5.
+Interpretation:
+0 = fully understands the meaning of the question and the corrupted word(s); no confusion.
+1 = almost fully understands the meaning; only slight confusion.
+2 = some confusion but still largely understands the problem.
+3 = noticeable misunderstanding or misreading of the question/word; partial loss of meaning.
+4 = major misunderstanding; the model is clearly confused by the wording or corrupted word.
+5 = does not understand the meaning of the question at all; it is fundamentally lost or reasoning from the wrong meaning.
+This score should capture how much the trace loses the intended meaning because of the typo.
+
+Task 3 - one_line_summary: Write a single sentence explaining what in the trace led to your
+scores, using the most important concrete cue from the trace (for example: a typo notice,
+hedging, a different real-word interpretation, or a clean straight-line solution). Keep it to one
+line and do not explain your scores numerically.
 
 Both evidence fields must be a VERBATIM substring copied from the reasoning trace
 (use "" if there is genuinely none).
 
 Output JSON only, no prose, no code fences:
-{{"repair_label": "...", "repair_evidence": "...", "doubt_rating": 0, "doubt_evidence": "..."}}"""
+{{"self_doubt_score": 0, "repair_understanding_score": 0, "self_doubt_evidence": "...", "repair_understanding_evidence": "...", "one_line_summary": "..."}}"""
 
 
 # ---------------------------------------------------------------------------
@@ -167,7 +179,7 @@ def load_traces(path, meta, limit, seed):
         e = ev[r["idx"]]
         if not e["answered"]:
             continue
-        reasoning = r.get("reasoning", "") or ""
+        reasoning = r.get("reasoning") or r.get("generation", "") or ""
         if not reasoning.strip():
             continue
         pairs = [] if meta["is_clean"] else pairs_for(r)
@@ -203,7 +215,7 @@ def norm_quote(s):
     return " ".join(str(s or "").lower().split())
 
 
-def judge_one(client, model, rec, retries=3):
+def judge_one(client, model, rec, retries=3, keep_evidence=False):
     """Return a cache row for one trace. Never raises."""
     prompt = build_prompt(rec)
     last_err = ""
@@ -211,42 +223,63 @@ def judge_one(client, model, rec, retries=3):
         try:
             resp = client.chat.completions.create(
                 model=model, messages=[{"role": "user", "content": prompt}],
-                temperature=0.0, max_tokens=300)
+                temperature=0.0, max_tokens=600)
             raw = (resp.choices[0].message.content or "").strip()
             u = getattr(resp, "usage", None)
             obj = extract_json(raw)
             if obj is None:
                 last_err = f"unparseable: {raw[:120]}"
                 continue
-            label = str(obj.get("repair_label", "")).strip().lower()
-            if label not in REPAIR_LABELS:
-                label = "unclear"
+
             try:
-                rating = int(round(float(obj.get("doubt_rating", -1))))
+                self_doubt = int(round(float(obj.get("self_doubt_score", -1))))
             except (TypeError, ValueError):
-                rating = -1
-            rating = rating if 0 <= rating <= 4 else -1
+                self_doubt = -1
+            self_doubt = self_doubt if 0 <= self_doubt <= 10 else -1
+
+            try:
+                repair_understanding = int(round(float(obj.get("repair_understanding_score", -1))))
+            except (TypeError, ValueError):
+                repair_understanding = -1
+            repair_understanding = repair_understanding if 0 <= repair_understanding <= 5 else -1
+
             low = rec["reasoning"].lower()
-            return dict(
-                config=rec["config"], idx=rec["idx"], repair_label=label,
-                doubt_rating=rating,
-                repair_evidence_ok=norm_quote(obj.get("repair_evidence")) in norm_quote(low),
-                doubt_evidence_ok=norm_quote(obj.get("doubt_evidence")) in norm_quote(low),
+            row = dict(
+                config=rec["config"], idx=rec["idx"],
+                self_doubt_score=self_doubt,
+                repair_understanding_score=repair_understanding,
+                self_doubt_evidence_ok=norm_quote(obj.get("self_doubt_evidence")) in norm_quote(low),
+                repair_understanding_evidence_ok=norm_quote(obj.get("repair_understanding_evidence")) in norm_quote(low),
                 n_in=getattr(u, "prompt_tokens", 0) or 0,
                 n_out=getattr(u, "completion_tokens", 0) or 0,
                 error="",
             )
+            if keep_evidence:
+                row["self_doubt_evidence"] = str(obj.get("self_doubt_evidence", ""))
+                row["repair_understanding_evidence"] = str(obj.get("repair_understanding_evidence", ""))
+                row["one_line_summary"] = str(obj.get("one_line_summary", ""))
+            return row
         except Exception as e:                      # network / provider errors
             last_err = str(e)[:150]
-    return dict(config=rec["config"], idx=rec["idx"], repair_label="error",
-                doubt_rating=-1, repair_evidence_ok=False, doubt_evidence_ok=False,
-                n_in=0, n_out=0, error=last_err)
+    row = dict(config=rec["config"], idx=rec["idx"],
+               self_doubt_score=-1, repair_understanding_score=-1,
+               self_doubt_evidence_ok=False, repair_understanding_evidence_ok=False,
+               n_in=0, n_out=0, error=last_err)
+    if keep_evidence:
+        row["self_doubt_evidence"] = ""
+        row["repair_understanding_evidence"] = ""
+        row["one_line_summary"] = ""
+    return row
 
 
 # ---------------------------------------------------------------------------
 # cache
 # ---------------------------------------------------------------------------
-def cache_path(model):
+def cache_path(model, out_path=None):
+    if out_path:
+        p = out_path if os.path.isabs(out_path) else os.path.join(_HERE, out_path)
+        os.makedirs(os.path.dirname(p) or ".", exist_ok=True)
+        return p
     os.makedirs(CACHE_DIR, exist_ok=True)
     safe = model.replace("/", "-").replace(":", "-")
     return os.path.join(CACHE_DIR, f"{DATASET}_{safe}_{PROMPT_VERSION}.jsonl")
@@ -331,18 +364,115 @@ COLLAPSE = {"silent_readthrough": "silent_fix", "explicit_notice_fix": "flagged"
             "explicit_notice_nofix": "flagged", "misread_wrong_word": "misread"}
 
 
+def scalar_report(joined):
+    """Write report tables for the current 0-10 / 0-5 judge rubric."""
+    valid = [r for r in joined if r.get("self_doubt_score", -1) >= 0
+             and r.get("repair_understanding_score", -1) >= 0]
+    if not valid:
+        print("no valid scalar judge scores to report")
+        return
+
+    tags = [t for t in dict.fromkeys(r["config"] for r in valid)]
+
+    def mean(rows, key):
+        return sum(r[key] for r in rows) / len(rows) if rows else 0.0
+
+    def share(rows, key, threshold):
+        return sum(r[key] >= threshold for r in rows) / len(rows) if rows else 0.0
+
+    # Per-configuration means and threshold shares are the primary scalar tables.
+    rows = []
+    print(f"\n=== {DATASET}: scalar LLM-judge scores per config ===")
+    print(f"{'config':16s}{'n':>6}{'doubt 0-10':>12}{'repair 0-5':>12}")
+    for tag in tags:
+        group = [r for r in valid if r["config"] == tag]
+        row = dict(
+            config=tag, n=len(group),
+            mean_self_doubt=round(mean(group, "self_doubt_score"), 3),
+            median_self_doubt=sorted(r["self_doubt_score"] for r in group)[len(group) // 2],
+            frac_self_doubt_ge5=round(share(group, "self_doubt_score", 5), 4),
+            mean_repair_understanding=round(mean(group, "repair_understanding_score"), 3),
+            median_repair_understanding=sorted(r["repair_understanding_score"] for r in group)[len(group) // 2],
+            frac_repair_understanding_ge3=round(share(group, "repair_understanding_score", 3), 4),
+            evidence_self_doubt_frac=round(sum(r.get("self_doubt_evidence_ok", False) for r in group) / len(group), 4),
+            evidence_repair_frac=round(sum(r.get("repair_understanding_evidence_ok", False) for r in group) / len(group), 4),
+        )
+        print(f"{tag:16s}{len(group):>6}{row['mean_self_doubt']:>12.2f}{row['mean_repair_understanding']:>12.2f}")
+        rows.append(row)
+    _write_csv(os.path.join(TABLES, "judge_scalar_per_config.csv"), rows)
+
+    # Correctness relationship: compare judge scores for correct and wrong answers.
+    rows = []
+    print("\n=== scalar judge scores by final outcome ===")
+    for tag in tags + ["__all__"]:
+        group = valid if tag == "__all__" else [r for r in valid if r["config"] == tag]
+        correct = [r for r in group if r["correct"]]
+        wrong = [r for r in group if not r["correct"]]
+        rows.append(dict(
+            config=tag, n=len(group), n_correct=len(correct), n_wrong=len(wrong),
+            mean_doubt_correct=round(mean(correct, "self_doubt_score"), 3),
+            mean_doubt_wrong=round(mean(wrong, "self_doubt_score"), 3),
+            mean_repair_correct=round(mean(correct, "repair_understanding_score"), 3),
+            mean_repair_wrong=round(mean(wrong, "repair_understanding_score"), 3),
+        ))
+    _write_csv(os.path.join(TABLES, "judge_scalar_by_outcome.csv"), rows)
+
+    # The proposal's typo-severity variables are stored as real/rate in each trace.
+    rows = []
+    by_real = defaultdict(list)
+    for r in valid:
+        if r["real"] is not None:
+            by_real[r["real"]].append(r)
+    for real in sorted(by_real):
+        group = by_real[real]
+        rows.append(dict(
+            real_ratio=real, n=len(group),
+            mean_self_doubt=round(mean(group, "self_doubt_score"), 3),
+            mean_repair_understanding=round(mean(group, "repair_understanding_score"), 3),
+            frac_self_doubt_ge5=round(share(group, "self_doubt_score", 5), 4),
+            frac_repair_understanding_ge3=round(share(group, "repair_understanding_score", 3), 4),
+        ))
+    _write_csv(os.path.join(TABLES, "judge_scalar_by_real.csv"), rows)
+
+    # Preserve the inspectable unit of analysis for later auditing and plotting.
+    detail = []
+    for r in valid:
+        detail.append(dict(
+            config=r["config"], idx=r["idx"], real_ratio=r["real"], typo_rate=r["rate"],
+            correct=int(bool(r["correct"])),
+            self_doubt_score=r["self_doubt_score"],
+            repair_understanding_score=r["repair_understanding_score"],
+            self_doubt_evidence_ok=int(bool(r.get("self_doubt_evidence_ok"))),
+            repair_understanding_evidence_ok=int(bool(r.get("repair_understanding_evidence_ok"))),
+        ))
+    _write_csv(os.path.join(TABLES, "judge_scalar_per_trace.csv"), detail)
+
+    print(f"valid scalar judgments={len(valid)}  skipped invalid/error rows={len(joined) - len(valid)}")
+    print(f"tables written to {TABLES}")
+
+
 def report(recs, results):
     """recs = sampled traces, results = {(config, idx): judge row}."""
+    has_legacy = False
     joined = []
     for r in recs:
         j = results.get((r["config"], r["idx"]))
-        if not j or j["repair_label"] == "error":
+        if not j:
             continue
-        joined.append({**r, **{k: j[k] for k in
-                               ("repair_label", "doubt_rating",
-                                "repair_evidence_ok", "doubt_evidence_ok")}})
+        if j.get("repair_label") == "error":
+            continue
+        if "repair_label" in j and "doubt_rating" in j:
+            has_legacy = True
+            joined.append({**r, **{k: j[k] for k in
+                                   ("repair_label", "doubt_rating",
+                                    "repair_evidence_ok", "doubt_evidence_ok")}})
+        elif "self_doubt_score" in j and "repair_understanding_score" in j:
+            joined.append({**r, **j})
     if not joined:
         print("no judged traces to report")
+        return
+    if not has_legacy:
+        scalar_report(joined)
         return
 
     tags = [t for t in dict.fromkeys(r["config"] for r in joined)]
@@ -478,6 +608,10 @@ def main():
     ap.add_argument("--model", default=JUDGE_MODEL, help="judge model at the router")
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("-mc", "--manual-check", action="store_true",
+                    help="keep the raw judge evidence strings in the JSONL cache for manual review")
+    ap.add_argument("--out", dest="out_path", default=None,
+                    help="custom JSONL output path; absolute or relative to full_analysis/")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the token/cost estimate and exit without calling the API")
     ap.add_argument("--report-only", action="store_true",
@@ -490,13 +624,18 @@ def main():
     recs = []
     for f in config_files():
         meta = parse_tag(f)
+        # The main report uses the canonical 500-question files. Some datasets
+        # also contain model-suffixed reruns; those are separate experiments.
+        if os.path.basename(f) != f"{DATASET}_{meta['tag']}.jsonl" or (
+            meta["tag"] != "clean" and meta["rate"] is None):
+            continue
         if wanted and meta["tag"] not in wanted:
             continue
         recs.extend(load_traces(f, meta, limit, args.seed))
     if not recs:
         raise SystemExit("no traces selected")
 
-    cpath = cache_path(args.model)
+    cpath = cache_path(args.model, args.out_path)
     cached = load_cache(cpath)
     todo = [r for r in recs if (r["config"], r["idx"]) not in cached]
 
@@ -524,7 +663,7 @@ def main():
         done = spent_in = spent_out = 0
         with open(cpath, "a", encoding="utf-8") as cf, \
                 ThreadPoolExecutor(max_workers=args.workers) as ex:
-            futs = {ex.submit(judge_one, client, args.model, r): r for r in todo}
+            futs = {ex.submit(judge_one, client, args.model, r, keep_evidence=args.manual_check): r for r in todo}
             for fut in as_completed(futs):
                 row = fut.result()
                 with lock:

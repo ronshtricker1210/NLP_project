@@ -1,0 +1,95 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{adjustbox}
+
+\usepackage{float}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Repair-understanding\\\large GSM8K}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What was measured?} The judge scores how much the model loses the intended meaning of the question because of corrupted wording. A score of 0 means the meaning is fully understood; 5 means the model is fundamentally lost. This is a semantic-understanding score, not a direct correctness label. The judge returns the score, a verbatim evidence quote when available, and a one-line summary. The tables below use 0--5 scores and include only valid answered traces from gsm8k\_first2\_5.jsonl.
+
+\section*{Examples at different scores} The examples below show the score, final-answer outcome, the judge's evidence, and its one-line summary. An empty evidence field means that the trace contained no suitable verbatim cue for that dimension.
+
+\paragraph{Trace typo50\_real70, index 0.}
+\textbf{Score:} 0 on the 0--5 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}She bakes 16 eggs per ady, which I assume means 16 eggs per day.\end{quote}
+\textbf{One-line summary:} The trace shows a straight-line solution with a brief clarification of a corrupted word, leading to confident scores.\medskip
+\paragraph{Trace typo75\_real10, index 1.}
+\textbf{Score:} 2 on the 0--5 scale. \textbf{Final-answer outcome:} wrong.
+\textbf{Judge evidence:} \begin{quote}Let's assume that blue finer requires 2 volts and white fiber requires 1 volt.\end{quote}
+\textbf{One-line summary:} The trace makes assumptions about voltage requirements without questioning the corrupted words, indicating some confusion but still largely understanding the problem.\medskip
+\paragraph{Trace typo25\_real40, index 6.}
+\textbf{Score:} 5 on the 0--5 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}First, I note that Seattle has 20 sheep.\end{quote}
+\textbf{One-line summary:} The trace ignores the corrupted words and incorrectly assumes the question is about sheep, leading to a loss of intended meaning.\medskip
+
+\section*{Aggregate tables}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by real-word typo ratio}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+10 & 1447 & 0.554 \\
+40 & 1457 & 0.697 \\
+70 & 1455 & 0.669 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by typo percentage}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{typo\_percentage} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+0 & 494 & 0.053 \\
+25 & 1450 & 0.58 \\
+50 & 1454 & 0.576 \\
+75 & 1455 & 0.764 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by final-answer correctness}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{outcome} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+correct & 3267 & 0.37 \\
+wrong & 1586 & 1.014 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Consequences} In this run, more typos are associated with less ability to recover and understand the question meaning: the mean rises from 0.053 for clean traces to 0.580 at 25 percent typos, 0.576 at 50 percent, and 0.764 at 75 percent. Higher scores mean more loss of the intended meaning.
+
+\end{document}

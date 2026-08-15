@@ -50,17 +50,13 @@ non-lexical measure for both dimensions: a separate model with a fixed, strict p
 The judge is a different model from the one under test, called at temperature 0 on a
 seeded random subsample of answered traces per config. It is shown the corrupted-word
 list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
-(head+tail window), and must return JSON with one repair label, a 0--4 self-doubt
-rating, and a \emph{verbatim quote} from the trace as evidence for each; rows whose
-quote is not found in the trace are flagged. Repair labels:
-\emph{silent\_readthrough} (never mentions the corruption),
-\emph{explicit\_notice\_fix} (flags it and recovers the intended word),
-\emph{explicit\_notice\_nofix} (flags it but never resolves it),
-\emph{misread\_wrong\_word} (reasons from a different real word),
-\emph{derailed} (stuck on the corruption), \emph{unclear}, \emph{not\_applicable} (clean).
-Doubt rating: 0 = no hesitation, 2 = re-checks a step, 4 = pervasive doubt / cannot settle.
-The judge is a subsample measure; the lexical tables above remain the full-data result,
-and the agreement tables say how far the two independent measures coincide.
+(head+tail window). It returns two scalar ratings and evidence: \emph{self\_doubt\_score}
+from 0--10, where 0 means no second-guessing and 10 means pervasive uncertainty or
+looping; and \emph{repair\_understanding\_score} from 0--5, where 0 means the question's
+meaning is fully understood and 5 means the model is fundamentally lost because of the
+corruption. The judge also returns a one-line justification and verbatim evidence quotes;
+quotes are checked against the reasoning trace. The judge is a subsample measure, while
+the lexical tables remain the full-data result.
 \medskip
 """
 
@@ -127,19 +123,16 @@ SECTIONS = [
         ("self_doubt_by_marker.csv", "Per-marker density (markers per 1000 reasoning words): clean vs pooled-typo. discrimination = typo minus clean (larger = more typo-responsive). All bank markers, ranked by discrimination."),
         ("self_doubt_by_outcome.csv", "Doubt density (markers per 1000 reasoning words) split by final outcome, per category (2g = second_guess, un = uncertainty, tot = both). For a group, density = total markers in that group / total reasoning words in that group x 1000. *_correct = over correct-answer traces; *_wrong = over wrong-answer traces; *_wrong_over_correct = _wrong / _correct."),
         ("__note__", JUDGE_NOTE),
-        ("judge_doubt_per_config.csv", "LLM-judge self-doubt rating per config on the judged subsample. mean_rating = mean 0-4 rating; frac_ge2 / frac_ge3 = share of traces rated at least 2 / at least 3; marker_per_1k = the lexical doubt density of the SAME traces, for side-by-side comparison."),
-        ("judge_doubt_by_outcome.csv", "LLM-judge doubt rating split by final outcome. rating_correct / rating_wrong = mean rating over correct / wrong traces; wrong_over_correct = rating_wrong / rating_correct."),
-        ("judge_doubt_vs_markers.csv", "Convergent validity of the two self-doubt measures: per-trace correlation between the judge's 0-4 rating and the lexical marker density, per config and pooled (__all__). Positive values mean the independent measures agree."),
+        ("judge_scalar_per_config.csv", "New scalar LLM-judge analysis per config. mean/median self_doubt_score use the 0-10 scale; mean/median repair_understanding_score use the 0-5 scale; threshold columns show the share of traces with substantial doubt (>=5) or substantial loss of meaning (>=3)."),
+        ("judge_scalar_by_outcome.csv", "New scalar LLM-judge scores split by final answer outcome. The correct/wrong columns are means over traces whose final answer was correct or wrong."),
+        ("judge_scalar_by_real.csv", "New scalar LLM-judge scores pooled by real-word typo ratio, showing whether higher real-word corruption is associated with more doubt or loss of understanding."),
+        ("judge_scalar_per_trace.csv", "Per-trace scalar judge records used to build the aggregate tables, including config, original index, correctness, both ratings, and evidence-validation flags."),
     ]),
     ("Repair Behaviour", [
         ("repair_wordlevel_per_config.csv", "How each corrupted word was handled, per config (categories defined below the table)."),
         ("__note__", REPAIR_CATEGORIES_NOTE),
         ("repair_wordlevel_by_real.csv", "Word handling pooled by real-word ratio: the non-word vs real-word contrast."),
         ("repair_wordlevel_by_outcome.csv", "Misread rate split by final correctness. A typo'd word is 'misread' when the reasoning uses only its corrupted form (e.g. sun instead of sum). Within each outcome group, misread rate = (typo'd words that were misread) / (all typo'd words examined), pooled over the group. misread_correct = over problems answered correctly; misread_wrong = over problems answered wrong; wrong_over_correct = misread_wrong / misread_correct."),
-        ("judge_repair_per_config.csv", "LLM-judge repair category per config (share of judged traces per label; labels defined in the note in the Self-doubt section). Unlike the word-level table above, the unit here is the whole trace, not a single corrupted word."),
-        ("judge_repair_by_real.csv", "LLM-judge repair category pooled by real-word ratio, rates pooled. The proposal predicts misread_wrong_word rises and the explicit_notice_* labels fall as the real-word share grows."),
-        ("judge_repair_by_outcome.csv", "Accuracy within each judge label over typo configs. accuracy = share of traces with that label that answered correctly; share = that label's share of all judged typo traces. Low accuracy on silent_readthrough / misread_wrong_word is the confident-silent-failure case."),
-        ("judge_repair_vs_wordlevel.csv", "Agreement between the two independent repair measures on the same traces, after collapsing the judge labels onto the word-level buckets (silent_readthrough -> silent_fix, explicit_notice_* -> flagged, misread_wrong_word -> misread). The first rows are the confusion matrix (rows = judge, columns = word-level); the __summary__ row gives n_comparable, raw_agreement, cohen_kappa, and evidence_verbatim_frac (share of judged traces whose quoted evidence was found verbatim in the trace)."),
     ]),
     ("Real-word Effect", [
         ("__note__", REALWORD_NOTE),
