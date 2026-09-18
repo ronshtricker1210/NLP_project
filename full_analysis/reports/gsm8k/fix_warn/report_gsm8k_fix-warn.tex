@@ -5,7 +5,7 @@
 \usepackage{float}
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
-\title{The Silent Tax: Typo-Robustness Analysis (GSM8K)\\\large DeepSeek-R1-Distill-Qwen-7B}
+\title{The Silent Tax: Typo-Robustness Analysis (GSM8K\_FIX-WARN)\\\large DeepSeek-R1-Distill-Qwen-7B}
 \date{}
 \begin{document}
 \maketitle
@@ -14,23 +14,23 @@
 \section*{Accuracy and Flips}
 \begin{table}[H]
 \centering
-\caption{Accuracy per config: answered-only and strict (truncated=wrong), with 95\% bootstrap CI on acc\_strict.}
+\caption{Accuracy per config. n = questions; n\_answered = questions that produced a final answer (not truncated at the token cap). acc\_answered = correct / n\_answered; acc\_strict = correct / n (truncated counted as wrong); ci\_lo/ci\_hi = 95\% bootstrap CI on acc\_strict.}
 \small
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-\textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
+\textbf{config} & \textbf{n} & \textbf{n\_answered} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
 \midrule
-clean & 500 & 0.9238 & 0.922 & 0.898 & 0.944 \\
-typo25\_real10 & 500 & 0.8574 & 0.854 & 0.822 & 0.884 \\
-typo25\_real40 & 500 & 0.8717 & 0.87 & 0.84 & 0.898 \\
-typo25\_real70 & 500 & 0.8548 & 0.848 & 0.816 & 0.878 \\
-typo50\_real10 & 500 & 0.7943 & 0.78 & 0.746 & 0.814 \\
-typo50\_real40 & 500 & 0.7474 & 0.728 & 0.692 & 0.766 \\
-typo50\_real70 & 500 & 0.7404 & 0.736 & 0.696 & 0.774 \\
-typo75\_real10 & 500 & 0.7056 & 0.7 & 0.66 & 0.742 \\
-typo75\_real40 & 500 & 0.6632 & 0.638 & 0.596 & 0.68 \\
-typo75\_real70 & 500 & 0.6394 & 0.61 & 0.566 & 0.654 \\
+clean & 500 & 499 & 0.9238 & 0.922 & 0.898 & 0.944 \\
+typo25\_real10 & 500 & 498 & 0.8574 & 0.854 & 0.822 & 0.884 \\
+typo25\_real40 & 500 & 499 & 0.8717 & 0.87 & 0.84 & 0.898 \\
+typo25\_real70 & 500 & 496 & 0.8548 & 0.848 & 0.816 & 0.878 \\
+typo50\_real10 & 500 & 491 & 0.7943 & 0.78 & 0.746 & 0.814 \\
+typo50\_real40 & 500 & 487 & 0.7474 & 0.728 & 0.692 & 0.766 \\
+typo50\_real70 & 500 & 497 & 0.7404 & 0.736 & 0.696 & 0.774 \\
+typo75\_real10 & 500 & 496 & 0.7056 & 0.7 & 0.66 & 0.742 \\
+typo75\_real40 & 500 & 481 & 0.6632 & 0.638 & 0.596 & 0.68 \\
+typo75\_real70 & 500 & 477 & 0.6394 & 0.61 & 0.566 & 0.654 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -224,6 +224,26 @@ typo75\_real70 & 14.065 & 14.077 & 1.001 & 19.126 & 27.078 & 1.416 & 33.192 & 41
 \end{adjustbox}
 \end{table}
 
+\noindent\textbf{LLM judge.} The proposal specifies a second,
+non-lexical measure for both dimensions: a separate model with a fixed, strict prompt.
+The judge is a different model from the one under test, called at temperature 0 on a
+seeded random subsample of answered traces per config. It is shown the corrupted-word
+list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
+(head+tail window). It returns two scalar ratings and evidence: \emph{self\_doubt\_score}
+from 0--10, where 0 means no second-guessing and 10 means pervasive uncertainty or
+looping; and \emph{repair\_understanding\_score} from 0--5, where 0 means the question's
+meaning is fully understood and 5 means the model is fundamentally lost because of the
+corruption. The judge also returns a one-line justification and verbatim evidence quotes;
+quotes are checked against the reasoning trace. The judge is a subsample measure, while
+the lexical tables remain the full-data result.
+\medskip
+
+% missing: judge_scalar_per_config.csv
+
+% missing: judge_scalar_by_outcome.csv
+
+% missing: judge_scalar_by_real.csv
+
 \section*{Repair Behaviour}
 \begin{table}[H]
 \centering
@@ -397,5 +417,10 @@ typo75\_real70 & 14.072 & 23.479 & 5.585 & 3.972 \\
 \end{tabular}
 \end{adjustbox}
 \end{table}
+
+\section*{Spellcheck Recovery}
+% missing: spellcheck_recovery_per_config.csv
+
+% missing: spellcheck_recovery_overall.csv
 
 \end{document}
