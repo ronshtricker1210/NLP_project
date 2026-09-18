@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TABLES_SRC = os.path.join(HERE, "..", "full_analysis", "tables")
+TABLES_SRC = os.path.join(HERE, "..", "full_analysis", "results_data")
 FIG_DIR = os.path.join(HERE, "figures")
 TAB_DIR = os.path.join(HERE, "tables")
 os.makedirs(FIG_DIR, exist_ok=True)
@@ -29,9 +29,9 @@ os.makedirs(TAB_DIR, exist_ok=True)
 
 # dataset key -> (directory under tables/, display name, colour)
 DATASETS = [
-    ("gsm8k", "gsm8k_20000", "GSM8K", "#1f77b4"),
-    ("math500", "math500", "MATH-500", "#d62728"),
-    ("arc", "arc", "ARC-Challenge", "#2ca02c"),
+    ("gsm8k", "gsm8k/results_20000", "GSM8K", "#1f77b4"),
+    ("math500", "math500/results", "MATH-500", "#d62728"),
+    ("arc", "arc/results", "ARC-Challenge", "#2ca02c"),
 ]
 RATES = [25, 50, 75]
 REALS = [10, 40, 70]
@@ -262,9 +262,9 @@ def fig_doubt():
 # Figure 5: prompt-level mitigations (GSM8K)
 # ---------------------------------------------------------------------------
 def fig_fixes():
-    base = keyed(load("gsm8k_20000", "accuracy_per_config.csv"))
-    warn = keyed(load("gsm8k_fix-warn", "accuracy_per_config.csv"))
-    rew = keyed(load("gsm8k_fix-rewrite", "accuracy_per_config.csv"))
+    base = keyed(load("gsm8k/results_20000", "accuracy_per_config.csv"))
+    warn = keyed(load("gsm8k/fix_warn", "accuracy_per_config.csv"))
+    rew = keyed(load("gsm8k/fix_rewrite", "accuracy_per_config.csv"))
     order = ["clean"] + CONFIGS
     labels = ["clean"] + [c.replace("typo", "").replace("_real", "/") for c in CONFIGS]
     xs = np.arange(len(order))

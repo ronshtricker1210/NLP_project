@@ -1,0 +1,23 @@
+marker,category,clean_per_1k,typo_per_1k,discrimination
+maybe,uncertainty,2.407,6.188,3.781
+or maybe/alt,uncertainty,2.03,2.937,0.908
+wait,second_guess,5.488,6.394,0.906
+perhaps,uncertainty,0.432,1.182,0.749
+unclear/confused,uncertainty,0.446,0.889,0.443
+might be,uncertainty,0.088,0.338,0.25
+not sure,uncertainty,0.014,0.155,0.141
+hmm,second_guess,3.109,3.233,0.124
+but wait,second_guess,0.584,0.663,0.079
+I assume,uncertainty,0.011,0.054,0.043
+not entirely,uncertainty,0.0,0.032,0.032
+could be,uncertainty,0.135,0.158,0.023
+possibly,uncertainty,0.0,0.006,0.006
+presumably,uncertainty,0.003,0.007,0.004
+reconsider,second_guess,0.0,0.001,0.001
+on second thought,second_guess,0.0,0.0,0.0
+I guess,uncertainty,0.218,0.173,-0.045
+actually,second_guess,0.405,0.345,-0.06
+hold on,second_guess,0.843,0.779,-0.063
+wait/actually no,second_guess,0.435,0.302,-0.133
+let me recheck,second_guess,0.961,0.776,-0.185
+double-check,second_guess,1.099,0.882,-0.217

@@ -28,11 +28,36 @@ DATASETS = {
     "gpqa":    {"kind": "mc",        "gold": lambda r: r["gold_answer"]},
     "arc":     {"kind": "mc",        "gold": lambda r: r["gold_answer"]},
 }
-if DATASET not in DATASETS:
+# Variants like gsm8k_20000 / gsm8k_fix-warn reuse their base dataset's spec.
+BASE_DATASET = next((k for k in DATASETS
+                     if DATASET == k or DATASET.startswith(k + "_")), None)
+if BASE_DATASET is None:
     raise SystemExit(f"unknown NLP_DATASET={DATASET!r}; choices: {list(DATASETS)}")
 
+def dataset_layout(ds):
+    """Folder pair for a dataset tag: gsm8k -> gsm8k/results,
+    gsm8k_20000 -> gsm8k/results_20000, gsm8k_fix-warn -> gsm8k/fix_warn."""
+    base = next((k for k in DATASETS if ds == k or ds.startswith(k + "_")), ds)
+    variant = ds[len(base):].lstrip("_")
+    if not variant:
+        sub = "results"
+    elif variant.startswith("fix-"):
+        sub = "fix_" + variant[4:].replace("-", "_")
+    else:
+        sub = f"results_{variant}"
+    return base, sub
+
+
+def tables_dir(ds):
+    return os.path.join(_HERE, "results_data", *dataset_layout(ds))
+
+
+def reports_dir(ds):
+    return os.path.join(_HERE, "reports", *dataset_layout(ds))
+
+
 DATA_DIR = os.path.join(_HERE, "data", DATASET)
-TABLES = os.path.join(_HERE, "tables", DATASET)
+TABLES = tables_dir(DATASET)
 os.makedirs(TABLES, exist_ok=True)
 # Cap used at generation time; math500/arc API runs used 17000 (NLP_MAX_NEW_TOKENS=17000).
 MAX_NEW_TOKENS = int(os.environ.get("NLP_MAX_NEW_TOKENS", 4096))
@@ -68,8 +93,8 @@ def config_files():
 
 # ---- answer extraction (strict: final section only) ------------------------
 def _kind_gold(row):
-    ds = row.get("dataset", DATASET)
-    spec = DATASETS.get(ds, DATASETS[DATASET])
+    ds = row.get("dataset", BASE_DATASET)
+    spec = DATASETS.get(ds, DATASETS[BASE_DATASET])
     return spec["kind"], spec["gold"](row)
 
 

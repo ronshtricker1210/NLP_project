@@ -16,7 +16,8 @@ import json
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATASET = os.environ.get("NLP_DATASET", "gsm8k")
 DATA_DIR = os.path.join(HERE, "data", DATASET)
-TABLES = os.path.join(HERE, "tables", DATASET)
+from common import tables_dir
+TABLES = tables_dir(DATASET)
 os.makedirs(TABLES, exist_ok=True)
 
 

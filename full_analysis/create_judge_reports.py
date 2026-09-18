@@ -171,8 +171,9 @@ def main():
     args = parser.parse_args()
 
     here = os.path.dirname(os.path.abspath(__file__))
-    tables_dir = os.path.join(here, "tables", args.dataset)
-    output_dir = os.path.join(here, "reports", "judge_scalar_reports")
+    import common
+    tables_dir = common.tables_dir(args.dataset)
+    output_dir = os.path.join(common.reports_dir(args.dataset), "llm_as_a_judge", "judge_scalar_reports")
     graph_dir = os.path.join(output_dir, "graphs")
     os.makedirs(graph_dir, exist_ok=True)
 

@@ -15,8 +15,9 @@ import os, sys, csv, subprocess, argparse
 _HERE = os.path.dirname(os.path.abspath(__file__))
 # Set from --dataset in main(); these module-level defaults follow the env var.
 DATASET = os.environ.get("NLP_DATASET", "gsm8k")
-TABLES = os.path.join(_HERE, "tables", DATASET)
-REPORT = os.path.join(_HERE, f"report_{DATASET}.tex")
+from common import tables_dir, reports_dir  # noqa: E402
+TABLES = tables_dir(DATASET)
+REPORT = os.path.join(reports_dir(DATASET), f"report_{DATASET}.tex")
 
 # active modules to run (imported-only files are excluded, so is the retired one).
 # llm_judge.py is NOT here on purpose: it needs HF_TOKEN and spends API credits.
@@ -126,7 +127,6 @@ SECTIONS = [
         ("judge_scalar_per_config.csv", "New scalar LLM-judge analysis per config. mean/median self_doubt_score use the 0-10 scale; mean/median repair_understanding_score use the 0-5 scale; threshold columns show the share of traces with substantial doubt (>=5) or substantial loss of meaning (>=3)."),
         ("judge_scalar_by_outcome.csv", "New scalar LLM-judge scores split by final answer outcome. The correct/wrong columns are means over traces whose final answer was correct or wrong."),
         ("judge_scalar_by_real.csv", "New scalar LLM-judge scores pooled by real-word typo ratio, showing whether higher real-word corruption is associated with more doubt or loss of understanding."),
-        ("judge_scalar_per_trace.csv", "Per-trace scalar judge records used to build the aggregate tables, including config, original index, correctness, both ratings, and evidence-validation flags."),
     ]),
     ("Repair Behaviour", [
         ("repair_wordlevel_per_config.csv", "How each corrupted word was handled, per config (categories defined below the table)."),
@@ -239,8 +239,9 @@ def main():
 
     DATASET = args.dataset
     os.environ["NLP_DATASET"] = DATASET      # every module reads this
-    TABLES = os.path.join(_HERE, "tables", DATASET)
-    REPORT = os.path.join(_HERE, f"report_{DATASET}.tex")
+    TABLES = tables_dir(DATASET)
+    REPORT = os.path.join(reports_dir(DATASET), f"report_{DATASET}.tex")
+    os.makedirs(os.path.dirname(REPORT), exist_ok=True)
 
     if not args.skip_run:
         run_modules()
