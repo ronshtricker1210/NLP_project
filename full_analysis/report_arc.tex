@@ -21,12 +21,12 @@
 \toprule
 \textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
 \midrule
-clean & 500 & 0.8505 & 0.774 & 0.738 & 0.81 \\
+clean & 500 & 0.8474 & 0.822 & 0.786 & 0.856 \\
 typo25\_real10 & 500 & 0.8645 & 0.842 & 0.808 & 0.874 \\
 typo25\_real40 & 500 & 0.856 & 0.832 & 0.798 & 0.862 \\
 typo25\_real70 & 500 & 0.82 & 0.802 & 0.764 & 0.836 \\
 typo50\_real10 & 500 & 0.8193 & 0.798 & 0.762 & 0.832 \\
-typo50\_real40 & 500 & 0.8308 & 0.766 & 0.728 & 0.802 \\
+typo50\_real40 & 500 & 0.8247 & 0.8 & 0.764 & 0.834 \\
 typo50\_real70 & 500 & 0.8244 & 0.798 & 0.76 & 0.834 \\
 typo75\_real10 & 500 & 0.8074 & 0.788 & 0.754 & 0.822 \\
 typo75\_real40 & 500 & 0.7732 & 0.75 & 0.71 & 0.788 \\
@@ -45,15 +45,15 @@ typo75\_real70 & 500 & 0.7469 & 0.726 & 0.686 & 0.766 \\
 \toprule
 \textbf{config} & \textbf{n\_both} & \textbf{r2w} & \textbf{w2r} & \textbf{r2w\_ratio} & \textbf{w2r\_ratio} & \textbf{net\_flip\_ratio} & \textbf{mcnemar\_b} & \textbf{mcnemar\_c} & \textbf{mcnemar\_stat} & \textbf{mcnemar\_p} \\
 \midrule
-typo25\_real10 & 443 & 21 & 27 & 0.0474 & 0.0609 & -0.0135 & 21 & 27 & 0.521 & 0.47048642 \\
-typo25\_real40 & 442 & 25 & 31 & 0.0566 & 0.0701 & -0.0136 & 25 & 31 & 0.446 & 0.50403587 \\
-typo25\_real70 & 444 & 39 & 25 & 0.0878 & 0.0563 & 0.0315 & 39 & 25 & 2.641 & 0.10416256 \\
-typo50\_real10 & 442 & 38 & 26 & 0.086 & 0.0588 & 0.0271 & 38 & 26 & 1.891 & 0.16913144 \\
-typo50\_real40 & 429 & 37 & 25 & 0.0862 & 0.0583 & 0.028 & 37 & 25 & 1.952 & 0.16241315 \\
-typo50\_real70 & 441 & 42 & 27 & 0.0952 & 0.0612 & 0.034 & 42 & 27 & 2.841 & 0.09191105 \\
-typo75\_real10 & 446 & 52 & 32 & 0.1166 & 0.0717 & 0.0448 & 52 & 32 & 4.298 & 0.03816577 \\
-typo75\_real40 & 441 & 59 & 26 & 0.1338 & 0.059 & 0.0748 & 59 & 26 & 12.047 & 0.00051874 \\
-typo75\_real70 & 444 & 73 & 23 & 0.1644 & 0.0518 & 0.1126 & 73 & 23 & 25.01 & 5.7e-07 \\
+typo25\_real10 & 473 & 24 & 31 & 0.0507 & 0.0655 & -0.0148 & 24 & 31 & 0.655 & 0.41849223 \\
+typo25\_real40 & 472 & 28 & 33 & 0.0593 & 0.0699 & -0.0106 & 28 & 33 & 0.262 & 0.60854777 \\
+typo25\_real70 & 474 & 42 & 26 & 0.0886 & 0.0549 & 0.0338 & 42 & 26 & 3.309 & 0.06890881 \\
+typo50\_real10 & 472 & 41 & 27 & 0.0869 & 0.0572 & 0.0297 & 41 & 27 & 2.485 & 0.11491486 \\
+typo50\_real40 & 471 & 42 & 28 & 0.0892 & 0.0594 & 0.0297 & 42 & 28 & 2.414 & 0.1202328 \\
+typo50\_real70 & 469 & 45 & 29 & 0.0959 & 0.0618 & 0.0341 & 45 & 29 & 3.041 & 0.08120887 \\
+typo75\_real10 & 475 & 55 & 36 & 0.1158 & 0.0758 & 0.04 & 55 & 36 & 3.56 & 0.05917207 \\
+typo75\_real40 & 471 & 63 & 29 & 0.1338 & 0.0616 & 0.0722 & 63 & 29 & 11.837 & 0.00058067 \\
+typo75\_real70 & 472 & 75 & 26 & 0.1589 & 0.0551 & 0.1038 & 75 & 26 & 22.812 & 1.79e-06 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -83,12 +83,12 @@ typo75\_real70 & 444 & 73 & 23 & 0.1644 & 0.0518 & 0.1126 & 73 & 23 & 25.01 & 5.
 \toprule
 \textbf{config} & \textbf{n\_answered} & \textbf{mean\_tok} & \textbf{median\_tok} & \textbf{p90\_tok} & \textbf{max\_tok} \\
 \midrule
-clean & 455 & 1153.9 & 824 & 2235 & 8512 \\
+clean & 485 & 1172.1 & 842 & 2238 & 8512 \\
 typo25\_real10 & 487 & 1221.9 & 869 & 2400 & 8753 \\
 typo25\_real40 & 486 & 1245.6 & 872.5 & 2588 & 8684 \\
 typo25\_real70 & 489 & 1233.8 & 871 & 2680 & 7092 \\
 typo50\_real10 & 487 & 1298.2 & 936 & 2615 & 9068 \\
-typo50\_real40 & 461 & 1320.7 & 868 & 2814 & 9110 \\
+typo50\_real40 & 485 & 1357.4 & 879 & 2935 & 9110 \\
 typo50\_real70 & 484 & 1329.2 & 922.0 & 2752 & 8588 \\
 typo75\_real10 & 488 & 1380.7 & 963.0 & 2752 & 7480 \\
 typo75\_real40 & 485 & 1412.8 & 930 & 3084 & 7686 \\
@@ -107,12 +107,12 @@ typo75\_real70 & 486 & 1452.9 & 998.0 & 3154 & 11834 \\
 \toprule
 \textbf{config} & \textbf{tok\_correct} & \textbf{tok\_wrong} & \textbf{wrong\_over\_correct} \\
 \midrule
-clean & 999.9 & 2030.3 & 2.0306 \\
+clean & 1024.9 & 1989.3 & 1.9409 \\
 typo25\_real10 & 1120.3 & 1870.4 & 1.6695 \\
 typo25\_real40 & 1114.3 & 2025.7 & 1.8179 \\
 typo25\_real70 & 1066.2 & 1997.5 & 1.8735 \\
 typo50\_real10 & 1184.4 & 1814.5 & 1.532 \\
-typo50\_real40 & 1174.5 & 2038.9 & 1.736 \\
+typo50\_real40 & 1206.3 & 2068.6 & 1.7148 \\
 typo50\_real70 & 1179.6 & 2031.6 & 1.7222 \\
 typo75\_real10 & 1231.6 & 2005.7 & 1.6286 \\
 typo75\_real40 & 1262.6 & 1924.8 & 1.5244 \\
@@ -149,12 +149,12 @@ sense, \dots}) is treated as repair behaviour, not self-doubt.
 \toprule
 \textbf{config} & \textbf{n\_answered} & \textbf{second\_guess\_per\_1k} & \textbf{second\_guess\_per\_trace} & \textbf{uncertainty\_per\_1k} & \textbf{uncertainty\_per\_trace} & \textbf{total\_per\_1k} & \textbf{total\_per\_trace} \\
 \midrule
-clean & 455 & 11.087 & 8.798 & 13.599 & 10.791 & 24.686 & 19.589 \\
+clean & 485 & 11.332 & 9.136 & 13.995 & 11.282 & 25.327 & 20.419 \\
 typo25\_real10 & 487 & 11.807 & 9.916 & 14.511 & 12.187 & 26.318 & 22.103 \\
 typo25\_real40 & 486 & 11.012 & 9.377 & 13.399 & 11.409 & 24.411 & 20.786 \\
 typo25\_real70 & 489 & 10.85 & 9.245 & 14.574 & 12.419 & 25.424 & 21.665 \\
 typo50\_real10 & 487 & 10.975 & 9.735 & 14.69 & 13.031 & 25.665 & 22.766 \\
-typo50\_real40 & 461 & 11.611 & 10.562 & 15.886 & 14.451 & 27.497 & 25.013 \\
+typo50\_real40 & 485 & 11.737 & 10.969 & 16.267 & 15.202 & 28.004 & 26.171 \\
 typo50\_real70 & 484 & 11.101 & 10.225 & 16.141 & 14.868 & 27.242 & 25.093 \\
 typo75\_real10 & 488 & 11.545 & 10.969 & 17.063 & 16.213 & 28.608 & 27.182 \\
 typo75\_real40 & 485 & 11.337 & 11.027 & 18.354 & 17.852 & 29.692 & 28.878 \\
@@ -173,28 +173,28 @@ typo75\_real70 & 486 & 11.642 & 11.675 & 19.197 & 19.251 & 30.839 & 30.926 \\
 \toprule
 \textbf{marker} & \textbf{category} & \textbf{clean\_per\_1k} & \textbf{typo\_per\_1k} & \textbf{discrimination} \\
 \midrule
-maybe & uncertainty & 6.7 & 7.466 & 0.766 \\
-or maybe/alt & uncertainty & 1.85 & 2.608 & 0.758 \\
-perhaps & uncertainty & 1.415 & 1.895 & 0.48 \\
-wait & second\_guess & 5.905 & 6.25 & 0.345 \\
-unclear/confused & uncertainty & 0.601 & 0.804 & 0.203 \\
-might be & uncertainty & 0.85 & 0.923 & 0.073 \\
-could be & uncertainty & 0.487 & 0.549 & 0.061 \\
-hold on & second\_guess & 0.199 & 0.257 & 0.057 \\
-not entirely & uncertainty & 0.266 & 0.318 & 0.052 \\
-not sure & uncertainty & 1.335 & 1.386 & 0.051 \\
-I guess & uncertainty & 0.044 & 0.062 & 0.018 \\
-I assume & uncertainty & 0.006 & 0.022 & 0.017 \\
-possibly & uncertainty & 0.036 & 0.044 & 0.008 \\
-let me recheck & second\_guess & 0.169 & 0.175 & 0.006 \\
+or maybe/alt & uncertainty & 1.941 & 2.624 & 0.683 \\
+maybe & uncertainty & 6.98 & 7.487 & 0.507 \\
+perhaps & uncertainty & 1.476 & 1.9 & 0.425 \\
+unclear/confused & uncertainty & 0.604 & 0.806 & 0.202 \\
+wait & second\_guess & 6.092 & 6.264 & 0.172 \\
+could be & uncertainty & 0.468 & 0.548 & 0.08 \\
+might be & uncertainty & 0.844 & 0.923 & 0.079 \\
+not sure & uncertainty & 1.325 & 1.383 & 0.058 \\
+not entirely & uncertainty & 0.266 & 0.319 & 0.053 \\
+hold on & second\_guess & 0.217 & 0.258 & 0.041 \\
+I guess & uncertainty & 0.043 & 0.062 & 0.018 \\
+I assume & uncertainty & 0.005 & 0.023 & 0.017 \\
+let me recheck & second\_guess & 0.164 & 0.174 & 0.011 \\
+possibly & uncertainty & 0.036 & 0.046 & 0.01 \\
 on second thought & second\_guess & 0.0 & 0.0 & 0.0 \\
-presumably & uncertainty & 0.008 & 0.006 & -0.003 \\
-reconsider & second\_guess & 0.017 & 0.01 & -0.007 \\
-but wait & second\_guess & 0.947 & 0.932 & -0.016 \\
-double-check & second\_guess & 0.291 & 0.268 & -0.022 \\
-wait/actually no & second\_guess & 0.496 & 0.471 & -0.025 \\
-hmm & second\_guess & 2.304 & 2.261 & -0.043 \\
-actually & second\_guess & 0.759 & 0.701 & -0.058 \\
+presumably & uncertainty & 0.008 & 0.006 & -0.002 \\
+reconsider & second\_guess & 0.015 & 0.01 & -0.005 \\
+double-check & second\_guess & 0.281 & 0.267 & -0.015 \\
+wait/actually no & second\_guess & 0.491 & 0.476 & -0.015 \\
+but wait & second\_guess & 0.969 & 0.931 & -0.039 \\
+actually & second\_guess & 0.772 & 0.703 & -0.07 \\
+hmm & second\_guess & 2.33 & 2.259 & -0.071 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -209,12 +209,12 @@ actually & second\_guess & 0.759 & 0.701 & -0.058 \\
 \toprule
 \textbf{config} & \textbf{2g\_correct} & \textbf{2g\_wrong} & \textbf{2g\_wrong\_over\_correct} & \textbf{un\_correct} & \textbf{un\_wrong} & \textbf{un\_wrong\_over\_correct} & \textbf{tot\_correct} & \textbf{tot\_wrong} & \textbf{tot\_wrong\_over\_correct} \\
 \midrule
-clean & 10.427 & 12.794 & 1.227 & 11.322 & 19.483 & 1.721 & 21.748 & 32.277 & 1.484 \\
+clean & 10.713 & 12.97 & 1.211 & 11.844 & 19.679 & 1.661 & 22.557 & 32.649 & 1.447 \\
 typo25\_real10 & 11.063 & 14.54 & 1.314 & 12.939 & 20.29 & 1.568 & 24.002 & 34.83 & 1.451 \\
 typo25\_real40 & 10.774 & 11.76 & 1.092 & 11.436 & 19.581 & 1.712 & 22.21 & 31.341 & 1.411 \\
 typo25\_real70 & 10.276 & 12.145 & 1.182 & 11.322 & 21.921 & 1.936 & 21.598 & 34.066 & 1.577 \\
 typo50\_real10 & 10.716 & 11.753 & 1.097 & 13.051 & 19.626 & 1.504 & 23.767 & 31.379 & 1.32 \\
-typo50\_real40 & 11.373 & 12.254 & 1.077 & 12.817 & 24.172 & 1.886 & 24.19 & 36.426 & 1.506 \\
+typo50\_real40 & 11.612 & 12.065 & 1.039 & 12.968 & 24.922 & 1.922 & 24.581 & 36.987 & 1.505 \\
 typo50\_real70 & 10.664 & 12.242 & 1.148 & 13.617 & 22.733 & 1.669 & 24.281 & 34.975 & 1.44 \\
 typo75\_real10 & 11.54 & 11.557 & 1.002 & 14.991 & 22.133 & 1.476 & 26.531 & 33.69 & 1.27 \\
 typo75\_real40 & 11.352 & 11.307 & 0.996 & 16.328 & 22.601 & 1.384 & 27.679 & 33.908 & 1.225 \\
@@ -329,7 +329,7 @@ typo25\_real10 & 1964 & 1572 & 114 & 41 & 237 & 0.8004 & 0.058 & 0.0209 & 0.1207
 typo25\_real40 & 1981 & 1481 & 180 & 61 & 259 & 0.7476 & 0.0909 & 0.0308 & 0.1307 \\
 typo25\_real70 & 1988 & 1384 & 243 & 105 & 256 & 0.6962 & 0.1222 & 0.0528 & 0.1288 \\
 typo50\_real10 & 3932 & 3023 & 317 & 100 & 492 & 0.7688 & 0.0806 & 0.0254 & 0.1251 \\
-typo50\_real40 & 3747 & 2691 & 439 & 135 & 482 & 0.7182 & 0.1172 & 0.036 & 0.1286 \\
+typo50\_real40 & 3927 & 2821 & 459 & 147 & 500 & 0.7184 & 0.1169 & 0.0374 & 0.1273 \\
 typo50\_real70 & 3887 & 2594 & 551 & 208 & 534 & 0.6674 & 0.1418 & 0.0535 & 0.1374 \\
 typo75\_real10 & 5847 & 4154 & 784 & 196 & 713 & 0.7104 & 0.1341 & 0.0335 & 0.1219 \\
 typo75\_real40 & 5777 & 3802 & 944 & 291 & 740 & 0.6581 & 0.1634 & 0.0504 & 0.1281 \\
@@ -363,7 +363,7 @@ bucket by which form appears in the reasoning:
 \textbf{real\_ratio} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
 \midrule
 10 & 11743 & 0.745 & 0.1035 & 0.0287 & 0.1228 \\
-40 & 11505 & 0.6931 & 0.1359 & 0.0423 & 0.1287 \\
+40 & 11685 & 0.6935 & 0.1355 & 0.0427 & 0.1283 \\
 70 & 11644 & 0.6361 & 0.169 & 0.0611 & 0.1338 \\
 \bottomrule
 \end{tabular}
@@ -383,7 +383,7 @@ typo25\_real10 & 0.0178 & 0.0391 & 2.196 \\
 typo25\_real40 & 0.0269 & 0.0521 & 1.939 \\
 typo25\_real70 & 0.0501 & 0.0641 & 1.28 \\
 typo50\_real10 & 0.0201 & 0.0485 & 2.418 \\
-typo50\_real40 & 0.033 & 0.0496 & 1.502 \\
+typo50\_real40 & 0.0342 & 0.0514 & 1.504 \\
 typo50\_real70 & 0.0515 & 0.0615 & 1.193 \\
 typo75\_real10 & 0.0293 & 0.0516 & 1.76 \\
 typo75\_real40 & 0.0466 & 0.062 & 1.328 \\
@@ -501,8 +501,8 @@ dataset's result.
 25 & real10\_to\_real40 & 474 & 0.865 & 0.8608 & -0.0042 & 32 & 30 & 0.8989403 \\
 25 & real40\_to\_real70 & 477 & 0.8616 & 0.8239 & -0.0377 & 40 & 22 & 0.03085 \\
 50 & real10\_to\_real70 & 472 & 0.8263 & 0.8326 & 0.0064 & 38 & 41 & 0.8219656 \\
-50 & real10\_to\_real40 & 450 & 0.8311 & 0.8333 & 0.0022 & 33 & 34 & 1.0 \\
-50 & real40\_to\_real70 & 448 & 0.8438 & 0.8281 & -0.0156 & 39 & 32 & 0.47642205 \\
+50 & real10\_to\_real40 & 473 & 0.8288 & 0.8288 & 0.0 & 35 & 35 & 0.90486113 \\
+50 & real40\_to\_real70 & 472 & 0.8369 & 0.8284 & -0.0085 & 39 & 35 & 0.72728232 \\
 75 & real10\_to\_real70 & 475 & 0.8126 & 0.7453 & -0.0674 & 60 & 28 & 0.00095108 \\
 75 & real10\_to\_real40 & 474 & 0.8143 & 0.7743 & -0.0401 & 54 & 35 & 0.05639171 \\
 75 & real40\_to\_real70 & 471 & 0.7834 & 0.7495 & -0.034 & 60 & 44 & 0.141326 \\
@@ -520,7 +520,7 @@ dataset's result.
 \toprule
 \textbf{n} & \textbf{coef\_num\_real} & \textbf{coef\_num\_nonword} & \textbf{odds\_real} & \textbf{odds\_nonword} & \textbf{intercept} \\
 \midrule
-4353 & -0.04173 & -0.00804 & 0.9591 & 0.992 & 1.67484 \\
+4377 & -0.04182 & -0.00784 & 0.959 & 0.9922 & 1.67003 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -536,7 +536,7 @@ dataset's result.
 \textbf{real\_ratio} & \textbf{n\_wrong} & \textbf{explicit\_notice\_frac} & \textbf{silent\_frac} \\
 \midrule
 10 & 248 & 0.3548 & 0.6452 \\
-40 & 258 & 0.376 & 0.624 \\
+40 & 265 & 0.3811 & 0.6189 \\
 70 & 296 & 0.3986 & 0.6014 \\
 \bottomrule
 \end{tabular}
@@ -553,12 +553,12 @@ dataset's result.
 \toprule
 \textbf{config} & \textbf{second\_guess} & \textbf{uncertainty} & \textbf{typo\_noticing} & \textbf{repair\_words} \\
 \midrule
-clean & 11.087 & 13.599 & 1.036 & 0.748 \\
+clean & 11.332 & 13.995 & 1.084 & 0.801 \\
 typo25\_real10 & 11.807 & 14.511 & 1.416 & 0.922 \\
 typo25\_real40 & 11.012 & 13.399 & 1.51 & 1.037 \\
 typo25\_real70 & 10.85 & 14.574 & 1.555 & 1.056 \\
 typo50\_real10 & 10.975 & 14.69 & 1.588 & 1.012 \\
-typo50\_real40 & 11.611 & 15.886 & 1.705 & 1.104 \\
+typo50\_real40 & 11.737 & 16.267 & 1.78 & 1.143 \\
 typo50\_real70 & 11.101 & 16.141 & 1.736 & 1.099 \\
 typo75\_real10 & 11.545 & 17.063 & 1.926 & 1.199 \\
 typo75\_real40 & 11.337 & 18.354 & 2.181 & 1.376 \\

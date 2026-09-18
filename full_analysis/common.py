@@ -55,7 +55,7 @@ def parse_tag(path):
 
 def config_files():
     """Clean first, then typo configs sorted by (rate, real), for DATASET."""
-    files = glob.glob(os.path.join(DATA_DIR, f"{DATASET}_*.jsonl"))
+    files = glob.glob(os.path.join(glob.escape(DATA_DIR), f"{DATASET}_*.jsonl"))
     if not files:
         raise SystemExit(
             f"no data for dataset '{DATASET}' in {DATA_DIR}\n"
