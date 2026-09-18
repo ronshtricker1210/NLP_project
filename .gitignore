@@ -36,6 +36,7 @@ data_creation/typo_variants/
 # ronshtricker/typo-reasoning-results on the Hub)
 full_analysis/raw_results/*
 !full_analysis/raw_results/README.md
+full_analysis/legacy/raw_results_gsm8k_budget4096/
 full_analysis/judge_cache/
 
 # LaTeX build artifacts

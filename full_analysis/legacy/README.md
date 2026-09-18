@@ -17,3 +17,11 @@ reports or the paper.
 - `report_gsm8k_fix-spellcheck_grid-pilot20.{pdf,tex}`: 20-question pilot of
   the spellcheck grid; the published HF data is the full run, now reported in
   `../reports/gsm8k/fix_spellcheck_grid/report_gsm8k_fix-spellcheck_grid.pdf`.
+
+- `report_gsm8k_budget4096.{pdf,tex}` and `raw_results_gsm8k_budget4096/`
+  (raw data untracked; same files as results/gsm8k/*.jsonl on the HF repo):
+  the early GSM8K grid at a 4,096-token generation budget. Superseded by the
+  20,000-token run the paper reports (`../reports/gsm8k/results_20000/`); at
+  4k, truncation confounds accuracy (19-108 capped traces per config).
+  Its analysis tables remain in `../analysis_tables/gsm8k/results/` (which
+  also holds the gsm8k judge tables - those are budget-independent).
