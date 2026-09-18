@@ -229,10 +229,12 @@ def main():
     args = parser.parse_args()
 
     here = os.path.dirname(os.path.abspath(__file__))
-    input_arg = args.input or os.path.join("full_analysis", "manual_check", f"{args.dataset}_llm_judge.jsonl")
     import sys
     sys.path.insert(0, os.path.join(here, "full_analysis"))
     import common
+    base, _ = common.dataset_layout(args.dataset)
+    input_arg = args.input or os.path.join("full_analysis", "results_data", base,
+                                           "llm_as_a_judge", f"{args.dataset}_judge_traces.jsonl")
     output_arg = args.output_root or os.path.join(common.reports_dir(args.dataset), "llm_as_a_judge")
     input_path = input_arg if os.path.isabs(input_arg) else os.path.join(here, input_arg)
     output_root = output_arg if os.path.isabs(output_arg) else os.path.join(here, output_arg)

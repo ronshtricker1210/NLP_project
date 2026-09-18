@@ -111,7 +111,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--input",
-        default=os.path.join("manual_check", "gsm8k_first2_5.jsonl"),
+        default=os.path.join("results_data", "gsm8k", "llm_as_a_judge", "manual_check", "gsm8k_first2_5.jsonl"),
         help="judge JSONL trace file",
     )
     parser.add_argument(
