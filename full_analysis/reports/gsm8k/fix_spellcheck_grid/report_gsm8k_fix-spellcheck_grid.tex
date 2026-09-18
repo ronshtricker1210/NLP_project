@@ -1,0 +1,525 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\title{The Silent Tax: Typo-Robustness Analysis (GSM8K\_FIX-SPELLCHECK\_GRID)\\\large DeepSeek-R1-Distill-Qwen-7B}
+\date{}
+\begin{document}
+\maketitle
+\noindent All tables are \emph{answered-only}: traces that hit the token cap before writing a final answer are excluded from the metrics. Configs are named \texttt{typo\{rate\}\_real\{ratio\}}: \emph{rate} = \% of words corrupted, \emph{real} = \% of typos that form real words. Baseline is the clean input.
+
+\section*{Accuracy and Flips}
+\begin{table}[H]
+\centering
+\caption{Accuracy per config. n = questions; n\_answered = questions that produced a final answer (not truncated at the token cap). acc\_answered = correct / n\_answered; acc\_strict = correct / n (truncated counted as wrong); ci\_lo/ci\_hi = 95\% bootstrap CI on acc\_strict.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{config} & \textbf{n} & \textbf{n\_answered} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
+\midrule
+clean & 1319 & 1306 & 0.8407 & 0.8324 & 0.8112 & 0.8537 \\
+rate25\_real70 & 500 & 487 & 0.7618 & 0.742 & 0.702 & 0.78 \\
+rate75\_real20 & 500 & 491 & 0.5825 & 0.572 & 0.53 & 0.616 \\
+rate50\_real20 & 500 & 487 & 0.6756 & 0.658 & 0.616 & 0.702 \\
+rate25\_real50 & 500 & 485 & 0.7299 & 0.708 & 0.668 & 0.748 \\
+rate75\_real40 & 500 & 493 & 0.5456 & 0.538 & 0.494 & 0.582 \\
+rate50\_real60 & 500 & 489 & 0.6196 & 0.606 & 0.564 & 0.648 \\
+rate25\_real10 & 500 & 485 & 0.7732 & 0.75 & 0.712 & 0.784 \\
+rate25\_real0 & 500 & 483 & 0.7867 & 0.76 & 0.724 & 0.798 \\
+rate50\_real0 & 500 & 486 & 0.714 & 0.694 & 0.654 & 0.732 \\
+rate25\_real30 & 500 & 487 & 0.7495 & 0.73 & 0.692 & 0.768 \\
+rate75\_real60 & 500 & 485 & 0.5155 & 0.5 & 0.458 & 0.546 \\
+rate50\_real40 & 500 & 489 & 0.6646 & 0.65 & 0.608 & 0.694 \\
+rate75\_real30 & 500 & 484 & 0.5496 & 0.532 & 0.49 & 0.578 \\
+rate50\_real10 & 500 & 486 & 0.6934 & 0.674 & 0.634 & 0.714 \\
+rate25\_real60 & 500 & 484 & 0.7479 & 0.724 & 0.682 & 0.762 \\
+rate25\_real40 & 500 & 488 & 0.7377 & 0.72 & 0.68 & 0.756 \\
+rate75\_real0 & 500 & 480 & 0.6562 & 0.63 & 0.588 & 0.674 \\
+rate75\_real10 & 500 & 490 & 0.6286 & 0.616 & 0.576 & 0.658 \\
+rate50\_real30 & 500 & 486 & 0.6687 & 0.65 & 0.608 & 0.69 \\
+rate50\_real70 & 500 & 489 & 0.6053 & 0.592 & 0.548 & 0.638 \\
+rate75\_real50 & 500 & 492 & 0.4939 & 0.486 & 0.444 & 0.528 \\
+rate50\_real50 & 500 & 492 & 0.628 & 0.618 & 0.576 & 0.66 \\
+rate75\_real70 & 500 & 490 & 0.4776 & 0.468 & 0.424 & 0.512 \\
+rate25\_real20 & 500 & 481 & 0.7651 & 0.736 & 0.696 & 0.774 \\
+typo30\_real0 & 500 & 486 & 0.7778 & 0.756 & 0.716 & 0.792 \\
+typo30\_real10 & 500 & 487 & 0.7906 & 0.77 & 0.73 & 0.806 \\
+typo30\_real20 & 500 & 489 & 0.7791 & 0.762 & 0.724 & 0.798 \\
+typo30\_real30 & 500 & 476 & 0.7563 & 0.72 & 0.682 & 0.758 \\
+typo30\_real40 & 500 & 487 & 0.77 & 0.75 & 0.712 & 0.788 \\
+typo30\_real50 & 500 & 484 & 0.7438 & 0.72 & 0.68 & 0.756 \\
+typo30\_real60 & 500 & 485 & 0.734 & 0.712 & 0.672 & 0.752 \\
+typo30\_real70 & 500 & 483 & 0.7288 & 0.704 & 0.662 & 0.744 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Answered-only flips vs clean, paired by question over n\_both (answered in both conditions). r2w / w2r = questions correct on clean but wrong on this config / wrong on clean but correct on this config; r2w\_ratio = r2w / n\_both, w2r\_ratio = w2r / n\_both; net\_flip\_ratio = r2w\_ratio - w2r\_ratio = (r2w - w2r) / n\_both, the net rate at which this config worsens answers relative to clean.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_both} & \textbf{r2w} & \textbf{w2r} & \textbf{r2w\_ratio} & \textbf{w2r\_ratio} & \textbf{net\_flip\_ratio} & \textbf{mcnemar\_b} & \textbf{mcnemar\_c} & \textbf{mcnemar\_stat} & \textbf{mcnemar\_p} \\
+\midrule
+rate25\_real70 & 485 & 64 & 27 & 0.132 & 0.0557 & 0.0763 & 64 & 27 & 14.242 & 0.00016076 \\
+rate75\_real20 & 489 & 139 & 17 & 0.2843 & 0.0348 & 0.2495 & 139 & 17 & 93.853 & 0.0 \\
+rate50\_real20 & 484 & 105 & 26 & 0.2169 & 0.0537 & 0.1632 & 105 & 26 & 46.443 & 0.0 \\
+rate25\_real50 & 482 & 68 & 19 & 0.1411 & 0.0394 & 0.1017 & 68 & 19 & 26.483 & 2.7e-07 \\
+rate75\_real40 & 490 & 160 & 17 & 0.3265 & 0.0347 & 0.2918 & 160 & 17 & 113.921 & 0.0 \\
+rate50\_real60 & 487 & 127 & 20 & 0.2608 & 0.0411 & 0.2197 & 127 & 20 & 76.435 & 0.0 \\
+rate25\_real10 & 483 & 57 & 27 & 0.118 & 0.0559 & 0.0621 & 57 & 27 & 10.012 & 0.00155532 \\
+rate25\_real0 & 482 & 46 & 16 & 0.0954 & 0.0332 & 0.0622 & 46 & 16 & 13.565 & 0.0002305 \\
+rate50\_real0 & 484 & 84 & 24 & 0.1736 & 0.0496 & 0.124 & 84 & 24 & 32.231 & 1e-08 \\
+rate25\_real30 & 486 & 66 & 22 & 0.1358 & 0.0453 & 0.0905 & 66 & 22 & 21.011 & 4.57e-06 \\
+rate75\_real60 & 483 & 171 & 15 & 0.354 & 0.0311 & 0.323 & 171 & 15 & 129.167 & 0.0 \\
+rate50\_real40 & 488 & 103 & 19 & 0.2111 & 0.0389 & 0.1721 & 103 & 19 & 56.467 & 0.0 \\
+rate75\_real30 & 482 & 154 & 14 & 0.3195 & 0.029 & 0.2905 & 154 & 14 & 115.006 & 0.0 \\
+rate50\_real10 & 484 & 92 & 23 & 0.1901 & 0.0475 & 0.1426 & 92 & 23 & 40.209 & 0.0 \\
+rate25\_real60 & 482 & 67 & 24 & 0.139 & 0.0498 & 0.0892 & 67 & 24 & 19.385 & 1.069e-05 \\
+rate25\_real40 & 486 & 72 & 19 & 0.1481 & 0.0391 & 0.1091 & 72 & 19 & 29.714 & 5e-08 \\
+rate75\_real0 & 478 & 114 & 28 & 0.2385 & 0.0586 & 0.1799 & 114 & 28 & 50.88 & 0.0 \\
+rate75\_real10 & 488 & 125 & 23 & 0.2561 & 0.0471 & 0.209 & 125 & 23 & 68.926 & 0.0 \\
+rate50\_real30 & 484 & 100 & 16 & 0.2066 & 0.0331 & 0.1736 & 100 & 16 & 59.388 & 0.0 \\
+rate50\_real70 & 487 & 129 & 17 & 0.2649 & 0.0349 & 0.23 & 129 & 17 & 84.39 & 0.0 \\
+rate75\_real50 & 489 & 179 & 14 & 0.3661 & 0.0286 & 0.3374 & 179 & 14 & 139.358 & 0.0 \\
+rate50\_real50 & 489 & 121 & 20 & 0.2474 & 0.0409 & 0.2065 & 121 & 20 & 70.922 & 0.0 \\
+rate75\_real70 & 487 & 189 & 16 & 0.3881 & 0.0329 & 0.3552 & 189 & 16 & 144.312 & 0.0 \\
+rate25\_real20 & 480 & 61 & 25 & 0.1271 & 0.0521 & 0.075 & 61 & 25 & 14.244 & 0.00016056 \\
+typo30\_real0 & 485 & 57 & 25 & 0.1175 & 0.0515 & 0.066 & 57 & 25 & 11.72 & 0.00061848 \\
+typo30\_real10 & 486 & 51 & 25 & 0.1049 & 0.0514 & 0.0535 & 51 & 25 & 8.224 & 0.00413472 \\
+typo30\_real20 & 486 & 57 & 29 & 0.1173 & 0.0597 & 0.0576 & 57 & 29 & 8.477 & 0.00359715 \\
+typo30\_real30 & 475 & 59 & 19 & 0.1242 & 0.04 & 0.0842 & 59 & 19 & 19.5 & 1.006e-05 \\
+typo30\_real40 & 485 & 59 & 25 & 0.1216 & 0.0515 & 0.0701 & 59 & 25 & 12.964 & 0.00031749 \\
+typo30\_real50 & 482 & 69 & 24 & 0.1432 & 0.0498 & 0.0934 & 69 & 24 & 20.817 & 5.05e-06 \\
+typo30\_real60 & 484 & 72 & 22 & 0.1488 & 0.0455 & 0.1033 & 72 & 22 & 25.543 & 4.3e-07 \\
+typo30\_real70 & 481 & 79 & 25 & 0.1642 & 0.052 & 0.1123 & 79 & 25 & 27.01 & 2e-07 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\medskip
+\noindent\textbf{McNemar test (used in the flips table above).}
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{What it is:} a paired significance test for before/after binary
+  outcomes. It looks only at the questions that \emph{changed} (the discordant pairs:
+  $b$ = right$\to$wrong, $c$ = wrong$\to$right) and ignores those that stayed the same.
+  \item \textbf{Null hypothesis:} typos break correct answers as often as they fix
+  wrong ones ($b = c$, i.e.\ no net effect).
+  \item \textbf{Statistic:} $(|b - c| - 1)^2 / (b + c)$ (column mcnemar\_stat);
+  mcnemar\_p is its chi-square $p$-value with 1 degree of freedom.
+  \item \textbf{When we reject it:} when mcnemar\_p $< 0.05$ --- the
+  right$\to$wrong vs wrong$\to$right imbalance is too large to be chance.
+\end{itemize}
+
+\section*{Reasoning Length}
+\begin{table}[H]
+\centering
+\caption{Absolute generated tokens per config (answered-only).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_answered} & \textbf{mean\_tok} & \textbf{median\_tok} & \textbf{p90\_tok} & \textbf{max\_tok} \\
+\midrule
+clean & 1306 & 589.0 & 449.5 & 1110 & 3966 \\
+rate25\_real70 & 487 & 646.4 & 469 & 1209 & 3972 \\
+rate75\_real20 & 491 & 619.0 & 462 & 915 & 4084 \\
+rate50\_real20 & 487 & 635.6 & 470 & 1038 & 4096 \\
+rate25\_real50 & 485 & 644.6 & 468 & 1191 & 4096 \\
+rate75\_real40 & 493 & 601.9 & 459 & 946 & 4096 \\
+rate50\_real60 & 489 & 576.0 & 450 & 880 & 3508 \\
+rate25\_real10 & 485 & 695.2 & 487 & 1395 & 4096 \\
+rate25\_real0 & 483 & 637.3 & 458 & 1112 & 4096 \\
+rate50\_real0 & 486 & 620.9 & 459.5 & 984 & 4096 \\
+rate25\_real30 & 487 & 640.4 & 468 & 1260 & 4096 \\
+rate75\_real60 & 485 & 585.2 & 465 & 845 & 4096 \\
+rate50\_real40 & 489 & 610.5 & 456 & 1001 & 4096 \\
+rate75\_real30 & 484 & 596.3 & 468.0 & 941 & 4096 \\
+rate50\_real10 & 486 & 622.9 & 457.0 & 1179 & 4096 \\
+rate25\_real60 & 484 & 660.3 & 466.0 & 1254 & 3764 \\
+rate25\_real40 & 488 & 661.6 & 462.0 & 1429 & 4096 \\
+rate75\_real0 & 480 & 606.0 & 460.0 & 863 & 4096 \\
+rate75\_real10 & 490 & 666.6 & 467.0 & 1236 & 4096 \\
+rate50\_real30 & 486 & 624.2 & 467.5 & 1131 & 4096 \\
+rate50\_real70 & 489 & 584.6 & 454 & 975 & 4096 \\
+rate75\_real50 & 492 & 588.3 & 461.0 & 850 & 4096 \\
+rate50\_real50 & 492 & 583.8 & 461.0 & 837 & 4096 \\
+rate75\_real70 & 490 & 570.3 & 458.5 & 768 & 4096 \\
+rate25\_real20 & 481 & 666.5 & 482 & 1263 & 4096 \\
+typo30\_real0 & 486 & 632.4 & 475.5 & 1077 & 4096 \\
+typo30\_real10 & 487 & 657.4 & 463 & 1278 & 4096 \\
+typo30\_real20 & 489 & 677.3 & 476 & 1340 & 4096 \\
+typo30\_real30 & 476 & 616.4 & 459.0 & 1071 & 3743 \\
+typo30\_real40 & 487 & 642.6 & 460 & 1197 & 4096 \\
+typo30\_real50 & 484 & 636.4 & 456.5 & 1174 & 3980 \\
+typo30\_real60 & 485 & 656.6 & 456 & 1326 & 4096 \\
+typo30\_real70 & 483 & 606.0 & 456 & 1082 & 4096 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean generated tokens for correct vs wrong answers. wrong\_over\_correct = tok\_wrong / tok\_correct (mean tokens of wrong answers divided by mean tokens of correct answers).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{config} & \textbf{tok\_correct} & \textbf{tok\_wrong} & \textbf{wrong\_over\_correct} \\
+\midrule
+clean & 582.6 & 622.8 & 1.0689 \\
+rate25\_real70 & 629.9 & 699.1 & 1.1098 \\
+rate75\_real20 & 595.8 & 651.3 & 1.0931 \\
+rate50\_real20 & 621.0 & 666.1 & 1.0726 \\
+rate25\_real50 & 607.0 & 746.0 & 1.2289 \\
+rate75\_real40 & 581.9 & 626.0 & 1.0758 \\
+rate50\_real60 & 569.7 & 586.2 & 1.0289 \\
+rate25\_real10 & 660.6 & 813.4 & 1.2313 \\
+rate25\_real0 & 620.5 & 699.3 & 1.127 \\
+rate50\_real0 & 624.0 & 613.0 & 0.9823 \\
+rate25\_real30 & 618.9 & 704.8 & 1.1387 \\
+rate75\_real60 & 529.9 & 644.0 & 1.2153 \\
+rate50\_real40 & 593.6 & 644.0 & 1.0849 \\
+rate75\_real30 & 579.3 & 617.1 & 1.0653 \\
+rate50\_real10 & 636.7 & 591.7 & 0.9294 \\
+rate25\_real60 & 639.9 & 720.9 & 1.1266 \\
+rate25\_real40 & 649.7 & 695.0 & 1.0698 \\
+rate75\_real0 & 590.3 & 635.9 & 1.0773 \\
+rate75\_real10 & 614.0 & 755.6 & 1.2306 \\
+rate50\_real30 & 626.9 & 618.8 & 0.9871 \\
+rate50\_real70 & 595.6 & 567.8 & 0.9533 \\
+rate75\_real50 & 538.1 & 637.2 & 1.1843 \\
+rate50\_real50 & 544.5 & 650.2 & 1.194 \\
+rate75\_real70 & 529.7 & 607.3 & 1.1465 \\
+rate25\_real20 & 649.7 & 721.0 & 1.1098 \\
+typo30\_real0 & 611.4 & 705.8 & 1.1545 \\
+typo30\_real10 & 642.8 & 712.5 & 1.1085 \\
+typo30\_real20 & 627.7 & 852.2 & 1.3577 \\
+typo30\_real30 & 619.5 & 606.9 & 0.9796 \\
+typo30\_real40 & 612.3 & 744.2 & 1.2155 \\
+typo30\_real50 & 614.7 & 699.6 & 1.138 \\
+typo30\_real60 & 652.2 & 668.8 & 1.0253 \\
+typo30\_real70 & 617.7 & 574.6 & 0.9304 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Self-doubt}
+\noindent The self-doubt markers are curated words grouped into two
+\emph{banks}, each matched as a case-insensitive whole-word pattern in the reasoning
+text. Density is matches per 1000 reasoning words.
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{second\_guess} --- the proposal's canonical self-correction words plus
+  direct reversals: \emph{wait, hmm, actually, reconsider, but wait, hold on, on second
+  thought, let me recheck, double-check}.
+  \item \textbf{uncertainty} --- hedging / ``not certain'' words: \emph{maybe, perhaps,
+  possibly, might be, could be, not sure, I guess, presumably, or maybe / alternatively,
+  unclear / confused}.
+\end{itemize}
+\noindent Example reasoning: ``\emph{Wait, maybe the total is 12\dots\ hmm, actually let
+me recheck}'' contributes \emph{wait, hmm, actually} (second\_guess) and \emph{maybe}
+(uncertainty). A separate \emph{typo-noticing} bank (\emph{typo, misspelled, doesn't make
+sense, \dots}) is treated as repair behaviour, not self-doubt.
+\medskip
+
+\begin{table}[H]
+\centering
+\caption{Doubt-marker density per config: second\_guess and uncertainty, per 1k words and per trace.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_answered} & \textbf{second\_guess\_per\_1k} & \textbf{second\_guess\_per\_trace} & \textbf{uncertainty\_per\_1k} & \textbf{uncertainty\_per\_trace} & \textbf{total\_per\_1k} & \textbf{total\_per\_trace} \\
+\midrule
+clean & 1306 & 7.15 & 1.494 & 3.47 & 0.725 & 10.62 & 2.219 \\
+rate25\_real70 & 487 & 8.554 & 2.133 & 7.525 & 1.877 & 16.08 & 4.01 \\
+rate75\_real20 & 491 & 7.57 & 1.678 & 9.315 & 2.065 & 16.885 & 3.743 \\
+rate50\_real20 & 487 & 8.658 & 2.076 & 7.904 & 1.895 & 16.562 & 3.971 \\
+rate25\_real50 & 485 & 8.52 & 2.115 & 7.059 & 1.753 & 15.579 & 3.868 \\
+rate75\_real40 & 493 & 6.252 & 1.331 & 10.074 & 2.144 & 16.326 & 3.475 \\
+rate50\_real60 & 489 & 7.351 & 1.436 & 7.634 & 1.491 & 14.984 & 2.926 \\
+rate25\_real10 & 485 & 9.811 & 2.746 & 6.593 & 1.845 & 16.404 & 4.592 \\
+rate25\_real0 & 483 & 8.854 & 2.174 & 5.65 & 1.387 & 14.504 & 3.561 \\
+rate50\_real0 & 486 & 7.29 & 1.667 & 5.949 & 1.36 & 13.239 & 3.027 \\
+rate25\_real30 & 487 & 8.535 & 2.105 & 5.937 & 1.464 & 14.472 & 3.569 \\
+rate75\_real60 & 485 & 6.626 & 1.307 & 9.375 & 1.849 & 16.001 & 3.157 \\
+rate50\_real40 & 489 & 7.765 & 1.697 & 8.121 & 1.775 & 15.886 & 3.472 \\
+rate75\_real30 & 484 & 7.093 & 1.446 & 6.86 & 1.399 & 13.954 & 2.845 \\
+rate50\_real10 & 486 & 8.421 & 1.977 & 9.297 & 2.183 & 17.717 & 4.16 \\
+rate25\_real60 & 484 & 8.04 & 2.052 & 8.137 & 2.076 & 16.177 & 4.128 \\
+rate25\_real40 & 488 & 8.918 & 2.328 & 8.706 & 2.273 & 17.623 & 4.6 \\
+rate75\_real0 & 480 & 7.124 & 1.51 & 8.854 & 1.877 & 15.978 & 3.388 \\
+rate75\_real10 & 490 & 8.944 & 2.324 & 11.834 & 3.076 & 20.778 & 5.4 \\
+rate50\_real30 & 486 & 8.004 & 1.866 & 7.572 & 1.765 & 15.576 & 3.632 \\
+rate50\_real70 & 489 & 7.044 & 1.466 & 7.506 & 1.562 & 14.55 & 3.029 \\
+rate75\_real50 & 492 & 6.146 & 1.213 & 8.73 & 1.724 & 14.875 & 2.937 \\
+rate50\_real50 & 492 & 5.907 & 1.187 & 6.454 & 1.297 & 12.361 & 2.484 \\
+rate75\_real70 & 490 & 5.984 & 1.112 & 9.575 & 1.78 & 15.559 & 2.892 \\
+rate25\_real20 & 481 & 9.679 & 2.561 & 7.895 & 2.089 & 17.574 & 4.651 \\
+typo30\_real0 & 486 & 8.276 & 1.951 & 4.461 & 1.051 & 12.737 & 3.002 \\
+typo30\_real10 & 487 & 9.146 & 2.363 & 7.398 & 1.912 & 16.545 & 4.275 \\
+typo30\_real20 & 489 & 8.795 & 2.325 & 5.995 & 1.585 & 14.79 & 3.91 \\
+typo30\_real30 & 476 & 8.279 & 1.889 & 7.192 & 1.641 & 15.471 & 3.529 \\
+typo30\_real40 & 487 & 9.161 & 2.279 & 7.345 & 1.828 & 16.506 & 4.107 \\
+typo30\_real50 & 484 & 8.74 & 2.124 & 7.814 & 1.899 & 16.554 & 4.023 \\
+typo30\_real60 & 485 & 8.575 & 2.151 & 6.988 & 1.753 & 15.563 & 3.903 \\
+typo30\_real70 & 483 & 8.189 & 1.826 & 5.432 & 1.211 & 13.621 & 3.037 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Per-marker density (markers per 1000 reasoning words): clean vs pooled-typo. discrimination = typo minus clean (larger = more typo-responsive). All bank markers, ranked by discrimination.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{marker} & \textbf{category} & \textbf{clean\_per\_1k} & \textbf{typo\_per\_1k} & \textbf{discrimination} \\
+\midrule
+maybe & uncertainty & 1.484 & 3.908 & 2.423 \\
+wait & second\_guess & 3.108 & 4.039 & 0.932 \\
+or maybe/alt & uncertainty & 1.096 & 1.798 & 0.702 \\
+perhaps & uncertainty & 0.341 & 0.842 & 0.501 \\
+unclear/confused & uncertainty & 0.246 & 0.543 & 0.298 \\
+hmm & second\_guess & 1.656 & 1.827 & 0.171 \\
+might be & uncertainty & 0.055 & 0.194 & 0.139 \\
+but wait & second\_guess & 0.322 & 0.415 & 0.093 \\
+not sure & uncertainty & 0.022 & 0.101 & 0.079 \\
+actually & second\_guess & 0.191 & 0.239 & 0.048 \\
+I assume & uncertainty & 0.022 & 0.064 & 0.042 \\
+not entirely & uncertainty & 0.004 & 0.023 & 0.02 \\
+could be & uncertainty & 0.07 & 0.081 & 0.011 \\
+presumably & uncertainty & 0.004 & 0.006 & 0.002 \\
+reconsider & second\_guess & 0.0 & 0.001 & 0.001 \\
+on second thought & second\_guess & 0.0 & 0.0 & 0.0 \\
+possibly & uncertainty & 0.004 & 0.002 & -0.001 \\
+I guess & uncertainty & 0.125 & 0.074 & -0.051 \\
+wait/actually no & second\_guess & 0.264 & 0.209 & -0.055 \\
+hold on & second\_guess & 0.48 & 0.411 & -0.069 \\
+let me recheck & second\_guess & 0.55 & 0.473 & -0.076 \\
+double-check & second\_guess & 0.579 & 0.489 & -0.09 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Doubt density (markers per 1000 reasoning words) split by final outcome, per category (2g = second\_guess, un = uncertainty, tot = both). For a group, density = total markers in that group / total reasoning words in that group x 1000. *\_correct = over correct-answer traces; *\_wrong = over wrong-answer traces; *\_wrong\_over\_correct = \_wrong / \_correct.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{2g\_correct} & \textbf{2g\_wrong} & \textbf{2g\_wrong\_over\_correct} & \textbf{un\_correct} & \textbf{un\_wrong} & \textbf{un\_wrong\_over\_correct} & \textbf{tot\_correct} & \textbf{tot\_wrong} & \textbf{tot\_wrong\_over\_correct} \\
+\midrule
+clean & 7.328 & 6.151 & 0.839 & 3.176 & 5.114 & 1.61 & 10.504 & 11.265 & 1.072 \\
+rate25\_real70 & 9.031 & 7.109 & 0.787 & 5.692 & 13.088 & 2.299 & 14.723 & 20.197 & 1.372 \\
+rate75\_real20 & 7.569 & 7.57 & 1.0 & 8.818 & 9.986 & 1.132 & 16.387 & 17.556 & 1.071 \\
+rate50\_real20 & 8.649 & 8.676 & 1.003 & 7.477 & 8.809 & 1.178 & 16.126 & 17.485 & 1.084 \\
+rate25\_real50 & 8.66 & 8.203 & 0.947 & 5.75 & 10.017 & 1.742 & 14.41 & 18.219 & 1.264 \\
+rate75\_real40 & 6.718 & 5.689 & 0.847 & 9.05 & 11.315 & 1.25 & 15.767 & 17.003 & 1.078 \\
+rate50\_real60 & 7.635 & 6.845 & 0.897 & 7.389 & 8.069 & 1.092 & 15.024 & 14.914 & 0.993 \\
+rate25\_real10 & 9.765 & 9.939 & 1.018 & 5.43 & 9.8 & 1.805 & 15.195 & 19.739 & 1.299 \\
+rate25\_real0 & 8.898 & 8.698 & 0.977 & 5.183 & 7.312 & 1.411 & 14.081 & 16.01 & 1.137 \\
+rate50\_real0 & 7.983 & 5.11 & 0.64 & 6.453 & 4.364 & 0.676 & 14.437 & 9.475 & 0.656 \\
+rate25\_real30 & 8.582 & 8.408 & 0.98 & 5.026 & 8.408 & 1.673 & 13.608 & 16.815 & 1.236 \\
+rate75\_real60 & 5.907 & 7.204 & 1.219 & 7.009 & 11.277 & 1.609 & 12.917 & 18.481 & 1.431 \\
+rate50\_real40 & 8.789 & 5.65 & 0.643 & 6.887 & 10.668 & 1.549 & 15.676 & 16.318 & 1.041 \\
+rate75\_real30 & 7.424 & 6.669 & 0.898 & 4.883 & 9.401 & 1.925 & 12.307 & 16.07 & 1.306 \\
+rate50\_real10 & 9.268 & 5.945 & 0.642 & 8.927 & 10.378 & 1.163 & 18.194 & 16.324 & 0.897 \\
+rate25\_real60 & 8.199 & 7.592 & 0.926 & 7.014 & 11.295 & 1.61 & 15.213 & 18.887 & 1.241 \\
+rate25\_real40 & 9.001 & 8.673 & 0.964 & 8.233 & 10.098 & 1.226 & 17.234 & 18.77 & 1.089 \\
+rate75\_real0 & 7.89 & 5.569 & 0.706 & 8.301 & 9.977 & 1.202 & 16.191 & 15.546 & 0.96 \\
+rate75\_real10 & 8.248 & 9.86 & 1.195 & 7.792 & 17.155 & 2.202 & 16.041 & 27.015 & 1.684 \\
+rate50\_real30 & 8.703 & 6.27 & 0.72 & 7.044 & 8.883 & 1.261 & 15.747 & 15.153 & 0.962 \\
+rate50\_real70 & 7.719 & 5.715 & 0.74 & 8.786 & 4.986 & 0.568 & 16.505 & 10.701 & 0.648 \\
+rate75\_real50 & 6.313 & 6.002 & 0.951 & 5.555 & 11.45 & 2.061 & 11.868 & 17.453 & 1.471 \\
+rate50\_real50 & 5.717 & 6.167 & 1.079 & 4.209 & 9.514 & 2.261 & 9.925 & 15.681 & 1.58 \\
+rate75\_real70 & 6.22 & 5.798 & 0.932 & 8.534 & 10.397 & 1.218 & 14.754 & 16.195 & 1.098 \\
+rate25\_real20 & 9.487 & 10.284 & 1.084 & 5.907 & 14.169 & 2.399 & 15.394 & 24.453 & 1.589 \\
+typo30\_real0 & 8.401 & 7.867 & 0.936 & 4.332 & 4.884 & 1.128 & 12.733 & 12.752 & 1.001 \\
+typo30\_real10 & 9.323 & 8.488 & 0.91 & 6.098 & 12.244 & 2.008 & 15.421 & 20.732 & 1.344 \\
+typo30\_real20 & 8.179 & 10.333 & 1.263 & 4.745 & 9.116 & 1.921 & 12.924 & 19.449 & 1.505 \\
+typo30\_real30 & 8.783 & 6.288 & 0.716 & 6.798 & 8.749 & 1.287 & 15.581 & 15.037 & 0.965 \\
+typo30\_real40 & 9.08 & 9.385 & 1.034 & 6.319 & 10.195 & 1.613 & 15.399 & 19.58 & 1.271 \\
+typo30\_real50 & 8.859 & 8.409 & 0.949 & 6.803 & 10.632 & 1.563 & 15.663 & 19.041 & 1.216 \\
+typo30\_real60 & 9.186 & 6.614 & 0.72 & 6.674 & 7.999 & 1.199 & 15.859 & 14.612 & 0.921 \\
+typo30\_real70 & 9.201 & 4.47 & 0.486 & 6.296 & 2.257 & 0.358 & 15.497 & 6.727 & 0.434 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\noindent\textbf{LLM judge.} The proposal specifies a second,
+non-lexical measure for both dimensions: a separate model with a fixed, strict prompt.
+The judge is a different model from the one under test, called at temperature 0 on a
+seeded random subsample of answered traces per config. It is shown the corrupted-word
+list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
+(head+tail window). It returns two scalar ratings and evidence: \emph{self\_doubt\_score}
+from 0--10, where 0 means no second-guessing and 10 means pervasive uncertainty or
+looping; and \emph{repair\_understanding\_score} from 0--5, where 0 means the question's
+meaning is fully understood and 5 means the model is fundamentally lost because of the
+corruption. The judge also returns a one-line justification and verbatim evidence quotes;
+quotes are checked against the reasoning trace. The judge is a subsample measure, while
+the lexical tables remain the full-data result.
+\medskip
+
+% missing: judge_scalar_per_config.csv
+
+% missing: judge_scalar_by_outcome.csv
+
+% missing: judge_scalar_by_real.csv
+
+\section*{Repair Behaviour}
+\begin{table}[H]
+\centering
+\caption{How each corrupted word was handled, per config (categories defined below the table).}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+\textbf{config} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_n} & \textbf{flagged\_n} & \textbf{misread\_n} & \textbf{not\_used\_n} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
+\midrule
+rate25\_real70 & 3548 & 2119 & 216 & 90 & 1123 & 0.5972 & 0.0609 & 0.0254 & 0.3165 \\
+rate75\_real20 & 9825 & 5982 & 215 & 142 & 3486 & 0.6089 & 0.0219 & 0.0145 & 0.3548 \\
+rate50\_real20 & 6964 & 4463 & 140 & 63 & 2298 & 0.6409 & 0.0201 & 0.009 & 0.33 \\
+rate25\_real50 & 3543 & 2250 & 131 & 78 & 1084 & 0.6351 & 0.037 & 0.022 & 0.306 \\
+rate75\_real40 & 9776 & 5621 & 363 & 209 & 3583 & 0.575 & 0.0371 & 0.0214 & 0.3665 \\
+rate50\_real60 & 6932 & 3995 & 304 & 183 & 2450 & 0.5763 & 0.0439 & 0.0264 & 0.3534 \\
+rate25\_real10 & 3537 & 2395 & 50 & 24 & 1068 & 0.6771 & 0.0141 & 0.0068 & 0.302 \\
+rate25\_real0 & 3493 & 2353 & 21 & 13 & 1106 & 0.6736 & 0.006 & 0.0037 & 0.3166 \\
+rate50\_real0 & 6928 & 4580 & 46 & 40 & 2262 & 0.6611 & 0.0066 & 0.0058 & 0.3265 \\
+rate25\_real30 & 3564 & 2304 & 106 & 49 & 1105 & 0.6465 & 0.0297 & 0.0137 & 0.31 \\
+rate75\_real60 & 9527 & 5199 & 394 & 308 & 3626 & 0.5457 & 0.0414 & 0.0323 & 0.3806 \\
+rate50\_real40 & 6989 & 4239 & 218 & 127 & 2405 & 0.6065 & 0.0312 & 0.0182 & 0.3441 \\
+rate75\_real30 & 9621 & 5779 & 253 & 184 & 3405 & 0.6007 & 0.0263 & 0.0191 & 0.3539 \\
+rate50\_real10 & 6926 & 4516 & 86 & 42 & 2282 & 0.652 & 0.0124 & 0.0061 & 0.3295 \\
+rate25\_real60 & 3533 & 2208 & 162 & 83 & 1080 & 0.625 & 0.0459 & 0.0235 & 0.3057 \\
+rate25\_real40 & 3574 & 2282 & 132 & 55 & 1105 & 0.6385 & 0.0369 & 0.0154 & 0.3092 \\
+rate75\_real0 & 9490 & 6100 & 62 & 57 & 3271 & 0.6428 & 0.0065 & 0.006 & 0.3447 \\
+rate75\_real10 & 9839 & 6215 & 126 & 106 & 3392 & 0.6317 & 0.0128 & 0.0108 & 0.3448 \\
+rate50\_real30 & 6878 & 4317 & 180 & 94 & 2287 & 0.6277 & 0.0262 & 0.0137 & 0.3325 \\
+rate50\_real70 & 6967 & 3972 & 353 & 199 & 2443 & 0.5701 & 0.0507 & 0.0286 & 0.3507 \\
+rate75\_real50 & 9793 & 5563 & 376 & 272 & 3582 & 0.5681 & 0.0384 & 0.0278 & 0.3658 \\
+rate50\_real50 & 7060 & 4203 & 263 & 148 & 2446 & 0.5953 & 0.0373 & 0.021 & 0.3465 \\
+rate75\_real70 & 9653 & 5105 & 466 & 383 & 3699 & 0.5289 & 0.0483 & 0.0397 & 0.3832 \\
+rate25\_real20 & 3494 & 2344 & 79 & 28 & 1043 & 0.6709 & 0.0226 & 0.008 & 0.2985 \\
+typo30\_real0 & 4249 & 2873 & 13 & 13 & 1350 & 0.6762 & 0.0031 & 0.0031 & 0.3177 \\
+typo30\_real10 & 4247 & 2846 & 60 & 28 & 1313 & 0.6701 & 0.0141 & 0.0066 & 0.3092 \\
+typo30\_real20 & 4292 & 2786 & 83 & 45 & 1378 & 0.6491 & 0.0193 & 0.0105 & 0.3211 \\
+typo30\_real30 & 4130 & 2629 & 102 & 55 & 1344 & 0.6366 & 0.0247 & 0.0133 & 0.3254 \\
+typo30\_real40 & 4244 & 2651 & 175 & 69 & 1349 & 0.6246 & 0.0412 & 0.0163 & 0.3179 \\
+typo30\_real50 & 4212 & 2584 & 168 & 92 & 1368 & 0.6135 & 0.0399 & 0.0218 & 0.3248 \\
+typo30\_real60 & 4237 & 2586 & 208 & 96 & 1347 & 0.6103 & 0.0491 & 0.0227 & 0.3179 \\
+typo30\_real70 & 4183 & 2516 & 212 & 113 & 1342 & 0.6015 & 0.0507 & 0.027 & 0.3208 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\noindent A \emph{corrupted word} is a word that received a
+typo --- it differs between the clean and typo question (e.g.\ \emph{sum} $\to$
+\emph{sun}). We recover these by diffing the two questions, then place each into one
+bucket by which form appears in the reasoning:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{silent\_fix} --- only the original word (\emph{sum}) appears: a quiet recovery.
+  \item \textbf{flagged} --- both forms appear (\emph{sum} and \emph{sun}): noticed and fixed.
+  \item \textbf{misread} --- only the corrupted form (\emph{sun}) appears: read as the wrong word.
+  \item \textbf{not\_used} --- neither form appears in the reasoning.
+\end{itemize}
+\noindent Columns \texttt{*\_n} are counts; \texttt{*\_frac} are the share of
+\texttt{n\_corrupt\_words}.
+\medskip
+
+% missing: repair_wordlevel_by_real.csv
+
+% missing: repair_wordlevel_by_outcome.csv
+
+\section*{Real-word Effect}
+\noindent This section isolates the effect of typo \emph{kind}
+(real-word vs non-word), holding the question, corrupted positions, and rate fixed ---
+something the vs-clean accuracy section cannot do. Three views:
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item a \textbf{controlled paired} comparison of low-real vs high-real variants on
+  the \emph{same} questions, with a McNemar test (paired table);
+  \item a \textbf{per-typo logistic regression} comparing the marginal harm of one
+  real-word vs one non-word typo (logit table);
+  \item whether wrong answers \textbf{flag the corruption} more or less as the
+  real-word share rises (silent-failure table).
+\end{itemize}
+\noindent Read the signs, deltas and $p$-values in the tables below for this
+dataset's result.
+\medskip
+
+% missing: realword_paired.csv
+
+% missing: realword_pertypo_logit.csv
+
+% missing: realword_silent_failure.csv
+
+\section*{Lexical Grid (overview)}
+\begin{table}[H]
+\centering
+\caption{All four marker families (second\_guess, uncertainty, typo\_noticing, repair\_words) across configs.}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{config} & \textbf{second\_guess} & \textbf{uncertainty} & \textbf{typo\_noticing} & \textbf{repair\_words} \\
+\midrule
+clean & 7.15 & 3.47 & 0.901 & 0.755 \\
+rate25\_real70 & 8.554 & 7.525 & 2.486 & 1.713 \\
+rate75\_real20 & 7.57 & 9.315 & 3.298 & 2.434 \\
+rate50\_real20 & 8.658 & 7.904 & 2.638 & 1.713 \\
+rate25\_real50 & 8.52 & 7.059 & 2.084 & 1.628 \\
+rate75\_real40 & 6.252 & 10.074 & 3.374 & 2.316 \\
+rate50\_real60 & 7.351 & 7.634 & 2.419 & 1.822 \\
+rate25\_real10 & 9.811 & 6.593 & 1.959 & 1.363 \\
+rate25\_real0 & 8.854 & 5.65 & 1.872 & 1.459 \\
+rate50\_real0 & 7.29 & 5.949 & 1.971 & 1.296 \\
+rate25\_real30 & 8.535 & 5.937 & 2.007 & 1.391 \\
+rate75\_real60 & 6.626 & 9.375 & 2.916 & 2.132 \\
+rate50\_real40 & 7.765 & 8.121 & 2.18 & 1.852 \\
+rate75\_real30 & 7.093 & 6.86 & 2.675 & 1.702 \\
+rate50\_real10 & 8.421 & 9.297 & 2.795 & 2.156 \\
+rate25\_real60 & 8.04 & 8.137 & 2.202 & 1.676 \\
+rate25\_real40 & 8.918 & 8.706 & 3.14 & 2.355 \\
+rate75\_real0 & 7.124 & 8.854 & 2.742 & 2.064 \\
+rate75\_real10 & 8.944 & 11.834 & 3.141 & 2.434 \\
+rate50\_real30 & 8.004 & 7.572 & 2.365 & 1.818 \\
+rate50\_real70 & 7.044 & 7.506 & 2.21 & 1.798 \\
+rate75\_real50 & 6.146 & 8.73 & 3.027 & 2.007 \\
+rate50\_real50 & 5.907 & 6.454 & 2.337 & 1.76 \\
+rate75\_real70 & 5.984 & 9.575 & 2.591 & 2.009 \\
+rate25\_real20 & 9.679 & 7.895 & 2.805 & 2.247 \\
+typo30\_real0 & 8.276 & 4.461 & 1.502 & 1.109 \\
+typo30\_real10 & 9.146 & 7.398 & 1.995 & 1.43 \\
+typo30\_real20 & 8.795 & 5.995 & 1.965 & 1.377 \\
+typo30\_real30 & 8.279 & 7.192 & 1.989 & 1.547 \\
+typo30\_real40 & 9.161 & 7.345 & 2.814 & 2.071 \\
+typo30\_real50 & 8.74 & 7.814 & 2.364 & 1.811 \\
+typo30\_real60 & 8.575 & 6.988 & 2.022 & 1.521 \\
+typo30\_real70 & 8.189 & 5.432 & 2.043 & 1.402 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Spellcheck Recovery}
+% missing: spellcheck_recovery_per_config.csv
+
+% missing: spellcheck_recovery_overall.csv
+
+\end{document}

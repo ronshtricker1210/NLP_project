@@ -1,0 +1,10 @@
+config,misread_correct,misread_wrong,wrong_over_correct
+typo25_real10,0.0066,0.0076,1.152
+typo25_real40,0.0143,0.0183,1.286
+typo25_real70,0.0222,0.035,1.581
+typo50_real10,0.0062,0.0058,0.945
+typo50_real40,0.0167,0.0207,1.236
+typo50_real70,0.0283,0.0289,1.018
+typo75_real10,0.0093,0.0131,1.408
+typo75_real40,0.0205,0.0224,1.092
+typo75_real70,0.0355,0.0431,1.216

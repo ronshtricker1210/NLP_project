@@ -1,0 +1,4 @@
+real_ratio,n_wrong,explicit_notice_frac,silent_frac
+10,441,0.0907,0.9093
+40,516,0.0775,0.9225
+70,565,0.0761,0.9239

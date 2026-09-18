@@ -1,0 +1,11 @@
+config,tok_correct,tok_wrong,wrong_over_correct
+clean,574.4,673.2,1.1719
+typo25_real10,660.6,813.4,1.2313
+typo25_real40,649.7,695.0,1.0698
+typo25_real70,629.9,699.1,1.1098
+typo50_real10,636.7,591.7,0.9294
+typo50_real40,593.6,644.0,1.0849
+typo50_real70,595.6,567.8,0.9533
+typo75_real10,614.0,755.6,1.2306
+typo75_real40,581.9,626.0,1.0758
+typo75_real70,529.7,607.3,1.1465

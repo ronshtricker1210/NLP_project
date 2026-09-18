@@ -5,7 +5,7 @@
 \usepackage{float}
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
-\title{The Silent Tax: Typo-Robustness Analysis (GSM8K)\\\large DeepSeek-R1-Distill-Qwen-7B}
+\title{The Silent Tax: Typo-Robustness Analysis (GSM8K\_FIX-SPELLCHECK)\\\large DeepSeek-R1-Distill-Qwen-7B}
 \date{}
 \begin{document}
 \maketitle
@@ -14,48 +14,23 @@
 \section*{Accuracy and Flips}
 \begin{table}[H]
 \centering
-\caption{Accuracy per config: answered-only and strict (truncated=wrong), with 95\% bootstrap CI on acc\_strict.}
+\caption{Accuracy per config. n = questions; n\_answered = questions that produced a final answer (not truncated at the token cap). acc\_answered = correct / n\_answered; acc\_strict = correct / n (truncated counted as wrong); ci\_lo/ci\_hi = 95\% bootstrap CI on acc\_strict.}
 \small
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-\textbf{config} & \textbf{n} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
+\textbf{config} & \textbf{n} & \textbf{n\_answered} & \textbf{acc\_answered} & \textbf{acc\_strict} & \textbf{ci\_lo} & \textbf{ci\_hi} \\
 \midrule
-clean & 20 & 0.7 & 0.7 & 0.5 & 0.9 \\
-clean\_fix-spellcheck & 1319 & 0.8407 & 0.8324 & 0.8112 & 0.8537 \\
-rate25\_real0\_fix-spellcheck & 500 & 0.7867 & 0.76 & 0.724 & 0.798 \\
-rate25\_real10\_fix-spellcheck & 500 & 0.7732 & 0.75 & 0.712 & 0.784 \\
-rate25\_real20\_fix-spellcheck & 500 & 0.7651 & 0.736 & 0.696 & 0.774 \\
-rate25\_real30\_fix-spellcheck & 500 & 0.7495 & 0.73 & 0.692 & 0.768 \\
-rate25\_real40\_fix-spellcheck & 500 & 0.7377 & 0.72 & 0.68 & 0.756 \\
-rate25\_real50\_fix-spellcheck & 500 & 0.7299 & 0.708 & 0.668 & 0.748 \\
-rate25\_real60\_fix-spellcheck & 500 & 0.7479 & 0.724 & 0.682 & 0.762 \\
-rate25\_real70\_fix-spellcheck & 500 & 0.7618 & 0.742 & 0.702 & 0.78 \\
-rate50\_real0\_fix-spellcheck & 500 & 0.714 & 0.694 & 0.654 & 0.732 \\
-rate50\_real10\_fix-spellcheck & 500 & 0.6934 & 0.674 & 0.634 & 0.714 \\
-rate50\_real20\_fix-spellcheck & 500 & 0.6756 & 0.658 & 0.616 & 0.702 \\
-rate50\_real30\_fix-spellcheck & 500 & 0.6687 & 0.65 & 0.608 & 0.69 \\
-rate50\_real40\_fix-spellcheck & 500 & 0.6646 & 0.65 & 0.608 & 0.694 \\
-rate50\_real50\_fix-spellcheck & 500 & 0.628 & 0.618 & 0.576 & 0.66 \\
-rate50\_real60\_fix-spellcheck & 500 & 0.6196 & 0.606 & 0.564 & 0.648 \\
-rate50\_real70\_fix-spellcheck & 500 & 0.6053 & 0.592 & 0.548 & 0.638 \\
-rate75\_real0\_fix-spellcheck & 500 & 0.6562 & 0.63 & 0.588 & 0.674 \\
-rate75\_real10\_fix-spellcheck & 500 & 0.6286 & 0.616 & 0.576 & 0.658 \\
-rate75\_real20\_fix-spellcheck & 500 & 0.5825 & 0.572 & 0.53 & 0.616 \\
-rate75\_real30\_fix-spellcheck & 500 & 0.5496 & 0.532 & 0.49 & 0.578 \\
-rate75\_real40\_fix-spellcheck & 500 & 0.5456 & 0.538 & 0.494 & 0.582 \\
-rate75\_real50\_fix-spellcheck & 500 & 0.4939 & 0.486 & 0.444 & 0.528 \\
-rate75\_real60\_fix-spellcheck & 500 & 0.5155 & 0.5 & 0.458 & 0.546 \\
-rate75\_real70\_fix-spellcheck & 500 & 0.4776 & 0.468 & 0.424 & 0.512 \\
-typo30\_real0\_fix-spellcheck & 500 & 0.7778 & 0.756 & 0.716 & 0.792 \\
-typo30\_real10\_fix-spellcheck & 500 & 0.7906 & 0.77 & 0.73 & 0.806 \\
-typo30\_real20\_fix-spellcheck & 500 & 0.7791 & 0.762 & 0.724 & 0.798 \\
-typo30\_real30\_fix-spellcheck & 500 & 0.7563 & 0.72 & 0.682 & 0.758 \\
-typo30\_real40\_fix-spellcheck & 500 & 0.77 & 0.75 & 0.712 & 0.788 \\
-typo30\_real50\_fix-spellcheck & 500 & 0.7438 & 0.72 & 0.68 & 0.756 \\
-typo30\_real60\_fix-spellcheck & 500 & 0.734 & 0.712 & 0.672 & 0.752 \\
-typo30\_real70\_fix-spellcheck & 500 & 0.7288 & 0.704 & 0.662 & 0.744 \\
-typo30\_real10 & 20 & 0.55 & 0.55 & 0.35 & 0.75 \\
+clean & 500 & 497 & 0.837 & 0.832 & 0.798 & 0.864 \\
+typo25\_real10 & 500 & 485 & 0.7732 & 0.75 & 0.712 & 0.784 \\
+typo25\_real40 & 500 & 488 & 0.7377 & 0.72 & 0.68 & 0.756 \\
+typo25\_real70 & 500 & 487 & 0.7618 & 0.742 & 0.702 & 0.78 \\
+typo50\_real10 & 500 & 486 & 0.6934 & 0.674 & 0.634 & 0.714 \\
+typo50\_real40 & 500 & 489 & 0.6646 & 0.65 & 0.608 & 0.694 \\
+typo50\_real70 & 500 & 489 & 0.6053 & 0.592 & 0.548 & 0.638 \\
+typo75\_real10 & 500 & 490 & 0.6286 & 0.616 & 0.576 & 0.658 \\
+typo75\_real40 & 500 & 493 & 0.5456 & 0.538 & 0.494 & 0.582 \\
+typo75\_real70 & 500 & 490 & 0.4776 & 0.468 & 0.424 & 0.512 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -70,40 +45,15 @@ typo30\_real10 & 20 & 0.55 & 0.55 & 0.35 & 0.75 \\
 \toprule
 \textbf{config} & \textbf{n\_both} & \textbf{r2w} & \textbf{w2r} & \textbf{r2w\_ratio} & \textbf{w2r\_ratio} & \textbf{net\_flip\_ratio} & \textbf{mcnemar\_b} & \textbf{mcnemar\_c} & \textbf{mcnemar\_stat} & \textbf{mcnemar\_p} \\
 \midrule
-clean\_fix-spellcheck & 19 & 0 & 2 & 0.0 & 0.1053 & -0.1053 & 0 & 2 & 0.5 & 0.47950012 \\
-rate25\_real0\_fix-spellcheck & 19 & 4 & 2 & 0.2105 & 0.1053 & 0.1053 & 4 & 2 & 0.167 & 0.6830914 \\
-rate25\_real10\_fix-spellcheck & 20 & 2 & 2 & 0.1 & 0.1 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
-rate25\_real20\_fix-spellcheck & 20 & 4 & 1 & 0.2 & 0.05 & 0.15 & 4 & 1 & 0.8 & 0.37109337 \\
-rate25\_real30\_fix-spellcheck & 20 & 2 & 1 & 0.1 & 0.05 & 0.05 & 2 & 1 & 0.0 & 1.0 \\
-rate25\_real40\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
-rate25\_real50\_fix-spellcheck & 20 & 1 & 1 & 0.05 & 0.05 & 0.0 & 1 & 1 & 0.5 & 0.47950012 \\
-rate25\_real60\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
-rate25\_real70\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
-rate50\_real0\_fix-spellcheck & 20 & 1 & 2 & 0.05 & 0.1 & -0.05 & 1 & 2 & 0.0 & 1.0 \\
-rate50\_real10\_fix-spellcheck & 19 & 3 & 2 & 0.1579 & 0.1053 & 0.0526 & 3 & 2 & 0.0 & 1.0 \\
-rate50\_real20\_fix-spellcheck & 20 & 4 & 2 & 0.2 & 0.1 & 0.1 & 4 & 2 & 0.167 & 0.6830914 \\
-rate50\_real30\_fix-spellcheck & 19 & 6 & 2 & 0.3158 & 0.1053 & 0.2105 & 6 & 2 & 1.125 & 0.28884437 \\
-rate50\_real40\_fix-spellcheck & 20 & 7 & 1 & 0.35 & 0.05 & 0.3 & 7 & 1 & 3.125 & 0.07709987 \\
-rate50\_real50\_fix-spellcheck & 20 & 6 & 1 & 0.3 & 0.05 & 0.25 & 6 & 1 & 2.286 & 0.13057002 \\
-rate50\_real60\_fix-spellcheck & 20 & 6 & 1 & 0.3 & 0.05 & 0.25 & 6 & 1 & 2.286 & 0.13057002 \\
-rate50\_real70\_fix-spellcheck & 20 & 6 & 1 & 0.3 & 0.05 & 0.25 & 6 & 1 & 2.286 & 0.13057002 \\
-rate75\_real0\_fix-spellcheck & 20 & 5 & 3 & 0.25 & 0.15 & 0.1 & 5 & 3 & 0.125 & 0.72367361 \\
-rate75\_real10\_fix-spellcheck & 20 & 7 & 0 & 0.35 & 0.0 & 0.35 & 7 & 0 & 5.143 & 0.0233422 \\
-rate75\_real20\_fix-spellcheck & 19 & 2 & 2 & 0.1053 & 0.1053 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
-rate75\_real30\_fix-spellcheck & 20 & 5 & 1 & 0.25 & 0.05 & 0.2 & 5 & 1 & 1.5 & 0.22067136 \\
-rate75\_real40\_fix-spellcheck & 20 & 9 & 2 & 0.45 & 0.1 & 0.35 & 9 & 2 & 3.273 & 0.07044043 \\
-rate75\_real50\_fix-spellcheck & 20 & 7 & 2 & 0.35 & 0.1 & 0.25 & 7 & 2 & 1.778 & 0.18242244 \\
-rate75\_real60\_fix-spellcheck & 19 & 7 & 1 & 0.3684 & 0.0526 & 0.3158 & 7 & 1 & 3.125 & 0.07709987 \\
-rate75\_real70\_fix-spellcheck & 20 & 9 & 2 & 0.45 & 0.1 & 0.35 & 9 & 2 & 3.273 & 0.07044043 \\
-typo30\_real0\_fix-spellcheck & 20 & 3 & 3 & 0.15 & 0.15 & 0.0 & 3 & 3 & 0.167 & 0.6830914 \\
-typo30\_real10\_fix-spellcheck & 19 & 3 & 2 & 0.1579 & 0.1053 & 0.0526 & 3 & 2 & 0.0 & 1.0 \\
-typo30\_real20\_fix-spellcheck & 20 & 2 & 2 & 0.1 & 0.1 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
-typo30\_real30\_fix-spellcheck & 18 & 2 & 2 & 0.1111 & 0.1111 & 0.0 & 2 & 2 & 0.25 & 0.61707508 \\
-typo30\_real40\_fix-spellcheck & 19 & 0 & 3 & 0.0 & 0.1579 & -0.1579 & 0 & 3 & 1.333 & 0.24821308 \\
-typo30\_real50\_fix-spellcheck & 19 & 3 & 1 & 0.1579 & 0.0526 & 0.1053 & 3 & 1 & 0.25 & 0.61707508 \\
-typo30\_real60\_fix-spellcheck & 19 & 3 & 1 & 0.1579 & 0.0526 & 0.1053 & 3 & 1 & 0.25 & 0.61707508 \\
-typo30\_real70\_fix-spellcheck & 19 & 3 & 2 & 0.1579 & 0.1053 & 0.0526 & 3 & 2 & 0.0 & 1.0 \\
-typo30\_real10 & 20 & 5 & 2 & 0.25 & 0.1 & 0.15 & 5 & 2 & 0.571 & 0.4496918 \\
+typo25\_real10 & 483 & 57 & 27 & 0.118 & 0.0559 & 0.0621 & 57 & 27 & 10.012 & 0.00155532 \\
+typo25\_real40 & 486 & 72 & 19 & 0.1481 & 0.0391 & 0.1091 & 72 & 19 & 29.714 & 5e-08 \\
+typo25\_real70 & 485 & 64 & 27 & 0.132 & 0.0557 & 0.0763 & 64 & 27 & 14.242 & 0.00016076 \\
+typo50\_real10 & 484 & 92 & 23 & 0.1901 & 0.0475 & 0.1426 & 92 & 23 & 40.209 & 0.0 \\
+typo50\_real40 & 488 & 103 & 19 & 0.2111 & 0.0389 & 0.1721 & 103 & 19 & 56.467 & 0.0 \\
+typo50\_real70 & 487 & 129 & 17 & 0.2649 & 0.0349 & 0.23 & 129 & 17 & 84.39 & 0.0 \\
+typo75\_real10 & 488 & 125 & 23 & 0.2561 & 0.0471 & 0.209 & 125 & 23 & 68.926 & 0.0 \\
+typo75\_real40 & 490 & 160 & 17 & 0.3265 & 0.0347 & 0.2918 & 160 & 17 & 113.921 & 0.0 \\
+typo75\_real70 & 487 & 189 & 16 & 0.3881 & 0.0329 & 0.3552 & 189 & 16 & 144.312 & 0.0 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -133,8 +83,16 @@ typo30\_real10 & 20 & 5 & 2 & 0.25 & 0.1 & 0.15 & 5 & 2 & 0.571 & 0.4496918 \\
 \toprule
 \textbf{config} & \textbf{n\_answered} & \textbf{mean\_tok} & \textbf{median\_tok} & \textbf{p90\_tok} & \textbf{max\_tok} \\
 \midrule
-clean & 20 & 596.0 & 443.5 & 1467 & 2467 \\
-typo30\_real10 & 20 & 603.2 & 517.0 & 1078 & 2140 \\
+clean & 497 & 590.5 & 450 & 1098 & 3966 \\
+typo25\_real10 & 485 & 695.2 & 487 & 1395 & 4096 \\
+typo25\_real40 & 488 & 661.6 & 462.0 & 1429 & 4096 \\
+typo25\_real70 & 487 & 646.4 & 469 & 1209 & 3972 \\
+typo50\_real10 & 486 & 622.9 & 457.0 & 1179 & 4096 \\
+typo50\_real40 & 489 & 610.5 & 456 & 1001 & 4096 \\
+typo50\_real70 & 489 & 584.6 & 454 & 975 & 4096 \\
+typo75\_real10 & 490 & 666.6 & 467.0 & 1236 & 4096 \\
+typo75\_real40 & 493 & 601.9 & 459 & 946 & 4096 \\
+typo75\_real70 & 490 & 570.3 & 458.5 & 768 & 4096 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -149,8 +107,16 @@ typo30\_real10 & 20 & 603.2 & 517.0 & 1078 & 2140 \\
 \toprule
 \textbf{config} & \textbf{tok\_correct} & \textbf{tok\_wrong} & \textbf{wrong\_over\_correct} \\
 \midrule
-clean & 629.9 & 516.7 & 0.8202 \\
-typo30\_real10 & 664.5 & 528.2 & 0.7949 \\
+clean & 574.4 & 673.2 & 1.1719 \\
+typo25\_real10 & 660.6 & 813.4 & 1.2313 \\
+typo25\_real40 & 649.7 & 695.0 & 1.0698 \\
+typo25\_real70 & 629.9 & 699.1 & 1.1098 \\
+typo50\_real10 & 636.7 & 591.7 & 0.9294 \\
+typo50\_real40 & 593.6 & 644.0 & 1.0849 \\
+typo50\_real70 & 595.6 & 567.8 & 0.9533 \\
+typo75\_real10 & 614.0 & 755.6 & 1.2306 \\
+typo75\_real40 & 581.9 & 626.0 & 1.0758 \\
+typo75\_real70 & 529.7 & 607.3 & 1.1465 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -183,8 +149,16 @@ sense, \dots}) is treated as repair behaviour, not self-doubt.
 \toprule
 \textbf{config} & \textbf{n\_answered} & \textbf{second\_guess\_per\_1k} & \textbf{second\_guess\_per\_trace} & \textbf{uncertainty\_per\_1k} & \textbf{uncertainty\_per\_trace} & \textbf{total\_per\_1k} & \textbf{total\_per\_trace} \\
 \midrule
-clean & 20 & 5.773 & 1.15 & 3.514 & 0.7 & 9.287 & 1.85 \\
-typo30\_real10 & 20 & 5.047 & 1.05 & 5.768 & 1.2 & 10.815 & 2.25 \\
+clean & 497 & 7.625 & 1.64 & 3.705 & 0.797 & 11.329 & 2.437 \\
+typo25\_real10 & 485 & 9.811 & 2.746 & 6.593 & 1.845 & 16.404 & 4.592 \\
+typo25\_real40 & 488 & 8.918 & 2.328 & 8.706 & 2.273 & 17.623 & 4.6 \\
+typo25\_real70 & 487 & 8.554 & 2.133 & 7.525 & 1.877 & 16.08 & 4.01 \\
+typo50\_real10 & 486 & 8.421 & 1.977 & 9.297 & 2.183 & 17.717 & 4.16 \\
+typo50\_real40 & 489 & 7.765 & 1.697 & 8.121 & 1.775 & 15.886 & 3.472 \\
+typo50\_real70 & 489 & 7.044 & 1.466 & 7.506 & 1.562 & 14.55 & 3.029 \\
+typo75\_real10 & 490 & 8.944 & 2.324 & 11.834 & 3.076 & 20.778 & 5.4 \\
+typo75\_real40 & 493 & 6.252 & 1.331 & 10.074 & 2.144 & 16.326 & 3.475 \\
+typo75\_real70 & 490 & 5.984 & 1.112 & 9.575 & 1.78 & 15.559 & 2.892 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -199,28 +173,28 @@ typo30\_real10 & 20 & 5.047 & 1.05 & 5.768 & 1.2 & 10.815 & 2.25 \\
 \toprule
 \textbf{marker} & \textbf{category} & \textbf{clean\_per\_1k} & \textbf{typo\_per\_1k} & \textbf{discrimination} \\
 \midrule
-maybe & uncertainty & 1.757 & 2.403 & 0.646 \\
-actually & second\_guess & 0.0 & 0.481 & 0.481 \\
-unclear/confused & uncertainty & 0.0 & 0.481 & 0.481 \\
-or maybe/alt & uncertainty & 1.757 & 2.163 & 0.406 \\
-wait & second\_guess & 2.51 & 2.884 & 0.374 \\
-might be & uncertainty & 0.0 & 0.24 & 0.24 \\
-could be & uncertainty & 0.0 & 0.24 & 0.24 \\
-I assume & uncertainty & 0.0 & 0.24 & 0.24 \\
+maybe & uncertainty & 1.665 & 4.535 & 2.869 \\
+or maybe/alt & uncertainty & 1.038 & 2.075 & 1.037 \\
+perhaps & uncertainty & 0.346 & 1.005 & 0.659 \\
+wait & second\_guess & 3.583 & 4.14 & 0.557 \\
+unclear/confused & uncertainty & 0.29 & 0.558 & 0.268 \\
+hmm & second\_guess & 1.59 & 1.802 & 0.211 \\
+might be & uncertainty & 0.065 & 0.216 & 0.151 \\
+not sure & uncertainty & 0.037 & 0.12 & 0.083 \\
+I assume & uncertainty & 0.009 & 0.072 & 0.062 \\
+actually & second\_guess & 0.225 & 0.264 & 0.039 \\
+not entirely & uncertainty & 0.009 & 0.027 & 0.018 \\
+but wait & second\_guess & 0.402 & 0.412 & 0.01 \\
 reconsider & second\_guess & 0.0 & 0.0 & 0.0 \\
-wait/actually no & second\_guess & 0.0 & 0.0 & 0.0 \\
 on second thought & second\_guess & 0.0 & 0.0 & 0.0 \\
-not sure & uncertainty & 0.0 & 0.0 & 0.0 \\
-perhaps & uncertainty & 0.0 & 0.0 & 0.0 \\
-possibly & uncertainty & 0.0 & 0.0 & 0.0 \\
-I guess & uncertainty & 0.0 & 0.0 & 0.0 \\
-presumably & uncertainty & 0.0 & 0.0 & 0.0 \\
-not entirely & uncertainty & 0.0 & 0.0 & 0.0 \\
-but wait & second\_guess & 0.502 & 0.24 & -0.262 \\
-hold on & second\_guess & 0.502 & 0.24 & -0.262 \\
-let me recheck & second\_guess & 0.502 & 0.24 & -0.262 \\
-hmm & second\_guess & 1.255 & 0.961 & -0.294 \\
-double-check & second\_guess & 0.502 & 0.0 & -0.502 \\
+possibly & uncertainty & 0.009 & 0.004 & -0.005 \\
+presumably & uncertainty & 0.009 & 0.004 & -0.005 \\
+could be & uncertainty & 0.122 & 0.09 & -0.031 \\
+I guess & uncertainty & 0.103 & 0.071 & -0.032 \\
+hold on & second\_guess & 0.458 & 0.406 & -0.052 \\
+let me recheck & second\_guess & 0.505 & 0.438 & -0.068 \\
+wait/actually no & second\_guess & 0.299 & 0.192 & -0.107 \\
+double-check & second\_guess & 0.561 & 0.452 & -0.109 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -235,12 +209,40 @@ double-check & second\_guess & 0.502 & 0.0 & -0.502 \\
 \toprule
 \textbf{config} & \textbf{2g\_correct} & \textbf{2g\_wrong} & \textbf{2g\_wrong\_over\_correct} & \textbf{un\_correct} & \textbf{un\_wrong} & \textbf{un\_wrong\_over\_correct} & \textbf{tot\_correct} & \textbf{tot\_wrong} & \textbf{tot\_wrong\_over\_correct} \\
 \midrule
-clean & 7.012 & 0.0 & 0.0 & 4.268 & 0.0 & 0.0 & 11.28 & 0.0 & 0.0 \\
-typo30\_real10 & 6.947 & 0.0 & 0.0 & 7.608 & 0.879 & 0.115 & 14.555 & 0.879 & 0.06 \\
+clean & 7.608 & 7.699 & 1.012 & 3.233 & 5.839 & 1.806 & 10.841 & 13.537 & 1.249 \\
+typo25\_real10 & 9.765 & 9.939 & 1.018 & 5.43 & 9.8 & 1.805 & 15.195 & 19.739 & 1.299 \\
+typo25\_real40 & 9.001 & 8.673 & 0.964 & 8.233 & 10.098 & 1.226 & 17.234 & 18.77 & 1.089 \\
+typo25\_real70 & 9.031 & 7.109 & 0.787 & 5.692 & 13.088 & 2.299 & 14.723 & 20.197 & 1.372 \\
+typo50\_real10 & 9.268 & 5.945 & 0.642 & 8.927 & 10.378 & 1.163 & 18.194 & 16.324 & 0.897 \\
+typo50\_real40 & 8.789 & 5.65 & 0.643 & 6.887 & 10.668 & 1.549 & 15.676 & 16.318 & 1.041 \\
+typo50\_real70 & 7.719 & 5.715 & 0.74 & 8.786 & 4.986 & 0.568 & 16.505 & 10.701 & 0.648 \\
+typo75\_real10 & 8.248 & 9.86 & 1.195 & 7.792 & 17.155 & 2.202 & 16.041 & 27.015 & 1.684 \\
+typo75\_real40 & 6.718 & 5.689 & 0.847 & 9.05 & 11.315 & 1.25 & 15.767 & 17.003 & 1.078 \\
+typo75\_real70 & 6.22 & 5.798 & 0.932 & 8.534 & 10.397 & 1.218 & 14.754 & 16.195 & 1.098 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \end{table}
+
+\noindent\textbf{LLM judge.} The proposal specifies a second,
+non-lexical measure for both dimensions: a separate model with a fixed, strict prompt.
+The judge is a different model from the one under test, called at temperature 0 on a
+seeded random subsample of answered traces per config. It is shown the corrupted-word
+list (\emph{original} $\to$ \emph{as shown}), the question, and the reasoning trace
+(head+tail window). It returns two scalar ratings and evidence: \emph{self\_doubt\_score}
+from 0--10, where 0 means no second-guessing and 10 means pervasive uncertainty or
+looping; and \emph{repair\_understanding\_score} from 0--5, where 0 means the question's
+meaning is fully understood and 5 means the model is fundamentally lost because of the
+corruption. The judge also returns a one-line justification and verbatim evidence quotes;
+quotes are checked against the reasoning trace. The judge is a subsample measure, while
+the lexical tables remain the full-data result.
+\medskip
+
+% missing: judge_scalar_per_config.csv
+
+% missing: judge_scalar_by_outcome.csv
+
+% missing: judge_scalar_by_real.csv
 
 \section*{Repair Behaviour}
 \begin{table}[H]
@@ -252,7 +254,15 @@ typo30\_real10 & 6.947 & 0.0 & 0.0 & 7.608 & 0.879 & 0.115 & 14.555 & 0.879 & 0.
 \toprule
 \textbf{config} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_n} & \textbf{flagged\_n} & \textbf{misread\_n} & \textbf{not\_used\_n} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
 \midrule
-typo30\_real10 & 174 & 113 & 1 & 2 & 58 & 0.6494 & 0.0057 & 0.0115 & 0.3333 \\
+typo25\_real10 & 3537 & 2395 & 50 & 24 & 1068 & 0.6771 & 0.0141 & 0.0068 & 0.302 \\
+typo25\_real40 & 3574 & 2282 & 132 & 55 & 1105 & 0.6385 & 0.0369 & 0.0154 & 0.3092 \\
+typo25\_real70 & 3548 & 2119 & 216 & 90 & 1123 & 0.5972 & 0.0609 & 0.0254 & 0.3165 \\
+typo50\_real10 & 6926 & 4516 & 86 & 42 & 2282 & 0.652 & 0.0124 & 0.0061 & 0.3295 \\
+typo50\_real40 & 6989 & 4239 & 218 & 127 & 2405 & 0.6065 & 0.0312 & 0.0182 & 0.3441 \\
+typo50\_real70 & 6967 & 3972 & 353 & 199 & 2443 & 0.5701 & 0.0507 & 0.0286 & 0.3507 \\
+typo75\_real10 & 9839 & 6215 & 126 & 106 & 3392 & 0.6317 & 0.0128 & 0.0108 & 0.3448 \\
+typo75\_real40 & 9776 & 5621 & 363 & 209 & 3583 & 0.575 & 0.0371 & 0.0214 & 0.3665 \\
+typo75\_real70 & 9653 & 5105 & 466 & 383 & 3699 & 0.5289 & 0.0483 & 0.0397 & 0.3832 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -281,7 +291,9 @@ bucket by which form appears in the reasoning:
 \toprule
 \textbf{real\_ratio} & \textbf{n\_corrupt\_words} & \textbf{silent\_fix\_frac} & \textbf{flagged\_frac} & \textbf{misread\_frac} & \textbf{not\_used\_frac} \\
 \midrule
-10 & 174 & 0.6494 & 0.0057 & 0.0115 & 0.3333 \\
+10 & 20302 & 0.6465 & 0.0129 & 0.0085 & 0.3321 \\
+40 & 20339 & 0.597 & 0.0351 & 0.0192 & 0.3487 \\
+70 & 20168 & 0.5551 & 0.0513 & 0.0333 & 0.3602 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -296,7 +308,15 @@ bucket by which form appears in the reasoning:
 \toprule
 \textbf{config} & \textbf{misread\_correct} & \textbf{misread\_wrong} & \textbf{wrong\_over\_correct} \\
 \midrule
-typo30\_real10 & 0.0108 & 0.0123 & 1.148 \\
+typo25\_real10 & 0.0066 & 0.0076 & 1.152 \\
+typo25\_real40 & 0.0143 & 0.0183 & 1.286 \\
+typo25\_real70 & 0.0222 & 0.035 & 1.581 \\
+typo50\_real10 & 0.0062 & 0.0058 & 0.945 \\
+typo50\_real40 & 0.0167 & 0.0207 & 1.236 \\
+typo50\_real70 & 0.0283 & 0.0289 & 1.018 \\
+typo75\_real10 & 0.0093 & 0.0131 & 1.408 \\
+typo75\_real40 & 0.0205 & 0.0224 & 1.092 \\
+typo75\_real70 & 0.0355 & 0.0431 & 1.216 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -327,15 +347,15 @@ dataset's result.
 \toprule
 \textbf{rate} & \textbf{compare} & \textbf{n\_both} & \textbf{acc\_low\_real} & \textbf{acc\_high\_real} & \textbf{delta\_acc} & \textbf{r2w} & \textbf{w2r} & \textbf{mcnemar\_p} \\
 \midrule
-25 & real10\_to\_real70 & 425 & 0.9176 & 0.9129 & -0.0047 & 21 & 19 & 0.87436706 \\
-25 & real10\_to\_real40 & 429 & 0.9138 & 0.9161 & 0.0023 & 17 & 18 & 1.0 \\
-25 & real40\_to\_real70 & 433 & 0.9169 & 0.9007 & -0.0162 & 30 & 23 & 0.40984673 \\
-50 & real10\_to\_real70 & 399 & 0.8521 & 0.802 & -0.0501 & 52 & 32 & 0.03816577 \\
-50 & real10\_to\_real40 & 411 & 0.8564 & 0.8418 & -0.0146 & 37 & 31 & 0.54428962 \\
-50 & real40\_to\_real70 & 411 & 0.8345 & 0.8078 & -0.0268 & 39 & 28 & 0.2218232 \\
-75 & real10\_to\_real70 & 346 & 0.8237 & 0.7341 & -0.0896 & 56 & 25 & 0.00085812 \\
-75 & real10\_to\_real40 & 366 & 0.8033 & 0.7978 & -0.0055 & 44 & 42 & 0.91412835 \\
-75 & real40\_to\_real70 & 354 & 0.7994 & 0.7514 & -0.048 & 42 & 25 & 0.05061718 \\
+25 & real10\_to\_real70 & 476 & 0.7794 & 0.7605 & -0.0189 & 50 & 41 & 0.40167817 \\
+25 & real10\_to\_real40 & 477 & 0.7778 & 0.7358 & -0.0419 & 58 & 38 & 0.0524795 \\
+25 & real40\_to\_real70 & 479 & 0.7411 & 0.7641 & 0.023 & 38 & 49 & 0.28366949 \\
+50 & real10\_to\_real70 & 479 & 0.6931 & 0.6138 & -0.0793 & 87 & 49 & 0.00151016 \\
+50 & real10\_to\_real40 & 478 & 0.6946 & 0.6736 & -0.0209 & 69 & 59 & 0.42632554 \\
+50 & real40\_to\_real70 & 482 & 0.668 & 0.6079 & -0.0602 & 66 & 37 & 0.00579924 \\
+75 & real10\_to\_real70 & 482 & 0.6307 & 0.4772 & -0.1535 & 115 & 41 & 1e-08 \\
+75 & real10\_to\_real40 & 484 & 0.6281 & 0.5537 & -0.0744 & 94 & 58 & 0.00452729 \\
+75 & real40\_to\_real70 & 485 & 0.5505 & 0.4804 & -0.0701 & 77 & 43 & 0.00259128 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -350,7 +370,7 @@ dataset's result.
 \toprule
 \textbf{n} & \textbf{coef\_num\_real} & \textbf{coef\_num\_nonword} & \textbf{odds\_real} & \textbf{odds\_nonword} & \textbf{intercept} \\
 \midrule
-20 & -0.55966 & -0.0458 & 0.5714 & 0.9552 & 1.11723 \\
+4397 & -0.07196 & -0.02779 & 0.9306 & 0.9726 & 1.34769 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -365,7 +385,9 @@ dataset's result.
 \toprule
 \textbf{real\_ratio} & \textbf{n\_wrong} & \textbf{explicit\_notice\_frac} & \textbf{silent\_frac} \\
 \midrule
-10 & 9 & 0.0 & 1.0 \\
+10 & 441 & 0.0907 & 0.9093 \\
+40 & 516 & 0.0775 & 0.9225 \\
+70 & 565 & 0.0761 & 0.9239 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -381,73 +403,24 @@ dataset's result.
 \toprule
 \textbf{config} & \textbf{second\_guess} & \textbf{uncertainty} & \textbf{typo\_noticing} & \textbf{repair\_words} \\
 \midrule
-clean & 5.773 & 3.514 & 0.753 & 0.502 \\
-typo30\_real10 & 5.047 & 5.768 & 1.682 & 1.202 \\
+clean & 7.625 & 3.705 & 0.851 & 0.73 \\
+typo25\_real10 & 9.811 & 6.593 & 1.959 & 1.363 \\
+typo25\_real40 & 8.918 & 8.706 & 3.14 & 2.355 \\
+typo25\_real70 & 8.554 & 7.525 & 2.486 & 1.713 \\
+typo50\_real10 & 8.421 & 9.297 & 2.795 & 2.156 \\
+typo50\_real40 & 7.765 & 8.121 & 2.18 & 1.852 \\
+typo50\_real70 & 7.044 & 7.506 & 2.21 & 1.798 \\
+typo75\_real10 & 8.944 & 11.834 & 3.141 & 2.434 \\
+typo75\_real40 & 6.252 & 10.074 & 3.374 & 2.316 \\
+typo75\_real70 & 5.984 & 9.575 & 2.591 & 2.009 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
 \section*{Spellcheck Recovery}
-\begin{table}[H]
-\centering
-\caption{External spellcheck recovery by config. restored\_exact\_pct = percentage of typo words that were corrected back to exactly their original clean word.}
-\small
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrrr}
-\toprule
-\textbf{config} & \textbf{n\_questions} & \textbf{total\_typo\_words} & \textbf{restored\_exact\_n} & \textbf{changed\_other\_n} & \textbf{not\_restored\_n} & \textbf{restored\_exact\_frac} & \textbf{restored\_exact\_pct} \\
-\midrule
-rate25\_real0\_fix-spellcheck & 500 & 6500 & 3500 & 1500 & 3000 & 0.538462 & 53.85 \\
-rate25\_real10\_fix-spellcheck & 500 & 6500 & 4000 & 1000 & 2500 & 0.615385 & 61.54 \\
-rate25\_real20\_fix-spellcheck & 500 & 6500 & 3500 & 1000 & 3000 & 0.538462 & 53.85 \\
-rate25\_real30\_fix-spellcheck & 500 & 6500 & 3500 & 0 & 3000 & 0.538462 & 53.85 \\
-rate25\_real40\_fix-spellcheck & 500 & 6500 & 3500 & 500 & 3000 & 0.538462 & 53.85 \\
-rate25\_real50\_fix-spellcheck & 500 & 6500 & 3000 & 0 & 3500 & 0.461538 & 46.15 \\
-rate25\_real60\_fix-spellcheck & 500 & 6500 & 2500 & 0 & 4000 & 0.384615 & 38.46 \\
-rate25\_real70\_fix-spellcheck & 500 & 6500 & 2500 & 0 & 4000 & 0.384615 & 38.46 \\
-rate50\_real0\_fix-spellcheck & 500 & 13000 & 9500 & 1000 & 3500 & 0.730769 & 73.08 \\
-rate50\_real10\_fix-spellcheck & 500 & 13000 & 8500 & 500 & 4500 & 0.653846 & 65.38 \\
-rate50\_real20\_fix-spellcheck & 500 & 13000 & 8000 & 1000 & 5000 & 0.615385 & 61.54 \\
-rate50\_real30\_fix-spellcheck & 500 & 13000 & 6000 & 1500 & 7000 & 0.461538 & 46.15 \\
-rate50\_real40\_fix-spellcheck & 500 & 13000 & 7000 & 500 & 6000 & 0.538462 & 53.85 \\
-rate50\_real50\_fix-spellcheck & 500 & 13000 & 4500 & 1000 & 8500 & 0.346154 & 34.62 \\
-rate50\_real60\_fix-spellcheck & 500 & 13000 & 5000 & 500 & 8000 & 0.384615 & 38.46 \\
-rate50\_real70\_fix-spellcheck & 500 & 13000 & 4000 & 500 & 9000 & 0.307692 & 30.77 \\
-rate75\_real0\_fix-spellcheck & 500 & 20000 & 12000 & 3500 & 8000 & 0.6 & 60.0 \\
-rate75\_real10\_fix-spellcheck & 500 & 20000 & 11500 & 3500 & 8500 & 0.575 & 57.5 \\
-rate75\_real20\_fix-spellcheck & 500 & 20000 & 12500 & 2000 & 7500 & 0.625 & 62.5 \\
-rate75\_real30\_fix-spellcheck & 500 & 20000 & 8500 & 3500 & 11500 & 0.425 & 42.5 \\
-rate75\_real40\_fix-spellcheck & 500 & 20000 & 9000 & 1500 & 11000 & 0.45 & 45.0 \\
-rate75\_real50\_fix-spellcheck & 500 & 20000 & 8000 & 2000 & 12000 & 0.4 & 40.0 \\
-rate75\_real60\_fix-spellcheck & 500 & 20000 & 6500 & 2000 & 13500 & 0.325 & 32.5 \\
-rate75\_real70\_fix-spellcheck & 500 & 20000 & 5000 & 1000 & 15000 & 0.25 & 25.0 \\
-typo30\_real0\_fix-spellcheck & 500 & 8000 & 4500 & 1500 & 3500 & 0.5625 & 56.25 \\
-typo30\_real10\_fix-spellcheck & 500 & 7900 & 4940 & 1000 & 2960 & 0.625316 & 62.53 \\
-typo30\_real20\_fix-spellcheck & 500 & 8000 & 5000 & 500 & 3000 & 0.625 & 62.5 \\
-typo30\_real30\_fix-spellcheck & 500 & 8000 & 4500 & 500 & 3500 & 0.5625 & 56.25 \\
-typo30\_real40\_fix-spellcheck & 500 & 8000 & 5000 & 0 & 3000 & 0.625 & 62.5 \\
-typo30\_real50\_fix-spellcheck & 500 & 8000 & 5000 & 0 & 3000 & 0.625 & 62.5 \\
-typo30\_real60\_fix-spellcheck & 500 & 8000 & 3000 & 500 & 5000 & 0.375 & 37.5 \\
-typo30\_real70\_fix-spellcheck & 500 & 8000 & 3500 & 500 & 4500 & 0.4375 & 43.75 \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
+% missing: spellcheck_recovery_per_config.csv
 
-\begin{table}[H]
-\centering
-\caption{Overall external spellcheck recovery for this dataset (pooled across spellcheck result files).}
-\small
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrrr}
-\toprule
-\textbf{dataset} & \textbf{configs\_count} & \textbf{total\_typo\_words} & \textbf{restored\_exact\_n} & \textbf{changed\_other\_n} & \textbf{not\_restored\_n} & \textbf{restored\_exact\_frac} & \textbf{restored\_exact\_pct} \\
-\midrule
-gsm8k & 32 & 379900 & 186940 & 34000 & 192960 & 0.492077 & 49.21 \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
+% missing: spellcheck_recovery_overall.csv
 
 \end{document}
