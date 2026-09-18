@@ -116,7 +116,7 @@ def main():
     )
     parser.add_argument(
         "--output-root",
-        default=".",
+        default=os.path.join("results_data", "gsm8k", "llm_as_a_judge"),
         help="directory under which the two requested output directories are created",
     )
     parser.add_argument("--dataset", default=None,

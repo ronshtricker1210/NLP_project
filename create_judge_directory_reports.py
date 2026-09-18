@@ -171,9 +171,10 @@ def build_report(info, rows, tables_dir, output_dir, input_name, dataset):
     dimension_dir = os.path.join(output_dir, info["directory"])
     os.makedirs(dimension_dir, exist_ok=True)
 
-    real_rows = read_csv(os.path.join(dimension_dir, info["files"][0]))
-    typo_rows = read_csv(os.path.join(dimension_dir, info["files"][1]))
-    outcome_rows = read_csv(os.path.join(dimension_dir, info["files"][2]))
+    csv_dir = os.path.join(os.path.dirname(tables_dir), "llm_as_a_judge", info["directory"])
+    real_rows = read_csv(os.path.join(csv_dir, info["files"][0]))
+    typo_rows = read_csv(os.path.join(csv_dir, info["files"][1]))
+    outcome_rows = read_csv(os.path.join(csv_dir, info["files"][2]))
 
     example_blocks = []
     for row in choose_examples(rows):
