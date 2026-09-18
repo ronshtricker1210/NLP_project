@@ -68,7 +68,7 @@ def main():
         print(f"{tag:16s}{s['n']:>5}{s['truncated']:>8.1%}{s['completion']:>8.1%}"
               f"{s['acc_answered']:>9.1%}{s['acc_strict']:>12.1%}{ci:>16}{d:>9}"
               f"{s['capped']/s['n']:>9.1%}")
-        rows_csv.append(dict(config=tag, n=s["n"],
+        rows_csv.append(dict(config=tag, n=s["n"], n_answered=s["answered"],
                              acc_answered=round(s["acc_answered"], 4),
                              acc_strict=round(s["acc_strict"], 4),
                              ci_lo=round(s["ci"][0], 4), ci_hi=round(s["ci"][1], 4)))

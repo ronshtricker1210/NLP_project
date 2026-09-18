@@ -109,7 +109,7 @@ dataset's result.
 # report layout: (section title, [(csv file, caption), ...])
 SECTIONS = [
     ("Accuracy and Flips", [
-        ("accuracy_per_config.csv", "Accuracy per config: answered-only and strict (truncated=wrong), with 95% bootstrap CI on acc_strict."),
+        ("accuracy_per_config.csv", "Accuracy per config. n = questions; n_answered = questions that produced a final answer (not truncated at the token cap). acc_answered = correct / n_answered; acc_strict = correct / n (truncated counted as wrong); ci_lo/ci_hi = 95% bootstrap CI on acc_strict."),
         ("flips_vs_clean.csv", "Answered-only flips vs clean, paired by question over n_both (answered in both conditions). r2w / w2r = questions correct on clean but wrong on this config / wrong on clean but correct on this config; r2w_ratio = r2w / n_both, w2r_ratio = w2r / n_both; net_flip_ratio = r2w_ratio - w2r_ratio = (r2w - w2r) / n_both, the net rate at which this config worsens answers relative to clean."),
         ("__note__", MCNEMAR_NOTE),
     ]),
