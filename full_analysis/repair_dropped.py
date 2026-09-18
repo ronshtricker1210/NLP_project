@@ -19,8 +19,8 @@ every config, and so do not bias config comparisons.
 Usage (after download_data.py):
     NLP_MAX_NEW_TOKENS=17000 python repair_dropped.py --dataset arc
 
-Rewrites data/<dataset>/*.jsonl in place (keeping <name>.jsonl.orig) and writes
-data/<dataset>/dropped_rows.json, the manifest of removed (config, idx). To
+Rewrites raw_results/<dataset>/*.jsonl in place (keeping <name>.jsonl.orig) and writes
+raw_results/<dataset>/dropped_rows.json, the manifest of removed (config, idx). To
 regenerate the removed traces for real instead, delete the dropped rows (this
 script) and use run_typo_api.py's resume mode - it re-runs exactly the idx
 missing from each output file.

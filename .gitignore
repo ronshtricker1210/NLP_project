@@ -34,7 +34,8 @@ data_creation/typo_variants/
 
 # Analysis inputs and judge outputs (JSONL — reproducible from
 # ronshtricker/typo-reasoning-results on the Hub)
-full_analysis/data/
+full_analysis/raw_results/*
+!full_analysis/raw_results/README.md
 full_analysis/judge_cache/
 
 # LaTeX build artifacts

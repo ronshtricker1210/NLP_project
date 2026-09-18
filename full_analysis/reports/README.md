@@ -16,9 +16,9 @@ supplementary/              cross-dataset baseline + fixes report
 
 Each report_<name>.pdf is compiled from report_<name>.tex, which
 `run_all.py --dataset <name>` regenerates from the CSVs in
-`../results_data/<dataset>/<variant>/` (identical structure). fix_warn and
-fix_rewrite raw generations were never published to the HF results repo, so
-their CSVs cannot be re-derived; their reports are kept as built.
+`../analysis_tables/<dataset>/<variant>/` (identical structure). The raw
+generations behind every table live on the HF Hub - see
+`../raw_results/README.md` for the repos and download commands.
 
 gpqa holds no reports yet: only a clean-baseline probe was run (see the paper's
 dataset-substitution note).

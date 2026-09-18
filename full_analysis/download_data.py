@@ -1,4 +1,4 @@
-"""Download a dataset's model-result files from the Hub into data/<dataset>/.
+"""Download a dataset's model-result files from the Hub into raw_results/<dataset>/.
 
 The raw JSONL (~370 MB for everything) is not committed; it lives on the public
 dataset repo ronshtricker/typo-reasoning-results under results/<dataset>/.
@@ -27,7 +27,7 @@ def main():
     ap.add_argument("--repo", default=REPO, help="HF dataset repo holding the results")
     args = ap.parse_args()
 
-    dest = os.path.join(_HERE, "data", args.dataset)
+    dest = os.path.join(_HERE, "raw_results", args.dataset)
     os.makedirs(dest, exist_ok=True)
     prefix = f"results/{args.dataset}/"
     files = [f for f in HfApi().list_repo_files(args.repo, repo_type="dataset")

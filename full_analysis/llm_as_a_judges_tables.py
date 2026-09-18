@@ -111,12 +111,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--input",
-        default=os.path.join("results_data", "gsm8k", "llm_as_a_judge", "manual_check", "gsm8k_first2_5.jsonl"),
+        default=os.path.join("analysis_tables", "gsm8k", "llm_as_a_judge", "manual_check", "gsm8k_first2_5.jsonl"),
         help="judge JSONL trace file",
     )
     parser.add_argument(
         "--output-root",
-        default=os.path.join("results_data", "gsm8k", "llm_as_a_judge"),
+        default=os.path.join("analysis_tables", "gsm8k", "llm_as_a_judge"),
         help="directory under which the two requested output directories are created",
     )
     parser.add_argument("--dataset", default=None,

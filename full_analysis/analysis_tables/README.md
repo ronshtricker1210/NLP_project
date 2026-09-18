@@ -1,10 +1,10 @@
-# Results data
+# Analysis tables
 
-The CSV tables every report and paper asset is built from. The structure
+The analysis CSVs every report and paper asset is built from. The structure
 mirrors `../reports/`: one folder per dataset, one subfolder per analysis
 variant (`results`, `results_20000`, `fix_warn`, `fix_rewrite`, ...).
 
-Regenerate any folder from the raw generations (downloaded by
+Regenerate any folder from the raw generations (in `../raw_results/`, downloaded by
 `download_data.py`) with:
 
     NLP_MAX_NEW_TOKENS=<cap> python run_all.py --dataset <name>

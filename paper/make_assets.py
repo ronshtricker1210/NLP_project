@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TABLES_SRC = os.path.join(HERE, "..", "full_analysis", "results_data")
+TABLES_SRC = os.path.join(HERE, "..", "full_analysis", "analysis_tables")
 FIG_DIR = os.path.join(HERE, "figures")
 TAB_DIR = os.path.join(HERE, "tables")
 os.makedirs(FIG_DIR, exist_ok=True)

@@ -1,8 +1,9 @@
 """Shared loading / scoring helpers for the wider typo analysis.
 
 Dataset-agnostic: the target dataset comes from the NLP_DATASET environment
-variable (default "gsm8k"). Data is read from data/<dataset>/ and tables are
-written to tables/<dataset>/, so several datasets coexist without clobbering.
+variable (default "gsm8k"). Raw generations are read from raw_results/<dataset>/
+and tables are written to analysis_tables/<base>/<variant>/ (see dataset_layout),
+so several datasets coexist without clobbering.
 
 Correctness reuses api-setup/score.py per dataset kind (gsm8k = numeric,
 math500 = math_verify on \\boxed, gpqa = multiple choice). Answer EXTRACTION is
@@ -49,14 +50,14 @@ def dataset_layout(ds):
 
 
 def tables_dir(ds):
-    return os.path.join(_HERE, "results_data", *dataset_layout(ds))
+    return os.path.join(_HERE, "analysis_tables", *dataset_layout(ds))
 
 
 def reports_dir(ds):
     return os.path.join(_HERE, "reports", *dataset_layout(ds))
 
 
-DATA_DIR = os.path.join(_HERE, "data", DATASET)
+DATA_DIR = os.path.join(_HERE, "raw_results", DATASET)
 TABLES = tables_dir(DATASET)
 os.makedirs(TABLES, exist_ok=True)
 # Cap used at generation time; math500/arc API runs used 17000 (NLP_MAX_NEW_TOKENS=17000).
