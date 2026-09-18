@@ -21,4 +21,4 @@ Download into this folder with:
 `dropped_rows.json` files here are audit manifests from the dropped-stream
 repair: per config, the question idx whose original rows were lost to a
 mid-generation connection drop and re-generated with identical prompts
-(tracked copies: ../rerun_manifest_arc.json, ../rerun_manifest_gpqa.json).
+(tracked copies in ../legacy/).
