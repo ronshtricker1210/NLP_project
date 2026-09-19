@@ -40,3 +40,7 @@ reports or the paper.
   all: that judge pass ran on the spell-check arm (see the paper's judge-
   coverage note). The GSM8K judge tables computed on the main 20k run now live
   in `../analysis_tables/gsm8k/results_20000/`.
+- `judge_reports_gsm8k_spellcheck_arm/`, `judge_tables_gsm8k_spellcheck_arm/`:
+  the GSM8K judge reports/traces built from the spell-check arm (the only GSM8K
+  judge pass that existed before 2026-09-19). Superseded by the judge run on the
+  20k main run: `../analysis_tables/gsm8k/results_20000/judge_scalar_*.csv`.
