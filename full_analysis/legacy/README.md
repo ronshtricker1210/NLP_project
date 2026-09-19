@@ -33,3 +33,10 @@ reports or the paper.
   same commit (8c32b31); only the cross-dataset one was run for every dataset.
 - `repair_behavior_old_version.py`: keyword-based repair measure, self-declared
   retired in its own docstring; superseded by `../analysis/repair_wordlevel.py`.
+
+- `analysis_tables_gsm8k_budget4096/`: the analysis CSVs of the 4,096-budget
+  GSM8K grid. Superseded by `../analysis_tables/gsm8k/results_20000/` (the run
+  the paper reports). NOTE its `judge_*.csv` files are NOT from this grid at
+  all: that judge pass ran on the spell-check arm (see the paper's judge-
+  coverage note). The GSM8K judge tables computed on the main 20k run now live
+  in `../analysis_tables/gsm8k/results_20000/`.

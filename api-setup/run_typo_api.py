@@ -431,7 +431,8 @@ def run_one(client, dataset, spec, config, variant, args, totals, checker=None):
         gold = gold_letter if spec["kind"] == "mc" else row[spec["gold"]]
         for s_idx in range(args.n_samples):
             if (idx, s_idx) not in done:
-                tasks.append((idx, s_idx, row, typo_q, spellchecked_q, spellcheck_changes, prompt, gold))
+                tasks.append((idx, s_idx, row, typo_q, spellchecked_q, spellcheck_changes,
+                              spellcheck_stats, prompt, gold))
     if not tasks:
         print("  nothing to do", flush=True)
         return
@@ -439,9 +440,13 @@ def run_one(client, dataset, spec, config, variant, args, totals, checker=None):
     t0, ok, errs = time.time(), 0, 0
     with open(outpath, "a", encoding="utf-8") as f, \
          ThreadPoolExecutor(max_workers=args.concurrency) as pool:
-        futs = {pool.submit(ask_one, client, args, t[4], args.retries): t for t in tasks}
+        # t = (idx, s_idx, row, typo_q, spellchecked_q, spellcheck_changes,
+        #      spellcheck_stats, prompt, gold) -- send the built PROMPT (t[7]),
+        #  not the bare question; index drifted when the spellcheck fields were added.
+        futs = {pool.submit(ask_one, client, args, t[7], args.retries): t for t in tasks}
         for fut in as_completed(futs):
-            idx, s_idx, row, typo_q, spellchecked_q, spellcheck_changes, prompt, gold = futs[fut]
+            (idx, s_idx, row, typo_q, spellchecked_q, spellcheck_changes,
+             spellcheck_stats, prompt, gold) = futs[fut]
             try:
                 gen = fut.result()
             except Exception as e:

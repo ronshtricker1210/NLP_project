@@ -94,7 +94,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--input",
-        default=os.path.join("analysis_tables", "gsm8k", "results", "judge_scalar_per_trace.csv"),
+        default=os.path.join("analysis_tables", "gsm8k", "results_20000", "judge_scalar_per_trace.csv"),
         help="per-trace scalar judge CSV",
     )
     parser.add_argument(
