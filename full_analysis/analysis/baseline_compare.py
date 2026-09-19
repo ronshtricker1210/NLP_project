@@ -8,6 +8,8 @@ import os
 import csv
 import glob
 
+import os as _os, sys as _sys  # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import common
 from common import DATA_DIR, DATASET, TABLES, load_evals, mcnemar
 

@@ -25,3 +25,11 @@ reports or the paper.
   4k, truncation confounds accuracy (19-108 capped traces per config).
   Its analysis tables remain in `../analysis_tables/gsm8k/results/` (which
   also holds the gsm8k judge tables - those are budget-independent).
+
+- `create_judge_reports_gsm8k_only.py` + `judge_scalar_reports_gsm8k_only/`:
+  an earlier, GSM8K-only judge report builder and its output. Superseded by
+  `../judge/build_judge_reports.py`, which produces the same two dimensions for
+  all three datasets (`../reports/<ds>/llm_as_a_judge/`). Both were added in the
+  same commit (8c32b31); only the cross-dataset one was run for every dataset.
+- `repair_behavior_old_version.py`: keyword-based repair measure, self-declared
+  retired in its own docstring; superseded by `../analysis/repair_wordlevel.py`.

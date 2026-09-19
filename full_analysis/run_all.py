@@ -23,9 +23,10 @@ REPORT = os.path.join(reports_dir(DATASET), f"report_{DATASET}.tex")
 # llm_judge.py is NOT here on purpose: it needs HF_TOKEN and spends API credits.
 # Run it yourself (python llm_judge.py --limit 150); its tables are picked up below
 # if they exist, and silently skipped if they don't.
-MODULES = ["accuracy_flips", "reasoning_length", "self_doubt",
-           "repair_wordlevel", "real_word_effect", "lexical_grid",
-           "spellcheck_recovery"]
+MODULES = ["analysis/accuracy_flips", "analysis/reasoning_length",
+           "analysis/self_doubt", "analysis/repair_wordlevel",
+           "analysis/real_word_effect", "analysis/lexical_grid",
+           "fixes/spellcheck_recovery"]
 
 # Free-text explanatory notes inserted into the report as raw LaTeX (via "__note__").
 SELF_DOUBT_NOTE = r"""\noindent The self-doubt markers are curated words grouped into two

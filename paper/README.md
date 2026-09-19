@@ -25,7 +25,7 @@ On Overleaf it just compiles (pdfLaTeX + BibTeX).
 - `custom.bib` — bibliography.
 - `figures/*.pdf`, `tables/tab_full_*.tex` — generated, do not edit by hand.
 - `make_assets.py` — regenerates everything in `figures/` and `tables/` from
-  `../full_analysis/tables/`. Run it after `../full_analysis/run_all.py`.
+  `../full_analysis/analysis_tables/`. Run it after `../full_analysis/run_all.py`.
 
 ```powershell
 python make_assets.py

@@ -33,6 +33,8 @@ except Exception:
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
+import os as _os, sys as _sys  # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 from common import config_files, parse_tag, load_evals, mcnemar, TABLES
 from marker_banks import classify_trace   # (notice_type, n_notice, n_repair)
 

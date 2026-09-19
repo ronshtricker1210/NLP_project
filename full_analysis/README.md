@@ -13,18 +13,51 @@ cd full_analysis
 # 1. install dependencies
 pip install huggingface_hub datasets numpy scikit-learn math_verify
 
-# 2. download the model-result files into data/<dataset>/
-python download_data.py                      # gsm8k (default)
+# 2. download the raw generations into raw_results/<dataset>/
+python tools/download_data.py                # gsm8k (default)
 
 # 3. run every analysis and build the LaTeX report
 python run_all.py                            # -> report_gsm8k.tex
 ```
 
 `run_all.py` runs all the analysis modules (regenerating the CSVs in
-`tables/<dataset>/`) and then writes **`report_<dataset>.tex`** — a self-contained,
+`analysis_tables/<dataset>/<variant>/`) and then writes **`reports/<dataset>/<variant>/report_<dataset>.tex`** — a self-contained,
 Overleaf-ready document with every result table. Open it in Overleaf (or
 `pdflatex report_gsm8k.tex`). To only rebuild the `.tex` from existing CSVs:
 `python run_all.py --skip-run`.
+
+## Layout
+
+```
+run_all.py          entry point: runs every analysis module, then builds the report .tex
+common.py           shared loading / scoring / dataset-to-folder mapping
+marker_banks.py     shared lexical marker banks
+
+analysis/           the core measures, one CSV set per dataset
+                      accuracy_flips.py     accuracy, completion, paired flips (McNemar)
+                      reasoning_length.py   generated-token lengths, answered-only
+                      self_doubt.py         doubt-marker densities
+                      repair_wordlevel.py   per-corrupted-word repair classification
+                      real_word_effect.py   real-word vs non-word logistic models
+                      lexical_grid.py       marker densities across the rate x real grid
+                      baseline_compare.py   R1 vs Qwen2.5-7B (run separately, needs both runs)
+fixes/              spellcheck_recovery.py  typo-recovery rates for the spellcheck arms
+judge/              llm_judge.py            the LLM-judge pass (costs API credits; NOT in run_all)
+                    llm_as_a_judges_tables.py  judge traces -> mean_by_* aggregate tables
+                    build_judge_reports.py     those tables -> per-dimension report .tex/.pdf
+                    plot_judge_scalar.py       judge score plots
+tools/              download_data.py        fetch raw generations from the HF Hub
+                    repair_dropped.py       detect/remove dropped-stream rows (audit tool)
+
+raw_results/        raw generations (gitignored, ~500MB; see its README for the HF repos)
+analysis_tables/    the CSVs every report and paper asset is built from
+reports/            report PDFs + the LaTeX they compile from
+legacy/             superseded artifacts, kept for the audit trail only
+```
+
+Scripts in subfolders are still run from this directory, e.g.
+`python judge/llm_judge.py --all`, `python tools/download_data.py --dataset arc`.
+
 
 ## Other datasets (math500, gpqa, …)
 
@@ -34,8 +67,8 @@ point everything at it with `--dataset` (scoring auto-switches: gsm8k = numeric,
 math500 = `math_verify` on `\boxed`, gpqa = multiple choice):
 
 ```bash
-python download_data.py --dataset math500
-python run_all.py       --dataset math500     # -> report_math500.tex, tables/math500/
+python tools/download_data.py --dataset math500
+python run_all.py             --dataset math500
 ```
 
 Under the hood every module reads the `NLP_DATASET` env var (set by `run_all.py`),

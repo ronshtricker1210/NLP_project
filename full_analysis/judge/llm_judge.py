@@ -42,11 +42,14 @@ try:
 except Exception:
     pass
 
+import os as _os, sys as _sys  # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "analysis"))
 from common import config_files, parse_tag, load_evals, TABLES, DATASET
 from self_doubt import count_markers
 from repair_wordlevel import corrupted_pairs, classify_word, MIN_LEN
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
+_HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_DIR = os.path.join(_HERE, "judge_cache")
 API_BASE = os.environ.get("API_BASE", "https://router.huggingface.co/v1")
 JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "meta-llama/Llama-3.3-70B-Instruct")

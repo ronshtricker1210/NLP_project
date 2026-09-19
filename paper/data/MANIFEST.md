@@ -21,7 +21,7 @@ paper/data/
 | Typo-perturbed question sets | `idoazou/gsm8k-typos`, `idoazou/math500-typos`, `idoazou/arc-typos`, `idoazou/gpqa-typos` | — |
 
 `Dolevabudi/typo-results` is the older repo and holds **GSM8K only**; the
-repo above is the complete one (108 files) and is what `download_data.py`
+repo above is the complete one (108 files) and is what `tools/download_data.py`
 now defaults to.
 
 | `--dataset` | Contents |
@@ -41,11 +41,11 @@ Fetch with the script already in the repo:
 
 ```powershell
 cd full_analysis
-python download_data.py --dataset gsm8k     # then math500, arc
+python tools/download_data.py --dataset gsm8k  # then math500, arc
 python run_all.py --dataset gsm8k --skip-run
 ```
 
-`download_data.py` renames `results/<ds>/typo25/real10.jsonl` to
+`tools/download_data.py` renames `results/<ds>/typo25/real10.jsonl` to
 `data/<ds>/<ds>_typo25_real10.jsonl`, which is what the analysis scripts expect.
 
 ### JSONL schema (one row = one question in one configuration)

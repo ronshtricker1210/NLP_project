@@ -99,7 +99,7 @@ def main():
     )
     parser.add_argument(
         "--out-dir",
-        default=os.path.join("reports", "judge_graphs"),
+        default=os.path.join("reports", "gsm8k", "llm_as_a_judge", "graphs"),
         help="directory for PNG plots",
     )
     args = parser.parse_args()

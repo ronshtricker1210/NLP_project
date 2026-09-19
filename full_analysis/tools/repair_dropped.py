@@ -27,7 +27,7 @@ missing from each output file.
 """
 import os, json, shutil, argparse, sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common import (DATASET, MAX_NEW_TOKENS, config_files, parse_tag,  # noqa: E402
                     eval_row)
 

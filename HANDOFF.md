@@ -70,7 +70,7 @@ Raw JSONL generation logs (~370 MB) are **not** in git. They live on the Hub:
 
 ```powershell
 cd full_analysis
-python download_data.py --dataset gsm8k      # then math500, arc
+python tools/download_data.py --dataset gsm8k  # then math500, arc
 python run_all.py --dataset gsm8k --skip-run # --skip-run = analyse only, no API calls
 cd ../paper
 python make_assets.py                        # regenerates figures/ and tables/
@@ -116,7 +116,7 @@ from the **root of the `master` branch** of
 ## 6. Known gaps (ranked by value of fixing)
 
 1. **GSM8K judge ran against the spellcheck arm, not the main arm.** Highest
-   value re-run: `python download_data.py --dataset gsm8k` then
+   value re-run: `python tools/download_data.py --dataset gsm8k` then
    `python llm_judge.py --all`.
 2. **MATH-500 judge cache is 100% errors** — all 4,962 rows have
    `repair_label = "error"`. No judge evidence at all for MATH-500.

@@ -18,7 +18,7 @@ import os, shutil, argparse
 from huggingface_hub import HfApi, hf_hub_download
 
 REPO = "ronshtricker/typo-reasoning-results"
-_HERE = os.path.dirname(os.path.abspath(__file__))
+_HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():

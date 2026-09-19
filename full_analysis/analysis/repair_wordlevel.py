@@ -31,6 +31,8 @@ try:
 except Exception:
     pass
 
+import os as _os, sys as _sys  # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 from common import config_files, parse_tag, load_evals, TABLES
 WORD = re.compile(r"[A-Za-z']+")
 MIN_LEN = 3   # ignore very short words (the/of/a) — they match trivially

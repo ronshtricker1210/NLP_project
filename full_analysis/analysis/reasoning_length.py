@@ -21,6 +21,8 @@ try:
 except Exception:
     pass
 
+import os as _os, sys as _sys  # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 from common import (config_files, parse_tag, load_evals, MAX_NEW_TOKENS,
                     TABLES, DATASET)
 import json

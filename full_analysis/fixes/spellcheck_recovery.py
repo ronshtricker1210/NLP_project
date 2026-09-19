@@ -13,9 +13,11 @@ import csv
 import glob
 import json
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATASET = os.environ.get("NLP_DATASET", "gsm8k")
 DATA_DIR = os.path.join(HERE, "raw_results", DATASET)
+import os as _os, sys as _sys  # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 from common import tables_dir
 TABLES = tables_dir(DATASET)
 os.makedirs(TABLES, exist_ok=True)
