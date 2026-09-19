@@ -7,6 +7,7 @@
 questions & 500 & 500 & 500 \\
 mean words & 45.8 & 31.5 & 23.5 \\
 median words & 43 & 26 & 20 \\
+eligible words & 30.6 & 15.7 & 16.6 \\
 \midrule
 typos @ $r{=}25$ & 7.6 & 4.0 & 4.2 \\
 typos @ $r{=}50$ & 15.3 & 7.9 & 8.3 \\
@@ -21,7 +22,10 @@ total typos & 68{,}739 & 35{,}685 & 37{,}248 \\
 \end{tabular}
 \caption{Dataset and corruption statistics over the nine corrupted conditions
 ($r\in\{25,50,75\}\%$, $\rho\in\{10,40,70\}\%$), on the first 500 questions of each
-benchmark. Typo counts are averaged over the three real-word ratios: for a fixed
+benchmark. \emph{Eligible words} are those the generator may corrupt, i.e. after
+removing protected spans (numbers, \LaTeX{}), single-character words and fifteen
+function words; the typo rate applies to these, so typos @ $r$ equals $r$ times the
+eligible count. Typo counts are averaged over the three real-word ratios: for a fixed
 typo rate the generator corrupts the same words regardless of $\rho$. Realised
 real-word ratios (pooled over all corrupted words) track their targets on GSM8K but
 fall short at $\rho{=}70$ on the
