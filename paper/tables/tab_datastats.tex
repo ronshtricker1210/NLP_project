@@ -20,19 +20,6 @@ real ratio @ $\rho{=}70$ & 0.698 & 0.681 & 0.682 \\
 total typos & 68{,}739 & 35{,}685 & 37{,}248 \\
 \bottomrule
 \end{tabular}
-\caption{Dataset and corruption statistics over the nine corrupted conditions
-($r\in\{25,50,75\}\%$, $\rho\in\{10,40,70\}\%$), on the first 500 questions of each
-benchmark. \emph{Eligible words} are those the generator may corrupt, i.e. after
-removing protected spans (numbers, \LaTeX{}), single-character words and fifteen
-function words; the typo rate applies to these, so typos @ $r$ equals $r$ times the
-eligible count. Typo counts are averaged over the three real-word ratios: for a fixed
-typo rate the generator corrupts the same words regardless of $\rho$. Realised
-real-word ratios (pooled over all corrupted words) track their targets on GSM8K but
-fall short at $\rho{=}70$ on the
-shorter datasets, where fewer selected words have a single-edit neighbour that is
-itself a valid word. The realised technique mix is 36--37\% replace, 32\% delete, 16--17\% insert and 15\% transpose, which differs from the sampling
-weights (0.40/0.20/0.20/0.20) because candidates that happen to form real words are
-redrawn on the non-word path; 10.0--10.2\% of corrupted words receive two edits
-(sampling probability 0.10).}
+\caption{Dataset and corruption statistics over the nine corrupted conditions ($r\in\{25,50,75\}\%$, $\rho\in\{10,40,70\}\%$), first 500 questions per benchmark. \emph{Eligible words} are those the generator may corrupt, after protected spans, single-character words and function words are removed; the typo rate applies to them, and real-word ratios are pooled over all corrupted words.}
 \label{tab:datastats}
 \end{table}
