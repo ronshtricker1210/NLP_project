@@ -37,8 +37,12 @@ META_COLS = ["target_real_ratio", "real_ratio", "num_total", "num_real", "num_no
              "typo_techniques", "typo_originals", "typo_replacements",
              "level", "subject", "unique_id", "Record ID"]
 
-# A small, representative default sweep so `--configs` can be omitted for a first run.
-DEFAULT_CONFIGS = ["real0", "real30", "real70"]
+# The study design: typo rate r in {25,50,75}% x real-word ratio rho in {10,40,70}%.
+# Off-design configs the typo datasets also carry (rho 0/20/30/50/60, the fixed ~30%
+# rate `realY` family) are deliberately NOT supported: every reported result uses this
+# 3x3 grid, and mixing designs produced non-comparable arms in the past.
+STUDY_RATES, STUDY_REALS = (25, 50, 75), (10, 40, 70)
+DEFAULT_CONFIGS = [f"rate{r}_real{p}" for r in STUDY_RATES for p in STUDY_REALS]
 
 write_lock = threading.Lock()
 
@@ -224,11 +228,15 @@ def resolve_datasets(arg):
 def resolve_configs(arg, repo):
     """--configs accepts 'all' (every config on the Hub) or a comma list."""
     if arg.strip().lower() == "all":
-        cfgs = sorted(get_dataset_config_names(repo))
-        if not cfgs:
-            raise SystemExit(f"--configs all: no configs found on the Hub for {repo}")
-        return cfgs
-    return [c.strip() for c in arg.split(",") if c.strip()]
+        return list(DEFAULT_CONFIGS)
+    cfgs = [c.strip() for c in arg.split(",") if c.strip()]
+    off = [c for c in cfgs if c not in DEFAULT_CONFIGS]
+    if off:
+        raise SystemExit(
+            f"off-design config(s): {', '.join(off)}\n"
+            f"  this study is r in {STUDY_RATES} x rho in {STUDY_REALS}; use: "
+            f"{', '.join(DEFAULT_CONFIGS)}")
+    return cfgs
 
 
 def build_prompt(kind, qtext, row, seed, fix=None):
@@ -265,8 +273,7 @@ def build_prompt(kind, qtext, row, seed, fix=None):
 
 def hub_path(dataset, config, variant, suffix=""):
     """Repo path for a result file: results/{dataset}/typo{rate}/real{ratio}.jsonl.
-    Plain realY configs use the fixed ~30% corruption rate (see DATASET_USAGE.md),
-    so they file under typo30; rateX_realY configs under typoX; clean baselines
+    rateX_realY configs file under typoX; clean baselines
     under results/{dataset}/clean.jsonl. A suffix (e.g. "_20000" for a different
     max-token budget) lands before .jsonl so variants coexist."""
     if variant == "clean":
@@ -274,9 +281,6 @@ def hub_path(dataset, config, variant, suffix=""):
     m = re.fullmatch(r"rate(\d+)_real(\d+)", config)
     if m:
         return f"results/{dataset}/typo{m.group(1)}/real{m.group(2)}{suffix}.jsonl"
-    m = re.fullmatch(r"real(\d+)", config)
-    if m:
-        return f"results/{dataset}/typo30/real{m.group(1)}{suffix}.jsonl"
     return f"results/{dataset}/{config}{suffix}.jsonl"
 
 

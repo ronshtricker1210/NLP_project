@@ -30,7 +30,6 @@ now defaults to.
 | `math500` | 20 files: R1 + `_Qwen2.5-7B-Instruct` control |
 | `arc` | 20 files: R1 + `_Qwen2.5-7B-Instruct` control |
 | `gsm8k_fix-spellcheck` | 10 files, the spell-check mitigation arm |
-| `gsm8k_fix-spellcheck_grid` | 33 files, wider spell-check grid (rates 25/30/50/75 × real 0–70) |
 | `gpqa` | 1 file, `clean` only — the grid was never completed |
 
 The raw JSONL for the **warn** and **rewrite** mitigation arms no longer exists
