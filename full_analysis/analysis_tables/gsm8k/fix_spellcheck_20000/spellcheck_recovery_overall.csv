@@ -1,0 +1,2 @@
+dataset,configs_count,total_typo_words,restored_exact_n,changed_other_n,not_restored_n,restored_exact_frac,restored_exact_pct
+gsm8k_fix-spellcheck_20000,9,68739,27653,8144,41086,0.40229,40.23

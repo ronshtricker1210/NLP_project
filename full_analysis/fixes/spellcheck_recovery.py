@@ -60,7 +60,7 @@ def main():
         print(f"[spellcheck_recovery] no data dir: {DATA_DIR}")
         return
 
-    files = sorted(glob.glob(os.path.join(DATA_DIR, f"{DATASET}_*.jsonl")))
+    files = sorted(glob.glob(os.path.join(glob.escape(DATA_DIR), f"{DATASET}_*.jsonl")))
     # Prefer explicit spellcheck suffix; fallback to rows with spellcheck metrics.
     cand = [f for f in files if "spellcheck" in os.path.basename(f)]
     if not cand:

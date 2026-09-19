@@ -1,0 +1,95 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{booktabs}
+
+\usepackage{adjustbox}
+
+\usepackage{float}
+
+\usepackage{caption}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{LLM-as-a-Judge Report: Repair-understanding\\\large GSM8K\_20000}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{What was measured?} The judge scores how much the model loses the intended meaning of the question because of corrupted wording. A score of 0 means the meaning is fully understood; 5 means the model is fundamentally lost. This is a semantic-understanding score, not a direct correctness label. The judge returns the score, a verbatim evidence quote when available, and a one-line summary. The tables below use 0--5 scores and include only valid answered traces from gsm8k\_20000\_judge\_traces.jsonl.
+
+\section*{Examples at different scores} The examples below show the score, final-answer outcome, the judge's evidence, and its one-line summary. An empty evidence field means that the trace contained no suitable verbatim cue for that dimension.
+
+\paragraph{Trace typo25\_real10, index 1.}
+\textbf{Score:} 0 on the 0--5 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}It says a robe takes 2 bolts of blue fiber and half that much white fiber\end{quote}
+\textbf{One-line summary:} The model's repeated checks and second-guessing, as seen in phrases like 'Wait, let me double-check' and 'I don't think I'm missing anything here', led to the scores.\medskip
+\paragraph{Trace typo50\_real40, index 0.}
+\textbf{Score:} 2 on the 0--5 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Hmm, that might be a typo. Maybe it's supposed to be 'four' eggs?\end{quote}
+\textbf{One-line summary:} The model's hesitation and questioning of the wording, such as 'Wait, does that mean she uses four eggs each day to bake muffins?' led to the scores.\medskip
+\paragraph{Trace typo75\_real10, index 1.}
+\textbf{Score:} 5 on the 0--5 scale. \textbf{Final-answer outcome:} correct.
+\textbf{Judge evidence:} \begin{quote}Hmm, that sounds a bit confusing and possibly has some typos.\end{quote}
+\textbf{One-line summary:} The trace is filled with repeated reconsideration and hesitation, such as 'But without more information, it's hard to say' and 'Maybe the answer is 3 volts,' indicating extreme uncertainty and confusion due to the corrupted words.\medskip
+
+\section*{Aggregate tables}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by real-word typo ratio}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{real\_ratio} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+10 & 1449 & 1.139 \\
+40 & 1474 & 1.319 \\
+70 & 1454 & 1.423 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by typo percentage}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{typo\_percentage} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+0 & 485 & 0.13 \\
+25 & 1466 & 0.881 \\
+50 & 1472 & 1.272 \\
+75 & 1439 & 1.737 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Mean score by final-answer correctness}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrr}
+\toprule
+\textbf{outcome} & \textbf{n} & \textbf{repair\_understanding\_score\_mean} \\
+\midrule
+correct & 3816 & 0.871 \\
+wrong & 1046 & 2.296 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\section*{Consequences} In this run, more typos are associated with less ability to recover and understand the question meaning: the mean rises from 0.053 for clean traces to 0.580 at 25 percent typos, 0.576 at 50 percent, and 0.764 at 75 percent. Higher scores mean more loss of the intended meaning.
+
+\end{document}
