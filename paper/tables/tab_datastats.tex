@@ -1,0 +1,34 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrr}
+\toprule
+ & GSM8K & MATH-500 & ARC-C \\
+\midrule
+questions & 500 & 500 & 500 \\
+mean words & 45.8 & 31.5 & 23.5 \\
+median words & 43 & 26 & 20 \\
+\midrule
+typos @ $r{=}25$ & 7.6 & 4.0 & 4.2 \\
+typos @ $r{=}50$ & 15.3 & 7.9 & 8.3 \\
+typos @ $r{=}75$ & 22.9 & 11.8 & 12.4 \\
+\midrule
+real ratio @ $\rho{=}10$ & 0.100 & 0.099 & 0.102 \\
+real ratio @ $\rho{=}40$ & 0.399 & 0.397 & 0.401 \\
+real ratio @ $\rho{=}70$ & 0.698 & 0.681 & 0.682 \\
+\midrule
+total typos & 68{,}739 & 35{,}685 & 37{,}248 \\
+\bottomrule
+\end{tabular}
+\caption{Dataset and corruption statistics over the nine corrupted conditions
+($r\in\{25,50,75\}\%$, $\rho\in\{10,40,70\}\%$), on the first 500 questions of each
+benchmark. Typo counts are averaged over the three real-word ratios: for a fixed
+typo rate the generator corrupts the same words regardless of $\rho$. Realised
+real-word ratios (pooled over all corrupted words) track their targets on GSM8K but
+fall short at $\rho{=}70$ on the
+shorter datasets, where fewer selected words have a single-edit neighbour that is
+itself a valid word. The realised technique mix is 36--37\% replace, 32\% delete, 16--17\% insert and 15\% transpose, which differs from the sampling
+weights (0.40/0.20/0.20/0.20) because candidates that happen to form real words are
+redrawn on the non-word path; 10.0--10.2\% of corrupted words receive two edits
+(sampling probability 0.10).}
+\label{tab:datastats}
+\end{table}
