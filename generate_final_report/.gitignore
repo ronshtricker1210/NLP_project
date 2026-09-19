@@ -1,0 +1,11 @@
+# LaTeX build artifacts: keep report.tex and report.pdf, drop the rest
+*.aux
+*.log
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+
+# matplotlib preview renders
+_preview/
