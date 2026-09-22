@@ -6,8 +6,9 @@
 %    Author text from report_text.txt (re-synced 2026-09-19), revised on
 %    branch review/report-fixes (2026-09-22): ACL template, length cut to
 %    the 8-page limit, numeric corrections, findings added to the
-%    Introduction, Conclusion moved before Limitations. report_text.txt must
-%    be updated to match before verify_text.py is run again.
+%    Introduction, Conclusion moved before Limitations; related work and
+%    bibliography verified against sources (2026-09-23). report_text.txt
+%    must be updated to match before verify_text.py is run again.
 %    3 Method: taken from Ron's paper.
 %
 % =====================================================================
@@ -86,8 +87,9 @@ while real users often make simple typing mistakes such as swapped letters,
 missing characters, or nearby-key errors. Strong performance on clean benchmark
 text may therefore overestimate reliability in real-world use.
 
-Previous work has shown that typos can hurt LLM performance, often linking this
-effect to subword tokenization \citep{gan2024,chai2024,zhao2026}. However, these
+Previous work has shown that typos can hurt LLM performance
+\citep{gan2024,zhao2026}, partly because they disrupt subword tokenization
+\citep{chai2024}. However, these
 studies mainly focus on final-answer accuracy and do not examine what happens
 inside the reasoning process.
 
@@ -163,16 +165,14 @@ answers 26 instead of 18.}
 
 \paragraph{Sensitivity to character-level typos.}
 \citet{belinkov2018} show that both synthetic and natural character-level noise
-substantially degrade neural machine translation, and that robustness to one
-type of noise does not necessarily transfer to others. Later work studied
-similar vulnerabilities in adversarial settings. HotFlip \citep{ebrahimi2018}
-shows that a few white-box character changes can alter a classifier's
-prediction, while TextFooler \citep{jin2020} generates black-box adversarial
-examples through word substitutions. PromptRobust \citep{zhu2024} shows that
-small character- and word-level changes to task prompts can substantially
-reduce LLM performance. \citet{pruthi2019} defend against adversarial
-misspellings by placing a robust word-recognition model before the classifier,
-an approach closely related to the spell-checking mitigation we evaluate.
+degrade neural machine translation, and that robustness to one type of noise
+does not transfer to others. Small adversarial character- and word-level edits
+also fool text classifiers \citep{ebrahimi2018,jin2020} and degrade LLMs through
+their prompts \citep{zhu2024}. Two lines of defense mirror our mitigations:
+\citet{pruthi2019} place a word-recognition model in front of the classifier to
+undo adversarial misspellings, and \citet{wang2024noisy} find that having an LLM
+clean a noisy instruction before the task is difficult, particularly for
+open-source models.
 
 \paragraph{Typos and modern LLMs.}
 \citet{gan2024} use an optimized adversarial search to inject typos into
@@ -180,18 +180,22 @@ reasoning benchmarks such as GSM8K, BBH, and MMLU, and show that model accuracy
 drops substantially as the number of character-level errors increases.
 \citet{chai2024} show that character-level typos can hurt model performance
 partly because they change how words are split into subwords.
-\citet{zhao2026} study typo robustness across several languages and 18
-open-source models, and find that typos hurt most on tasks that require
-generation or more complex reasoning.
+\citet{zhao2026} study typo robustness across 12 languages and 18 open-source
+models, and find that typos hurt most on tasks that require generation or
+reasoning. Concurrently, \citet{hu2026hive} report that a thinking budget
+recovers most of the accuracy lost to QWERTY keyboard perturbations, and trace
+the harm to how many of the question's tokens are destroyed.
 
-These studies measure final-answer accuracy rather than the reasoning process
-itself, and they vary typos by generation mechanism rather than by whether the
-corrupted form is itself a valid word. That distinction matters. A typo that
-creates a non-word, such as \texttt{triangle\arrow trianlge}, mainly affects
+These studies mainly measure final-answer accuracy rather than the reasoning
+process itself, and they vary typos by generation mechanism rather than by
+whether the corrupted form is itself a valid word. That distinction is classic
+in spelling correction, where real-word errors cannot be caught by dictionary
+lookup \citep{kukich1992,hirst2005}, and it matters here too. A typo that
+creates a non-word, such as \texttt{triangle\arrow trianlge}, mainly disrupts
 tokenization, while a typo that creates another valid word, such as
-\texttt{sum\arrow sun}, leaves tokenization intact and changes the meaning of
-the sentence. Our study separates these cases and examines how the model
-responds to each during reasoning.
+\texttt{sum\arrow sun}, is tokenized normally but changes the meaning of the
+sentence. Our study separates these cases and examines how the model responds
+to each during reasoning.
 
 \paragraph{Reasoning traces and self-correction.}
 Reasoning models such as DeepSeek-R1 \citep{deepseekr1} produce long reasoning
@@ -211,7 +215,8 @@ continue reasoning correctly.
 \subsection{Controlled typo generation}
 
 We generate corrupted versions of each question by modifying only its
-natural-language text. Numbers, \LaTeX{} expressions, and \LaTeX{} command
+natural-language text, building on the keyboard-aware edit operations of
+MulTypo \citep{zhao2026} and adding control over real-word typos. Numbers, \LaTeX{} expressions, and \LaTeX{} command
 names are protected and never modified. Candidate words must consist only of
 ASCII letters, and we exclude single-character words and a small set of common
 function words.
@@ -233,7 +238,8 @@ word.
 For each question, we convert $\rho$ into a target number of real-word typos,
 using probabilistic rounding when the target is not an integer. We then process
 the selected words in random order. While the target has not been reached, the
-generator searches for valid real-word variants using the NLTK English lexicon.
+generator searches for valid real-word variants using the NLTK English lexicon
+\citep{bird2009nltk}.
 If none exists for a selected word, that word receives a non-word typo and the
 generator continues trying to satisfy the target with the remaining words. Any
 real word produced accidentally is counted toward the target. Because the
@@ -329,7 +335,7 @@ tracks how the model handles each corrupted word: whether the trace uses the
 original word, the corrupted form, or both, classifying each typo as silently
 fixed, flagged, misread, or not used (\S\ref{sec:repair}). Second, we count
 curated uncertainty and second-guessing expressions, normalized by trace length
-(\S\ref{sec:doubt}). Third, an LLM judge receives the list of corrupted words
+(\S\ref{sec:doubt}). Third, an LLM judge \citep{zheng2023} receives the list of corrupted words
 with their originals, the question as shown to the model, and the reasoning
 trace (its first and last 2{,}000 characters). Using a fixed rubric, it assigns
 a \emph{self-doubt} score from 0 (a clear, straight-line solution) to 10
@@ -614,9 +620,12 @@ rewrite commits it early to a single, possibly wrong, interpretation. The main
 difficulty is therefore not detecting that a typo exists, but recovering the
 intended word when the corruption is ambiguous. A more promising direction may
 be to keep multiple interpretations open during reasoning and resolve them
-later using the structure of the problem. Finally, longer traces should not be
-read as evidence of successful self-correction: incorrect answers produce
-longer traces even on clean input.
+later using the structure of the problem. This is consistent with the concurrent
+finding that a thinking budget absorbs most keyboard noise \citep{hu2026hive}:
+in our data, too, the mildest typo rate costs little on MATH-500 and ARC. Dense
+corruption and real-word typos are where long reasoning stops recovering.
+Finally, longer traces should not be read as evidence of successful
+self-correction: incorrect answers produce longer traces even on clean input.
 
 % =====================================================================
 \section{Conclusion}
@@ -652,7 +661,7 @@ $p < 10^{-6}$ on $n{=}480$ paired items), but generalization to larger reasoning
 models is untested.
 
 \paragraph{Dataset substitution.}
-We originally planned to use GPQA-Diamond, but replaced it with ARC-Challenge,
+We originally planned to use GPQA-Diamond \citep{rein2024}, but replaced it with ARC-Challenge,
 which is also a multiple-choice science dataset. On clean GPQA-Diamond, the
 model reached only about 52\% accuracy. Since random guessing gives 25\%, this
 leaves limited room to measure further drops under corruption: as performance
