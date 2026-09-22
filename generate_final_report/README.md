@@ -22,8 +22,9 @@ The result is `report.pdf`.
 
 | File | Role |
 |---|---|
-| `report.tex` | the paper |
-| `make_assets.py` | draws the five figures and writes the generated table fragments |
+| `report.tex` | the paper, in ACL format |
+| `acl.sty`, `acl_natbib.bst` | ACL style files, copied from `../paper/` |
+| `make_assets.py` | draws the five figures and writes the generated table fragments (`fig_fixes.pdf` is drawn but no longer used: Table 3 carries the same numbers plus the spell-check arm) |
 | `custom.bib` | bibliography, copied from `../paper/custom.bib` |
 | `figures/` | generated — do not edit by hand |
 | `tables/` | generated — **except `tab_datastats.tex`**, see below |
@@ -65,7 +66,11 @@ Set `NLP_TABLES` to read the CSVs from somewhere other than
 
 ## Checking the prose
 
-The draft is the source of truth for sections 1–9. After editing either side:
+The draft is the source of truth for the prose. **The review pass on branch
+`review/report-fixes` edited `report.tex` directly** (ACL cut, numeric fixes,
+findings added to the Introduction, Conclusion moved before Limitations), so
+`report_text.txt` must be updated from `report.tex` before this check is
+meaningful again. After editing either side:
 
 ```bash
 python verify_text.py /path/to/report_text.txt
@@ -81,6 +86,12 @@ Anything else means the paper and the draft have diverged and one of them needs
 updating.
 
 ## Layout notes
+
+The course requires the ACL format and at most 8 pages. `report.tex` uses
+`\usepackage[final]{acl}` with no margin, font-size or float-spacing overrides;
+the Conclusion must end on page 8. Limitations and the AI disclosure are
+unnumbered sections after the Conclusion, which ACL does not count toward the
+limit. Check the page count after every prose edit.
 
 Two things that are easy to undo by accident:
 
